@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>取色器 Color Picker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'copy-flash': 'copyFlash 0.6s ease-out',
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                    },
+                    keyframes: {
+                        copyFlash: {
+                            '0%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.15)' },
+                            '100%': { transform: 'scale(1)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(8px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .color-picker-canvas { cursor: crosshair; border-radius: 12px; }
+        .slider-track { cursor: pointer; border-radius: 8px; }
+        .tooltip {
+            position: absolute;
+            background: #1f2937;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            pointer-events: none;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 md:p-8">
+    <div class="max-w-xl mx-auto">
+        <!-- 返回首页 -->
+        <a href="../../index.html" class="inline-flex items-center text-blue-500 hover:text-blue-700 mb-4 transition-colors">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            返回工具首页
+        </a>
+
+        <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 animate-fade-in">
+            <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-6">
+                <span class="inline-flex items-center gap-2">
+                    <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+                    </svg>
+                    取色器
+                </span>
+            </h1>
+
+            <!-- ===== 颜色预览条 ===== -->
+            <div id="colorPreview" class="w-full h-20 rounded-xl mb-5 shadow-inner transition-all duration-200" style="background-color: #667eea;">
+                <div class="h-full flex items-center justify-center text-white text-sm font-mono drop-shadow-lg" id="previewHex">#667EEA</div>
+            </div>
+
+            <!-- ===== 取色面板 ===== -->
+            <div class="relative mb-5">
+                <canvas id="pickerCanvas" class="color-picker-canvas w-full h-52 shadow-md border border-gray-200"></canvas>
+                <!-- 取色指示器 -->
+                <div id="pickerDot" class="absolute w-5 h-5 rounded-full border-2 border-white shadow-lg pointer-events-none transition-all duration-75"
+                     style="top:50%; left:50%; transform: translate(-50%, -50%); background: #667eea; box-shadow: 0 0 0 2px rgba(0,0,0,0.2), 0 0 0 5px rgba(255,255,255,0.4);"></div>
+            </div>
+
+            <!-- ===== 色相滑块 ===== -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-600 mb-1.5">色相 (Hue)</label>
+                <div class="relative">
+                    <div id="hueSlider" class="slider-track h-3 mb-1" style="background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);"></div>
+                    <div id="hueThumb" class="absolute w-4 h-4 rounded-full border-2 border-white shadow-md pointer-events-none top-1/2"
+                         style="transform: translate(-50%, -50%); left: 66.7%; background: #764ba2; box-shadow: 0 0 0 2px rgba(0,0,0,0.15);"></div>
+                </div>
+            </div>
+
+            <!-- ===== 透明度滑块 ===== -->
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-gray-600 mb-1.5">透明度 (Alpha)</label>
+                <div class="relative">
+                    <canvas id="alphaSlider" class="slider-track w-full h-3 rounded-lg mb-1 border border-gray-200"></canvas>
+                    <div id="alphaThumb" class="absolute w-4 h-4 rounded-full border-2 border-white shadow-md pointer-events-none top-1/2"
+                         style="transform: translate(-50%, -50%); left: 100%; background: #667eea; box-shadow: 0 0 0 2px rgba(0,0,0,0.15);"></div>
+                </div>
+            </div>
+
+            <!-- ===== 吸管按钮 + 快捷颜色 ===== -->
+            <div class="flex items-center gap-3 mb-5 flex-wrap">
+                <button id="eyedropperBtn" class="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-sm font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                    </svg>
+                    屏幕取色
+                </button>
+                <span class="text-xs text-gray-400">或直接输入色值</span>
+            </div>
+
+            <!-- ===== 颜色值输入区 ===== -->
+            <div class="space-y-3 mb-5">
+                <!-- HEX -->
+                <div class="flex items-center gap-3">
+                    <label class="text-sm font-medium text-gray-600 w-14 shrink-0">HEX</label>
+                    <div class="flex-1 relative">
+                        <input type="text" id="hexInput" value="#667EEA" maxlength="9"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all"
+                               style="padding-right: 40px;">
+                    </div>
+                    <button data-copy="#667EEA" class="copy-btn flex items-center justify-center w-9 h-9 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-all" title="复制 HEX">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- RGB -->
+                <div class="flex items-center gap-3">
+                    <label class="text-sm font-medium text-gray-600 w-14 shrink-0">RGB</label>
+                    <div class="flex gap-2 flex-1">
+                        <input type="number" id="rInput" value="102" min="0" max="255"
+                               class="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm font-mono text-center focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all"
+                               style="border-left: 3px solid #ef4444;">
+                        <input type="number" id="gInput" value="126" min="0" max="255"
+                               class="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm font-mono text-center focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all"
+                               style="border-left: 3px solid #22c55e;">
+                        <input type="number" id="bInput" value="234" min="0" max="255"
+                               class="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm font-mono text-center focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all"
+                               style="border-left: 3px solid #3b82f6;">
+                    </div>
+                    <button data-copy="rgb(102, 126, 234)" class="copy-btn flex items-center justify-center w-9 h-9 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-all" title="复制 RGB">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- HSL -->
+                <div class="flex items-center gap-3">
+                    <label class="text-sm font-medium text-gray-600 w-14 shrink-0">HSL</label>
+                    <div class="flex-1 relative">
+                        <input type="text" id="hslInput" value="hsl(229, 77%, 66%)" readonly
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono bg-gray-50 text-gray-600"
+                               style="padding-right: 40px;">
+                    </div>
+                    <button data-copy="hsl(229, 77%, 66%)" class="copy-btn flex items-center justify-center w-9 h-9 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-all" title="复制 HSL">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ===== 颜色历史 ===== -->
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-2">最近选取的颜色</label>
+                <div id="colorHistory" class="flex gap-2 flex-wrap min-h-[36px]">
+                    <span class="text-xs text-gray-400 self-center">还没有选取颜色</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 全局状态 ====================
+        let currentH = 229;
+        let currentS = 77;
+        let currentL = 66;
+        let currentA = 1;
+        let colorHistory = [];
+
+        // ==================== DOM 元素 ====================
+        const pickerCanvas = document.getElementById('pickerCanvas');
+        const pickerCtx = pickerCanvas.getContext('2d');
+        const pickerDot = document.getElementById('pickerDot');
+        const colorPreview = document.getElementById('colorPreview');
+        const previewHex = document.getElementById('previewHex');
+
+        const hueSlider = document.getElementById('hueSlider');
+        const hueThumb = document.getElementById('hueThumb');
+
+        const alphaCanvas = document.getElementById('alphaSlider');
+        const alphaCtx = alphaCanvas.getContext('2d');
+        const alphaThumb = document.getElementById('alphaThumb');
+
+        const hexInput = document.getElementById('hexInput');
+        const rInput = document.getElementById('rInput');
+        const gInput = document.getElementById('gInput');
+        const bInput = document.getElementById('bInput');
+        const hslInput = document.getElementById('hslInput');
+
+        const eyedropperBtn = document.getElementById('eyedropperBtn');
+        const colorHistoryEl = document.getElementById('colorHistory');
+        const copyBtns = document.querySelectorAll('.copy-btn');
+
+        // ==================== 工具函数 ====================
+        function hslToRgb(h, s, l) {
+            s /= 100; l /= 100;
+            const k = n => (n + h / 30) % 12;
+            const a = s * Math.min(l, 1 - l);
+            const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+            return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)];
+        }
+
+        function rgbToHsl(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h = 0, s = 0;
+            const l = (max + min) / 2;
+            if (max !== min) {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                    case g: h = ((b - r) / d + 2) / 6; break;
+                    case b: h = ((r - g) / d + 4) / 6; break;
+                }
+            }
+            return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
+        }
+
+        function hslToHex(h, s, l) {
+            const [r, g, b] = hslToRgb(h, s, l);
+            return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0').toUpperCase()).join('');
+        }
+
+        function hexToRgb(hex) {
+            hex = hex.replace('#', '');
+            if (hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+            if (hex.length === 8) {
+                return [parseInt(hex.slice(0,2), 16), parseInt(hex.slice(2,4), 16), parseInt(hex.slice(4,6), 16), Math.round(parseInt(hex.slice(6,8), 16) / 255 * 100) / 100];
+            }
+            return [parseInt(hex.slice(0,2), 16), parseInt(hex.slice(2,4), 16), parseInt(hex.slice(4,6), 16), 1];
+        }
+
+        function getCurrentHex() {
+            const hex = hslToHex(currentH, currentS, currentL);
+            if (currentA < 1) {
+                return hex + Math.round(currentA * 255).toString(16).padStart(2, '0').toUpperCase();
+            }
+            return hex;
+        }
+
+        function getCurrentRgb() {
+            const [r, g, b] = hslToRgb(currentH, currentS, currentL);
+            return `rgb${currentA < 1 ? 'a' : ''}(${r}, ${g}, ${b}${currentA < 1 ? ', ' + currentA.toFixed(2) : ''})`;
+        }
+
+        function getCurrentHsl() {
+            if (currentA < 1) {
+                return `hsla(${currentH}, ${currentS}%, ${currentL}%, ${currentA.toFixed(2)})`;
+            }
+            return `hsl(${currentH}, ${currentS}%, ${currentL}%)`;
+        }
+
+        // ==================== 画布绘制 ====================
+        function drawPickerCanvas() {
+            const w = pickerCanvas.width;
+            const h = pickerCanvas.height;
+            const imageData = pickerCtx.createImageData(w, h);
+
+            for (let y = 0; y < h; y++) {
+                const lightness = 100 - (y / h) * 100; // top=100% (white), bottom=0% (black)
+                for (let x = 0; x < w; x++) {
+                    const saturation = (x / w) * 100; // left=0%, right=100%
+                    const [r, g, b] = hslToRgb(currentH, saturation, lightness);
+                    const idx = (y * w + x) * 4;
+                    imageData.data[idx] = r;
+                    imageData.data[idx + 1] = g;
+                    imageData.data[idx + 2] = b;
+                    imageData.data[idx + 3] = 255;
+                }
+            }
+            pickerCtx.putImageData(imageData, 0, 0);
+        }
+
+        function drawAlphaSlider() {
+            const w = alphaCanvas.width;
+            const h = alphaCanvas.height;
+            const [r, g, b] = hslToRgb(currentH, currentS, currentL);
+            const imageData = alphaCtx.createImageData(w, h);
+            const baseColor = `rgb(${r},${g},${b})`;
+
+            // Draw checkerboard
+            alphaCtx.clearRect(0, 0, w, h);
+            const cs = 4;
+            for (let y = 0; y < h; y += cs) {
+                for (let x = 0; x < w; x += cs) {
+                    alphaCtx.fillStyle = ((Math.floor(x/cs) + Math.floor(y/cs)) % 2 === 0) ? '#e5e7eb' : '#fff';
+                    alphaCtx.fillRect(x, y, cs, cs);
+                }
+            }
+
+            // Draw gradient
+            const gradient = alphaCtx.createLinearGradient(0, 0, w, 0);
+            gradient.addColorStop(0, `rgba(${r},${g},${b},0)`);
+            gradient.addColorStop(1, `rgba(${r},${g},${b},1)`);
+            alphaCtx.fillStyle = gradient;
+            alphaCtx.fillRect(0, 0, w, h);
+        }
+
+        // ==================== UI 更新 ====================
+        function updatePreview() {
+            const color = `hsla(${currentH}, ${currentS}%, ${currentL}%, ${currentA})`;
+            colorPreview.style.backgroundColor = color;
+            previewHex.textContent = getCurrentHex();
+            // 文本反色
+            const [r, g, b] = hslToRgb(currentH, currentS, currentL);
+            const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            previewHex.style.color = luminance > 0.55 ? '#1f2937' : '#ffffff';
+        }
+
+        function updateInputs() {
+            const [r, g, b] = hslToRgb(currentH, currentS, currentL);
+            hexInput.value = getCurrentHex();
+            rInput.value = r;
+            gInput.value = g;
+            bInput.value = b;
+            hslInput.value = getCurrentHsl();
+        }
+
+        function updateCopyButtons() {
+            copyBtns.forEach(btn => {
+                const format = btn.closest('.flex')?.querySelector('label')?.textContent;
+                if (format === 'HEX') btn.dataset.copy = hexInput.value;
+                if (format === 'RGB') btn.dataset.copy = getCurrentRgb();
+                if (format === 'HSL') btn.dataset.copy = getCurrentHsl();
+            });
+        }
+
+        function updatePickerDot() {
+            const x = (currentS / 100) * pickerCanvas.offsetWidth;
+            const y = ((100 - currentL) / 100) * pickerCanvas.offsetHeight;
+            pickerDot.style.left = x + 'px';
+            pickerDot.style.top = y + 'px';
+            const dotColor = currentL > 70 ? '#1f2937' : '#ffffff';
+            pickerDot.style.background = `hsl(${currentH}, ${currentS}%, ${currentL}%)`;
+            pickerDot.style.boxShadow = `0 0 0 2px ${dotColor === '#ffffff' ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.4)'}`;
+        }
+
+        function updateHueThumb() {
+            const pct = (currentH / 360) * 100;
+            hueThumb.style.left = pct + '%';
+            hueThumb.style.background = `hsl(${currentH}, 100%, 50%)`;
+        }
+
+        function updateAlphaThumb() {
+            const pct = currentA * 100;
+            alphaThumb.style.left = pct + '%';
+            alphaThumb.style.background = `hsla(${currentH}, ${currentS}%, ${currentL}%, ${currentA})`;
+        }
+
+        function updateAll() {
+            drawPickerCanvas();
+            drawAlphaSlider();
+            updatePreview();
+            updateInputs();
+            updateCopyButtons();
+            updatePickerDot();
+            updateHueThumb();
+            updateAlphaThumb();
+        }
+
+        function setColorHSL(h, s, l) {
+            currentH = Math.round(h) % 360;
+            if (currentH < 0) currentH += 360;
+            currentS = Math.max(0, Math.min(100, Math.round(s)));
+            currentL = Math.max(0, Math.min(100, Math.round(l)));
+            updateAll();
+        }
+
+        function setColorFromRgb(r, g, b) {
+            const [h, s, l] = rgbToHsl(r, g, b);
+            currentH = h;
+            currentS = s;
+            currentL = l;
+            updateAll();
+        }
+
+        function setColorFromHex(hex) {
+            const [r, g, b, a] = hexToRgb(hex);
+            setColorFromRgb(r, g, b);
+            if (a !== undefined && a < 1) {
+                currentA = a;
+                updateAll();
+            }
+        }
+
+        // ==================== 添加历史记录 ====================
+        function addToHistory(hex) {
+            if (colorHistory.includes(hex)) {
+                colorHistory = colorHistory.filter(c => c !== hex);
+            }
+            colorHistory.unshift(hex);
+            if (colorHistory.length > 12) colorHistory.pop();
+            renderHistory();
+        }
+
+        function renderHistory() {
+            if (colorHistory.length === 0) {
+                colorHistoryEl.innerHTML = '<span class="text-xs text-gray-400 self-center">还没有选取颜色</span>';
+                return;
+            }
+            colorHistoryEl.innerHTML = colorHistory.map(c => `
+                <button class="history-color w-8 h-8 rounded-lg border-2 border-gray-200 hover:border-blue-400 shadow-sm hover:shadow-md transition-all hover:scale-110 animate-slide-up"
+                        style="background-color: ${c};"
+                        data-color="${c}"
+                        title="${c}">
+                </button>
+            `).join('');
+
+            document.querySelectorAll('.history-color').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const hex = btn.dataset.color;
+                    setColorFromHex(hex);
+                    currentA = 1;
+                    updateAll();
+                });
+            });
+        }
+
+        // ==================== 事件处理 ====================
+
+        // 取色面板 - 鼠标交互
+        function handlePickerInteraction(e) {
+            const rect = pickerCanvas.getBoundingClientRect();
+            const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+            const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
+
+            currentS = Math.round((x / rect.width) * 100);
+            currentL = Math.round((1 - y / rect.height) * 100);
+            updateAll();
+        }
+
+        let isPickerActive = false;
+        pickerCanvas.addEventListener('mousedown', (e) => {
+            isPickerActive = true;
+            handlePickerInteraction(e);
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (isPickerActive) handlePickerInteraction(e);
+        });
+        window.addEventListener('mouseup', () => {
+            if (isPickerActive) {
+                addToHistory(getCurrentHex());
+                isPickerActive = false;
+            }
+        });
+
+        // 取色面板 - 触摸交互
+        pickerCanvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            isPickerActive = true;
+            handlePickerInteraction(e.touches[0]);
+        });
+        window.addEventListener('touchmove', (e) => {
+            if (isPickerActive) {
+                e.preventDefault();
+                handlePickerInteraction(e.touches[0]);
+            }
+        });
+        window.addEventListener('touchend', () => {
+            if (isPickerActive) {
+                addToHistory(getCurrentHex());
+                isPickerActive = false;
+            }
+        });
+
+        // 色相滑块 - 鼠标
+        function handleHueInteraction(e) {
+            const rect = hueSlider.getBoundingClientRect();
+            const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+            currentH = Math.round((x / rect.width) * 360);
+            updateAll();
+        }
+
+        let isHueActive = false;
+        hueSlider.addEventListener('mousedown', (e) => { isHueActive = true; handleHueInteraction(e); });
+        window.addEventListener('mousemove', (e) => { if (isHueActive) handleHueInteraction(e); });
+        window.addEventListener('mouseup', () => { isHueActive = false; });
+
+        hueSlider.addEventListener('touchstart', (e) => { e.preventDefault(); isHueActive = true; handleHueInteraction(e.touches[0]); });
+        window.addEventListener('touchmove', (e) => { if (isHueActive) { e.preventDefault(); handleHueInteraction(e.touches[0]); } });
+        window.addEventListener('touchend', () => { isHueActive = false; });
+
+        // 透明度滑块
+        function handleAlphaInteraction(e) {
+            const rect = alphaCanvas.getBoundingClientRect();
+            const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+            currentA = Math.round((x / rect.width) * 100) / 100;
+            updateAll();
+        }
+
+        let isAlphaActive = false;
+        alphaCanvas.addEventListener('mousedown', (e) => { isAlphaActive = true; handleAlphaInteraction(e); });
+        window.addEventListener('mousemove', (e) => { if (isAlphaActive) handleAlphaInteraction(e); });
+        window.addEventListener('mouseup', () => { isAlphaActive = false; });
+
+        alphaCanvas.addEventListener('touchstart', (e) => { e.preventDefault(); isAlphaActive = true; handleAlphaInteraction(e.touches[0]); });
+        window.addEventListener('touchmove', (e) => { if (isAlphaActive) { e.preventDefault(); handleAlphaInteraction(e.touches[0]); } });
+        window.addEventListener('touchend', () => { isAlphaActive = false; });
+
+        // ==================== 输入框事件 ====================
+
+        // HEX 输入
+        hexInput.addEventListener('input', () => {
+            let val = hexInput.value.trim();
+            if (!val.startsWith('#')) val = '#' + val;
+            const hexPattern = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/;
+            if (hexPattern.test(val)) {
+                setColorFromHex(val);
+                currentA = val.length === 9 ? Math.round(parseInt(val.slice(7, 9), 16) / 255 * 100) / 100 : 1;
+                updateAll();
+            }
+        });
+
+        hexInput.addEventListener('blur', () => {
+            const hex = getCurrentHex();
+            hexInput.value = hex;
+        });
+
+        hexInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                addToHistory(getCurrentHex());
+            }
+        });
+
+        // RGB 输入
+        function handleRgbInput() {
+            const r = Math.max(0, Math.min(255, parseInt(rInput.value) || 0));
+            const g = Math.max(0, Math.min(255, parseInt(gInput.value) || 0));
+            const b = Math.max(0, Math.min(255, parseInt(bInput.value) || 0));
+            setColorFromRgb(r, g, b);
+        }
+
+        rInput.addEventListener('input', handleRgbInput);
+        gInput.addEventListener('input', handleRgbInput);
+        bInput.addEventListener('input', handleRgbInput);
+
+        [rInput, gInput, bInput].forEach(inp => {
+            inp.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') addToHistory(getCurrentHex());
+            });
+        });
+
+        // ==================== 复制按钮 ====================
+        copyBtns.forEach(btn => {
+            btn.addEventListener('click', async () => {
+                let textToCopy = btn.dataset.copy;
+                try {
+                    await navigator.clipboard.writeText(textToCopy);
+                    btn.classList.add('animate-copy-flash');
+                    btn.style.backgroundColor = '#22c55e';
+                    btn.style.color = '#fff';
+                    setTimeout(() => {
+                        btn.classList.remove('animate-copy-flash');
+                        btn.style.backgroundColor = '';
+                        btn.style.color = '';
+                    }, 600);
+                } catch {
+                    // Fallback
+                    const tempInput = document.createElement('input');
+                    tempInput.value = textToCopy;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                }
+            });
+        });
+
+        // ==================== 吸管取色 (EyeDropper API) ====================
+        eyedropperBtn.addEventListener('click', async () => {
+            if (!window.EyeDropper) {
+                // Fallback: 使用 input type=color
+                const input = document.createElement('input');
+                input.type = 'color';
+                input.click();
+                input.addEventListener('input', () => {
+                    setColorFromHex(input.value);
+                    currentA = 1;
+                    updateAll();
+                    addToHistory(input.value);
+                });
+                return;
+            }
+
+            try {
+                const dropper = new EyeDropper();
+                const result = await dropper.open();
+                setColorFromHex(result.sRGBHex);
+                currentA = 1;
+                updateAll();
+                addToHistory(result.sRGBHex);
+            } catch (e) {
+                // 用户取消
+            }
+        });
+
+        // ==================== 初始化 ====================
+        function initCanvasSizes() {
+            const rect = pickerCanvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            pickerCanvas.width = rect.width * dpr;
+            pickerCanvas.height = rect.height * dpr;
+            pickerCtx.scale(dpr, dpr);
+            pickerCanvas.style.width = rect.width + 'px';
+            pickerCanvas.style.height = rect.height + 'px';
+
+            const aRect = alphaCanvas.getBoundingClientRect();
+            alphaCanvas.width = aRect.width * dpr;
+            alphaCanvas.height = aRect.height * dpr;
+            alphaCtx.scale(dpr, dpr);
+        }
+
+        initCanvasSizes();
+        setColorHSL(229, 77, 66);
+        currentA = 1;
+        updateAll();
+        // 默认颜色加入历史
+        addToHistory('#667EEA');
+
+        window.addEventListener('resize', () => {
+            initCanvasSizes();
+            updateAll();
+        });
+    </script>
+</body>
+</html>
