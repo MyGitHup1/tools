@@ -39,7 +39,7 @@
                     <input type="radio" name="hashType" value="SHA256" class="mr-2"> SHA-256
                 </label>
             </div>
-            <p class="text-sm text-gray-500 mt-2">提示：多次上传文件会<strong>追加</strong>到列表，不会覆盖原有文件</p>
+            <p class="text-sm text-gray-500 mt-2">提示：多次上传文件会<strong>追加</strong>到列表，切换算法后点击计算可重新求值</p>
         </div>
 
         <!-- 文件上传区域 -->
@@ -102,8 +102,9 @@
         const status = document.getElementById('status');
         const hashTableBody = document.getElementById('hashTableBody');
         const compareTableBody = document.getElementById('compareTableBody');
-        // 全局文件列表：用于累加，不再每次清空
         let fileList = [];
+        // 额外保存原始 File 对象，用于切换算法后重算
+        let rawFileList = [];
 
         // 格式化文件大小
         function formatFileSize(bytes) {
@@ -160,7 +161,6 @@
         function renderCompareResult() {
             compareTableBody.innerHTML = '';
             const len = fileList.length;
-            // 双重循环实现两两组合 (i < j 避免重复对比)
             for (let i = 0; i < len; i++) {
                 for (let j = i + 1; j < len; j++) {
                     const fileA = fileList[i];
@@ -185,34 +185,43 @@
             }
         }
 
-        // 处理新增文件：追加到列表，不覆盖旧数据
-        async function handleNewFiles(files) {
-            if (files.length === 0) return;
-            status.textContent = '正在计算哈希，请稍候...';
+        // 核心：根据原始文件列表，重新计算全部哈希
+        async function recalcAllHash() {
+            if (rawFileList.length === 0) {
+                status.textContent = '暂无文件可计算！';
+                status.className = 'mb-4 text-red-600 h-6';
+                return;
+            }
+            status.textContent = '正在重新计算哈希，请稍候...';
             status.className = 'mb-4 text-orange-600 h-6';
 
-            // 获取选中的哈希算法
             const hashType = document.querySelector('input[name="hashType"]:checked').value;
-            let addCount = 0;
+            fileList = [];
 
-            // 遍历新文件，追加到全局列表
-            for (const file of files) {
+            for (const file of rawFileList) {
                 const hash = await getFileHash(file, hashType);
                 fileList.push({
                     name: file.name,
                     size: formatFileSize(file.size),
                     hash: hash
                 });
-                addCount++;
             }
 
-            // 重新渲染列表和对比结果
             renderHashList();
             renderCompareResult();
-            status.textContent = `成功追加 ${addCount} 个文件，当前总计 ${fileList.length} 个文件`;
+            status.textContent = `算法切换完成，当前总计 ${rawFileList.length} 个文件`;
             status.className = 'mb-4 text-green-600 h-6';
+        }
 
-            // 清空 fileInput，允许下次继续选择同批文件
+        // 处理新增文件：追加原始文件 + 计算哈希
+        async function handleNewFiles(files) {
+            if (files.length === 0) return;
+            // 保存原始 File 对象，用于后续重算
+            for (const f of files) {
+                rawFileList.push(f);
+            }
+            // 统一重算全部
+            await recalcAllHash();
             fileInput.value = '';
         }
 
@@ -238,24 +247,13 @@
             handleNewFiles(e.dataTransfer.files);
         });
 
-        // 计算按钮（重新计算/刷新对比）
-        calcBtn.addEventListener('click', () => {
-            if (fileList.length === 0) {
-                status.textContent = '请先上传文件！';
-                status.className = 'mb-4 text-red-600 h-6';
-                return;
-            }
-            // 重新渲染（切换哈希算法后可刷新）
-            handleNewFiles([]);
-            renderHashList();
-            renderCompareResult();
-            status.textContent = `已刷新，当前总计 ${fileList.length} 个文件`;
-            status.className = 'mb-4 text-green-600 h-6';
-        });
+        // 计算按钮：触发全局重算（切换算法后点这里生效）
+        calcBtn.addEventListener('click', recalcAllHash);
 
-        // 清空按钮：彻底重置所有数据
+        // 清空按钮：彻底重置
         clearBtn.addEventListener('click', () => {
             fileList = [];
+            rawFileList = [];
             fileInput.value = '';
             hashTableBody.innerHTML = '';
             compareTableBody.innerHTML = '';
