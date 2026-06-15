@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>二维码生成器 QR Code Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <style>
         .qr-container canvas { border-radius: 12px; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
@@ -144,28 +144,39 @@
             currentText = text;
             qrCanvas.innerHTML = '';
 
-            const size = parseInt(qrSize.value);
-            const opts = {
-                width: size,
-                height: size,
-                color: { dark: qrColor.value + 'ff', light: qrBg.value + 'ff' },
-                errorCorrectionLevel: qrLevel.value
-            };
-
-            QRCode.toCanvas(text, opts, (err, canvas) => {
-                if (err) {
-                    qrInfo.textContent = '生成失败：' + err.message;
-                    qrInfo.className = 'text-center text-xs text-red-500 mt-3';
-                    return;
-                }
-                canvas.style.maxWidth = '100%';
-                canvas.style.height = 'auto';
-                qrCanvas.appendChild(canvas);
-                currentCanvas = canvas;
+            if (typeof QRCode === 'undefined') {
+                qrInfo.textContent = '⚠️ 二维码库加载失败，请刷新页面重试';
+                qrInfo.className = 'text-center text-xs text-red-500 mt-3';
                 qrResult.classList.remove('hidden');
+                return;
+            }
+
+            const size = parseInt(qrSize.value);
+            try {
+                const qr = new QRCode(qrCanvas, {
+                    text: text,
+                    width: size,
+                    height: size,
+                    colorDark: qrColor.value,
+                    colorLight: qrBg.value,
+                    correctLevel: QRCode.CorrectLevel[qrLevel.value]
+                });
+                qrResult.classList.remove('hidden');
+                // 拿到 canvas 引用用于下载
+                setTimeout(() => {
+                    const canvas = qrCanvas.querySelector('canvas');
+                    if (canvas) {
+                        canvas.style.maxWidth = '100%';
+                        canvas.style.height = 'auto';
+                        currentCanvas = canvas;
+                    }
+                }, 100);
                 qrInfo.textContent = `二维码内容：${text.length > 50 ? text.slice(0, 50) + '...' : text}（${text.length} 字符）`;
                 qrInfo.className = 'text-center text-xs text-gray-400 mt-3';
-            });
+            } catch (e) {
+                qrInfo.textContent = '生成失败：' + e.message;
+                qrInfo.className = 'text-center text-xs text-red-500 mt-3';
+            }
         }
 
         generateBtn.addEventListener('click', generateQR);
