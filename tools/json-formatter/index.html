@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON 格式化工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+        .json-string { color: #16a34a; }
+        .json-number { color: #2563eb; }
+        .json-boolean { color: #9333ea; }
+        .json-null { color: #9ca3af; }
+        .json-key { color: #0d9488; font-weight: 600; }
+        .json-brace { color: #6b7280; }
+        pre { tab-size: 2; }
+        .syntax-highlight { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 md:p-8">
+    <div class="max-w-4xl mx-auto">
+        <a href="../../index.html" class="inline-flex items-center text-blue-500 hover:text-blue-700 mb-4 transition-colors">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            返回工具首页
+        </a>
+
+        <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-2 flex items-center justify-center gap-2">
+                <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                </svg>
+                JSON 格式化工具
+            </h1>
+            <p class="text-center text-sm text-gray-400 mb-6">格式化 · 压缩 · 校验 · 语法高亮</p>
+
+            <!-- 工具栏 -->
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button id="formatBtn" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                    </svg>
+                    格式化
+                </button>
+                <button id="compressBtn" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
+                    </svg>
+                    压缩
+                </button>
+                <button id="validateBtn" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    校验
+                </button>
+                <button id="copyBtn" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
+                    复制结果
+                </button>
+                <button id="clearBtn" class="px-4 py-2 bg-red-400 hover:bg-red-500 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    清空
+                </button>
+
+                <div class="ml-auto flex items-center gap-3">
+                    <label class="flex items-center gap-1.5 text-sm text-gray-500 cursor-pointer">
+                        <input type="checkbox" id="sortKeys" class="rounded"> 排序 Key
+                    </label>
+                    <select id="indentSize" class="px-2 py-1.5 border border-gray-300 rounded-lg text-sm text-gray-600">
+                        <option value="2">2 空格</option>
+                        <option value="4" selected>4 空格</option>
+                        <option value="1">Tab</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 状态提示 -->
+            <div id="statusBar" class="mb-3 text-sm"></div>
+
+            <!-- 编辑区 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <!-- 输入 -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1.5">输入 JSON</label>
+                    <textarea id="jsonInput" placeholder='粘贴 JSON 到这里...&#10;例如：{"name":"张三","age":25,"hobbies":["coding","reading"]}'
+                        class="w-full h-80 lg:h-96 px-4 py-3 border border-gray-300 rounded-xl text-sm font-mono resize-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition-all"></textarea>
+                </div>
+
+                <!-- 输出 -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1.5">格式化结果</label>
+                    <div class="relative">
+                        <pre id="jsonOutput" class="w-full h-80 lg:h-96 px-4 py-3 border border-gray-200 rounded-xl text-sm font-mono bg-gray-50 overflow-auto whitespace-pre-wrap syntax-highlight"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 统计 -->
+            <div id="stats" class="mt-4 flex flex-wrap gap-3 text-xs text-gray-500"></div>
+        </div>
+    </div>
+
+    <script>
+        const jsonInput = document.getElementById('jsonInput');
+        const jsonOutput = document.getElementById('jsonOutput');
+        const statusBar = document.getElementById('statusBar');
+        const stats = document.getElementById('stats');
+        const sortKeys = document.getElementById('sortKeys');
+        const indentSize = document.getElementById('indentSize');
+
+        function syntaxHighlight(json) {
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^"\\])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (match) => {
+                let cls = 'json-number';
+                if (/^"/.test(match)) {
+                    cls = /:$/.test(match) ? 'json-key' : 'json-string';
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'json-null';
+                }
+                return `<span class="${cls}">${match}</span>`;
+            });
+        }
+
+        function setStatus(type, text) {
+            const classes = { ok: 'text-green-600', warn: 'text-amber-600', error: 'text-red-500' };
+            statusBar.innerHTML = `<span class="${classes[type] || 'text-gray-500'}">${text}</span>`;
+        }
+
+        function formatJSON() {
+            const raw = jsonInput.value.trim();
+            if (!raw) { jsonOutput.textContent = ''; setStatus('', ''); stats.innerHTML = ''; return; }
+
+            let parsed;
+            try {
+                parsed = JSON.parse(raw);
+            } catch (e) {
+                // 尝试定位错误
+                const pos = parseInt(e.message.match(/position (\d+)/)?.[1]);
+                let hint = raw;
+                if (pos !== undefined && pos < raw.length) {
+                    const start = Math.max(0, pos - 30);
+                    const end = Math.min(raw.length, pos + 30);
+                    hint = '...' + raw.slice(start, end) + '...';
+                }
+                setStatus('error', `❌ JSON 格式错误：${e.message}`);
+                jsonOutput.innerHTML = `<span class="text-red-400">// 输入的不是合法 JSON\n// ${e.message}\n// 请在左侧修正后重新格式化</span>`;
+                stats.innerHTML = '';
+                return;
+            }
+
+            const indent = indentSize.value === '1' ? '\t' : parseInt(indentSize.value);
+            const formatted = JSON.stringify(parsed, sortKeys.checked ? null : undefined, indent);
+            jsonOutput.innerHTML = syntaxHighlight(formatted);
+
+            // 统计
+            const countNodes = (obj) => {
+                if (obj === null || typeof obj !== 'object') return 0;
+                let count = Array.isArray(obj) ? obj.length : Object.keys(obj).length;
+                for (const v of Object.values(obj)) {
+                    if (v && typeof v === 'object') count += countNodes(v);
+                }
+                return count;
+            };
+            const totalNodes = parsed ? countNodes(parsed) : 0;
+            const depth = (obj, d = 1) => {
+                if (!obj || typeof obj !== 'object') return d;
+                let max = d;
+                for (const v of Object.values(obj)) {
+                    if (v && typeof v === 'object') max = Math.max(max, depth(v, d + 1));
+                }
+                return max;
+            };
+            const objDepth = parsed ? depth(parsed) : 0;
+
+            setStatus('ok', `✅ 合法的 JSON`);
+            stats.innerHTML = `
+                <span class="px-2 py-1 bg-gray-100 rounded-full">📏 ${raw.length} 字符 → ${formatted.length} 字符</span>
+                <span class="px-2 py-1 bg-gray-100 rounded-full">📊 ${totalNodes} 个节点</span>
+                <span class="px-2 py-1 bg-gray-100 rounded-full">📐 ${objDepth} 层深度</span>
+                <span class="px-2 py-1 bg-gray-100 rounded-full">${Array.isArray(parsed) ? '📋 数组' : '📦 ' + (parsed && typeof parsed === 'object' ? '对象' : typeof parsed)}</span>
+            `;
+        }
+
+        function compressJSON() {
+            const raw = jsonInput.value.trim();
+            if (!raw) return;
+            try {
+                const parsed = JSON.parse(raw);
+                const compressed = JSON.stringify(parsed);
+                jsonOutput.innerHTML = syntaxHighlight(compressed);
+                setStatus('ok', `✅ 压缩完成 — ${compressed.length} 字符`);
+                stats.innerHTML = `<span class="px-2 py-1 bg-gray-100 rounded-full">📏 ${raw.length} → ${compressed.length} 字符（节省 ${Math.round((1 - compressed.length / raw.length) * 100)}%）</span>`;
+            } catch (e) {
+                setStatus('error', `❌ JSON 格式错误：${e.message}`);
+            }
+        }
+
+        function validateJSON() {
+            const raw = jsonInput.value.trim();
+            if (!raw) { setStatus('', ''); return; }
+            try {
+                const parsed = JSON.parse(raw);
+                setStatus('ok', '✅ 格式正确！完全合法的 JSON');
+            } catch (e) {
+                setStatus('error', `❌ 格式错误：${e.message}`);
+            }
+        }
+
+        document.getElementById('formatBtn').addEventListener('click', formatJSON);
+        document.getElementById('compressBtn').addEventListener('click', compressJSON);
+        document.getElementById('validateBtn').addEventListener('click', validateJSON);
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            jsonInput.value = '';
+            jsonOutput.textContent = '';
+            statusBar.innerHTML = '';
+            stats.innerHTML = '';
+        });
+
+        document.getElementById('copyBtn').addEventListener('click', async () => {
+            const text = jsonOutput.textContent;
+            if (!text) return;
+            try {
+                await navigator.clipboard.writeText(text);
+                const btn = document.getElementById('copyBtn');
+                const orig = btn.innerHTML;
+                btn.innerHTML = '✅ 已复制！';
+                btn.classList.add('bg-emerald-500');
+                setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('bg-emerald-500'); }, 1500);
+            } catch {
+                // fallback
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+            }
+        });
+
+        sortKeys.addEventListener('change', formatJSON);
+        indentSize.addEventListener('change', formatJSON);
+
+        // 快捷键 Ctrl+Enter 格式化
+        jsonInput.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                formatJSON();
+            }
+        });
+
+        // 自动格式化防抖
+        let autoTimer;
+        jsonInput.addEventListener('input', () => {
+            clearTimeout(autoTimer);
+            autoTimer = setTimeout(formatJSON, 500);
+        });
+
+        // 初始化示例
+        jsonInput.value = JSON.stringify({
+            name: "张三",
+            age: 25,
+            email: "zhangsan@example.com",
+            isActive: true,
+            score: null,
+            hobbies: ["coding", "reading", "gaming"],
+            address: {
+                province: "广东",
+                city: "深圳",
+                zip: "518000"
+            },
+            projects: [
+                { id: 1, title: "StreamApp", status: "active" },
+                { id: 2, title: "AirCon Remote", status: "developing" }
+            ]
+        }, null, 2);
+        formatJSON();
+    </script>
+</body>
+</html>

@@ -11,7 +11,11 @@ tools/
 └── tools/                      # 所有工具存放目录
     ├── hash-compare/           # 文件 Hash 两两对比工具
     │   └── index.html
-    └── color-picker/           # 取色器工具
+    ├── color-picker/           # 取色器工具
+    │   └── index.html
+    ├── qrcode-generator/       # 二维码生成器
+    │   └── index.html
+    └── json-formatter/         # JSON 格式化工具
         └── index.html
 ```
 
@@ -38,3 +42,5 @@ tools/
 |------|------|
 | [文件 Hash 两两对比](tools/hash-compare/index.html) | 批量上传文件，计算 MD5/SHA-1/SHA-256 哈希值，自动两两对比找出重复文件 |
 | [取色器](tools/color-picker/index.html) | 可视化取色，支持 HSL 面板调节、透明度、HEX/RGB/HSL 格式输出、屏幕取色及颜色历史 |
+| [二维码生成器](tools/qrcode-generator/index.html) | 输入文字/链接实时生成二维码，支持尺寸颜色调节、Wi-Fi 名片等快捷模板、PNG 下载 |
+| [JSON 格式化工具](tools/json-formatter/index.html) | 在线 JSON 格式化/压缩/校验，语法高亮，Key 排序，节点统计，Ctrl+Enter 快捷格式化 |
