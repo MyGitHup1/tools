@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高压电源设计工具箱</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+        .tab-active { border-bottom: 3px solid #f59e0b; color: #f59e0b; }
+        .tab-inactive { color: #9ca3af; border-bottom: 3px solid transparent; }
+        .input-focus:focus { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15); }
+        .danger-badge { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .warn-badge { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .safe-badge { background: linear-gradient(135deg, #22c55e, #16a34a); }
+        .resistor-body { transition: all 0.2s; }
+    </style>
+</head>
+<body class="bg-gray-900 min-h-screen text-gray-200">
+    <div class="max-w-5xl mx-auto px-4 py-6">
+        <!-- Header -->
+        <div class="flex items-center gap-3 mb-2">
+            <a href="../../index.html" class="text-amber-500 hover:text-amber-400 transition-colors text-sm flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                返回
+            </a>
+            <span class="text-gray-600">|</span>
+            <span class="text-xs text-gray-600">高压电源设计工具箱 v1.0</span>
+        </div>
+
+        <div class="text-center mb-6">
+            <h1 class="text-3xl font-bold mb-1">
+                <span class="text-yellow-400">⚡</span>
+                <span class="bg-gradient-to-r from-amber-400 to-red-500 bg-clip-text text-transparent">高压电源设计工具箱</span>
+            </h1>
+            <p class="text-gray-500 text-sm">分压器设计 · RC充放电 · 功率热耗散 · 电容储能</p>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="flex border-b border-gray-700 mb-6">
+            <button class="tab-btn tab-active px-5 py-3 text-sm font-medium transition-colors" data-tab="divider">
+                高压分压器
+            </button>
+            <button class="tab-btn tab-inactive px-5 py-3 text-sm font-medium transition-colors" data-tab="rc">
+                RC 充放电
+            </button>
+            <button class="tab-btn tab-inactive px-5 py-3 text-sm font-medium transition-colors" data-tab="power">
+                功率热耗散
+            </button>
+            <button class="tab-btn tab-inactive px-5 py-3 text-sm font-medium transition-colors" data-tab="capacitor">
+                电容储能
+            </button>
+        </div>
+
+        <!-- ==================== TAB 1: 高压分压器设计 ==================== -->
+        <div id="tab-divider" class="tab-content animate-fade-in">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- 输入区 -->
+                <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                    <h2 class="text-lg font-semibold text-amber-400 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        设计参数
+                    </h2>
+
+                    <div class="space-y-4">
+                        <!-- 输入电压 -->
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">高压输入 Vin</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="div-vin" value="10000" min="1" class="input-focus flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white outline-none transition-all">
+                                <select id="div-vin-unit" class="bg-gray-700 border border-gray-600 rounded-lg px-2 py-2 text-sm text-white outline-none">
+                                    <option value="1">V</option>
+                                    <option value="1000" selected>kV</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 输出电压 -->
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">期望输出 Vout（进入ADC/表头）</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="div-vout" value="5" min="0.001" step="0.01" class="input-focus flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white outline-none transition-all">
+                                <select id="div-vout-unit" class="bg-gray-700 border border-gray-600 rounded-lg px-2 py-2 text-sm text-white outline-none">
+                                    <option value="1" selected>V</option>
+                                    <option value="0.001">mV</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 单电阻耐压 -->
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">单颗电阻最大耐压（取决于封装）</label>
+                            <select id="div-rating" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white outline-none">
+                                <option value="200">200V — 0805/1206 常规</option>
+                                <option value="300">300V — 1210/2512</option>
+                                <option value="500" selected>500V — 高压厚膜 / 2W+</option>
+                                <option value="1000">1000V — 专用高压电阻</option>
+                                <option value="2000">2000V — 棒状高压电阻</option>
+                            </select>
+                        </div>
+
+                        <!-- 高端总阻值 -->
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">高端总阻值 R_high</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="div-rhigh" value="10" min="0.001" step="0.1" class="input-focus flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white outline-none transition-all">
+                                <select id="div-rhigh-unit" class="bg-gray-700 border border-gray-600 rounded-lg px-2 py-2 text-sm text-white outline-none">
+                                    <option value="1e6" selected>MΩ</option>
+                                    <option value="1e3">kΩ</option>
+                                    <option value="1">Ω</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 安全裕量 -->
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">电压安全裕量</label>
+                            <select id="div-margin" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white outline-none">
+                                <option value="0.5">50% — 保守（推荐）</option>
+                                <option value="0.7" selected>70% — 常规</option>
+                                <option value="0.85">85% — 激进</option>
+                            </select>
+                        </div>
+
+                        <button id="div-calc" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-lg transition-colors text-sm">
+                            计算分压器参数
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 结果区 -->
+                <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                    <h2 class="text-lg font-semibold text-amber-400 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        设计结果
+                    </h2>
+                    <div id="div-result" class="text-gray-500 text-sm text-center py-8">
+                        点击"计算分压器参数"查看结果
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分压器示意图 -->
+            <div class="mt-6 bg-gray-800 rounded-xl p-6 border border-gray-700" id="div-schematic-container" style="display:none;">
+                <h2 class="text-lg font-semibold text-amber-400 mb-4">分压器结构示意</h2>
+                <div id="div-schematic" class="flex items-center justify-center min-h-[200px]"></div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB 2: RC 充放电 ==================== -->
+        <div id="tab-rc" class="tab-content animate-fade-in" style="display:none;">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                    <h2 class="text-lg font-semibold text-amber-400 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        RC 参数
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">电阻 R</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="rc-r" value="100" min="0.001" step="0.1" class="input-focus flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white outline-none transition-all">
+                                <select id="rc-r-unit" class="bg-gray-700 border border-gray-600 rounded-lg px-2 py-2 text-sm text-white outline-none">
+                                    <option value="1e6">MΩ</option>
+                                    <option value="1e3" selected>kΩ</option>
+                                    <option value="1">Ω</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">电容 C</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="rc-c" value="10" min="0.000001" step="0.1" class="input-focus flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white outline-none transition-all">
+                                <select id="rc-c-unit" class="bg-gray-700 border border-gray-600 rounded-lg px-2 py-2 text-sm text-white outline-none">
+                                    <option value="0.000001" selected>μF</option>
+                                    <option value="0.001">nF</option>
+                                    <option value="1e-6">pF</option>
+                                    <option value="1">F</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">电源电压 Vs</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="rc-vs" value="1000" min="0" step="1" class="input-focus flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white outline-none transition-all">
+                                <select id="rc-vs-unit" class="bg-gray-700 border border-gray-600 rounded-lg px-2 py-2 text-sm text-white outline-none">
+                                    <option value="1000" selected>kV</option>
+                                    <option value="1">V</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">模式</label>
+                            <select id="rc-mode" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white outline-none">
+                                <option value="charge">充电 — 电容从 0V 到 Vs</option>
+                                <option value="discharge">放电 — 电容从 Vs 到 0V</option>
+                            </select>
+                        </div>
+                        <button id="rc-calc" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-lg transition-colors text-sm">
+                            计算并绘制曲线
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                    <h2 class="text-lg font-semibold text-amber-400 mb-4">结果</h2>
+                    <div id="rc-result" class="space-y-2 text-sm"></div>
+                    <div class="mt-4">
+                        <canvas id="rc-chart" height="220"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB 3: 功率热耗散 ==================== -->
+        <div id="tab-power" class="tab-content animate-fade-in" style="display:none;">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                    <h2 class="text-lg font-semibold text-amber-400 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
+                        </svg>
+                        功率计算
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">计算模式</label>
+                            <select id="pwr-mode" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white outline-none">
+                                <option value="vr">已知电压 + 电阻 → I, P</option>
+                                <option value="vi">已知电压 + 电流 → R, P</option>
+                                <option value="ir">已知电流 + 电阻 → V, P</option>
+                            </select>
+                        </div>
+                        <div id="pwr-inputs" class="space-y-3"></div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">环境温度 Ta</label>
+                            <input type="number" id="pwr-ta" value="25" class="input-focus w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">散热方式</label>
+                            <select id="pwr-cooling" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white outline-none">
+                                <option value="still">自然空气 (RθJA ≈ 60°C/W 2512)</option>
+                                <option value="copper">大面积覆铜 (RθJA ≈ 30°C/W)</option>
+                                <option value="forced">强制风冷 (RθJA ≈ 15°C/W)</option>
+                            </select>
+                        </div>
+                        <button id="pwr-calc" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-lg transition-colors text-sm">
+                            计算功率与温升
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                    <h2 class="text-lg font-semibold text-amber-400 mb-4">计算结果</h2>
+                    <div id="pwr-result" class="text-gray-500 text-sm text-center py-8">
+                        输入参数后点击计算
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB 4: 电容储能 ==================== -->
+        <div id="tab-capacitor" class="tab-content animate-fade-in" style="display:none;">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                    <h2 class="text-lg font-semibold text-amber-400 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                        电容储能计算
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">电容值 C</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="cap-c" value="100" min="0.000001" step="0.1" class="input-focus flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white outline-none transition-all">
+                                <select id="cap-c-unit" class="bg-gray-700 border border-gray-600 rounded-lg px-2 py-2 text-sm text-white outline-none">
+                                    <option value="0.000001" selected>μF</option>
+                                    <option value="1">F</option>
+                                    <option value="0.001">mF</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">充电电压 Vc</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="cap-v" value="1000" min="0.001" step="1" class="input-focus flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white outline-none transition-all">
+                                <select id="cap-v-unit" class="bg-gray-700 border border-gray-600 rounded-lg px-2 py-2 text-sm text-white outline-none">
+                                    <option value="1000" selected>kV</option>
+                                    <option value="1">V</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">放电电阻 Rd（可选，计算放电时间）</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="cap-rd" value="" placeholder="留空跳过" class="input-focus flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white outline-none transition-all">
+                                <select id="cap-rd-unit" class="bg-gray-700 border border-gray-600 rounded-lg px-2 py-2 text-sm text-white outline-none">
+                                    <option value="1e3">kΩ</option>
+                                    <option value="1e6" selected>MΩ</option>
+                                    <option value="1">Ω</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button id="cap-calc" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-lg transition-colors text-sm">
+                            计算储能
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                    <h2 class="text-lg font-semibold text-amber-400 mb-4">储能分析</h2>
+                    <div id="cap-result" class="text-gray-500 text-sm text-center py-8">
+                        输入参数后点击计算
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== TAB SWITCHING ====================
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.className = b.className.replace('tab-active', 'tab-inactive'));
+                btn.className = btn.className.replace('tab-inactive', 'tab-active');
+                document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+                document.getElementById('tab-' + btn.dataset.tab).style.display = '';
+            });
+        });
+
+        // ==================== HELPER ====================
+        function fmtNum(n, digits = 3) {
+            if (n === 0) return '0';
+            if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(digits) + ' M';
+            if (Math.abs(n) >= 1e3) return (n / 1e3).toFixed(digits) + ' k';
+            if (Math.abs(n) >= 1) return n.toFixed(digits);
+            if (Math.abs(n) >= 1e-3) return (n * 1e3).toFixed(digits) + ' m';
+            if (Math.abs(n) >= 1e-6) return (n * 1e6).toFixed(digits) + ' μ';
+            return (n * 1e9).toFixed(digits) + ' n';
+        }
+        function engUnit(val) {
+            if (val === 0) return '0';
+            const abs = Math.abs(val);
+            if (abs >= 1e9) return (val/1e9).toFixed(2) + ' G';
+            if (abs >= 1e6) return (val/1e6).toFixed(2) + ' M';
+            if (abs >= 1e3) return (val/1e3).toFixed(2) + ' k';
+            if (abs >= 1) return val.toFixed(2);
+            if (abs >= 1e-3) return (val*1e3).toFixed(2) + ' m';
+            if (abs >= 1e-6) return (val*1e6).toFixed(2) + ' μ';
+            if (abs >= 1e-9) return (val*1e9).toFixed(2) + ' n';
+            return (val*1e12).toFixed(2) + ' p';
+        }
+        function dangerLevel(power, maxPower) {
+            const ratio = power / maxPower;
+            if (ratio > 1) return { cls: 'danger-badge', text: '⚠️ 超额定功率！' };
+            if (ratio > 0.7) return { cls: 'warn-badge', text: '⚡ 接近上限' };
+            return { cls: 'safe-badge', text: '✅ 安全' };
+        }
+
+        // ==================== TAB 1: 分压器设计 ====================
+        document.getElementById('div-calc').addEventListener('click', () => {
+            const vin = parseFloat(document.getElementById('div-vin').value) * parseFloat(document.getElementById('div-vin-unit').value);
+            const vout = parseFloat(document.getElementById('div-vout').value) * parseFloat(document.getElementById('div-vout-unit').value);
+            const vrating = parseFloat(document.getElementById('div-rating').value);
+            const rhigh_raw = parseFloat(document.getElementById('div-rhigh').value) * parseFloat(document.getElementById('div-rhigh-unit').value);
+            const margin = parseFloat(document.getElementById('div-margin').value);
+
+            if (isNaN(vin) || isNaN(vout) || vout >= vin) {
+                document.getElementById('div-result').innerHTML = '<p class="text-red-400">⚠️ 请检查输入参数：Vout 必须小于 Vin</p>';
+                return;
+            }
+
+            // Ratio
+            const ratio = vin / vout;
+            // R_low = R_high / (Vin/Vout - 1)
+            const rlow = rhigh_raw / (ratio - 1);
+
+            // Number of series resistors needed on high side
+            const effectiveRating = vrating * margin;
+            const numSeries = Math.ceil(vin / effectiveRating);
+            const rPerPiece = rhigh_raw / numSeries;
+            const vPerPiece = vin / numSeries;
+
+            // Power
+            const totalP = (vin * vin) / (rhigh_raw + rlow);
+            const pHighTotal = (vin - vout) * (vin - vout) / rhigh_raw;
+            const pLow = (vout * vout) / rlow;
+            const pHighPerPiece = pHighTotal / numSeries;
+            // Assume 2512 package can do 1W, 1206=0.25W
+            const piecePowerRating = numSeries >= 20 ? 0.5 : 1;
+
+            // Current
+            const current = vin / (rhigh_raw + rlow);
+
+            // Standard resistor values
+            const stdE24 = [1.0,1.1,1.2,1.3,1.5,1.6,1.8,2.0,2.2,2.4,2.7,3.0,3.3,3.6,3.9,4.3,4.7,5.1,5.6,6.2,6.8,7.5,8.2,9.1];
+            function findNearestStd(val) {
+                if (val <= 0) return 1;
+                const exp = Math.floor(Math.log10(val));
+                const mantissa = val / Math.pow(10, exp);
+                let nearest = stdE24[0];
+                let minDiff = Infinity;
+                for (const s of stdE24) {
+                    const diff = Math.abs(s - mantissa);
+                    if (diff < minDiff) { minDiff = diff; nearest = s; }
+                }
+                return nearest * Math.pow(10, exp);
+            }
+
+            const rPerPieceStd = findNearestStd(rPerPiece);
+            const rlowStd = findNearestStd(rlow);
+            const actualVout = vin * rlowStd / (numSeries * rPerPieceStd + rlowStd);
+
+            const pSafetyHigh = dangerLevel(pHighPerPiece, piecePowerRating);
+            const pSafetyLow = dangerLevel(pLow, piecePowerRating);
+
+            document.getElementById('div-result').innerHTML = `
+                <div class="space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-gray-700/50 rounded-lg p-3">
+                            <span class="text-xs text-gray-500">分压比</span>
+                            <div class="text-xl font-bold text-amber-400">${ratio.toFixed(1)} : 1</div>
+                        </div>
+                        <div class="bg-gray-700/50 rounded-lg p-3">
+                            <span class="text-xs text-gray-500">回路电流</span>
+                            <div class="text-xl font-bold text-amber-400">${engUnit(current)}A</div>
+                        </div>
+                        <div class="bg-gray-700/50 rounded-lg p-3">
+                            <span class="text-xs text-gray-500">高端串联数</span>
+                            <div class="text-xl font-bold text-cyan-400">${numSeries} 颗</div>
+                        </div>
+                        <div class="bg-gray-700/50 rounded-lg p-3">
+                            <span class="text-xs text-gray-500">每颗耐压</span>
+                            <div class="text-xl font-bold ${vPerPiece > vrating ? 'text-red-400' : 'text-cyan-400'}">${vPerPiece.toFixed(0)}V</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-700/30 rounded-lg p-4 space-y-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-gray-400">高端每颗 (标准值)</span>
+                            <span class="text-white font-mono font-bold">${engUnit(rPerPieceStd)}Ω × ${numSeries}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-gray-400">总 R_high</span>
+                            <span class="text-white font-mono">${engUnit(rPerPieceStd * numSeries)}Ω</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-gray-400">R_low (标准值)</span>
+                            <span class="text-white font-mono font-bold">${engUnit(rlowStd)}Ω</span>
+                        </div>
+                        <hr class="border-gray-700">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-gray-400">实际 Vout</span>
+                            <span class="text-amber-400 font-bold">${actualVout.toFixed(3)}V</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-gray-400">误差</span>
+                            <span class="${Math.abs(actualVout - vout)/vout < 0.05 ? 'text-green-400' : 'text-amber-400'}">${((actualVout - vout)/vout * 100).toFixed(1)}%</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-400">总功耗</span>
+                            <span class="text-xs text-white">${engUnit(totalP)}W</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-400">高端每颗功耗</span>
+                            <span class="text-xs text-white">${engUnit(pHighPerPiece)}W</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full text-white ${pSafetyHigh.cls}">${pSafetyHigh.text}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-400">低端功耗</span>
+                            <span class="text-xs text-white">${engUnit(pLow)}W</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full text-white ${pSafetyLow.cls}">${pSafetyLow.text}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Draw schematic
+            document.getElementById('div-schematic-container').style.display = '';
+            const sch = document.getElementById('div-schematic');
+            const maxDraw = Math.min(numSeries, 12);
+            let svg = `<svg viewBox="0 0 600 ${180 + maxDraw * 20}" class="w-full max-w-lg mx-auto">`;
+            svg += `<text x="60" y="30" fill="#fbbf24" font-size="14" font-weight="bold">Vin = ${(vin/1000).toFixed(1)}kV</text>`;
+            svg += `<line x1="80" y1="40" x2="80" y2="60" stroke="#9ca3af" stroke-width="2"/>`;
+
+            for (let i = 0; i < maxDraw; i++) {
+                const y = 60 + i * 28;
+                svg += `<rect x="60" y="${y}" width="40" height="8" rx="2" fill="#f59e0b" opacity="${0.5 + 0.5 * (i/maxDraw)}"/>`;
+                svg += `<line x1="80" y1="${y+8}" x2="80" y2="${y+28}" stroke="#9ca3af" stroke-width="1.5"/>`;
+            }
+            if (numSeries > maxDraw) {
+                svg += `<text x="90" y="${60 + maxDraw * 14 + 4}" fill="#6b7280" font-size="12">... 共 ${numSeries} 颗</text>`;
+            } else {
+                svg += `<line x1="80" y1="${60 + maxDraw * 28}" x2="80" y2="${60 + maxDraw * 28 + 15}" stroke="#9ca3af" stroke-width="2"/>`;
+            }
+
+            const midY = numSeries > maxDraw ? 60 + maxDraw * 28 + 20 : 60 + maxDraw * 28 + 15;
+            svg += `<text x="90" y="${midY + 15}" fill="#9ca3af" font-size="11">Vmid → ADC</text>`;
+            svg += `<line x1="80" y1="${midY}" x2="80" y2="${midY + 40}" stroke="#9ca3af" stroke-width="2"/>`;
+            svg += `<rect x="60" y="${midY + 40}" width="40" height="8" rx="2" fill="#22c55e"/>`;
+            svg += `<line x1="80" y1="${midY + 48}" x2="80" y2="${midY + 65}" stroke="#9ca3af" stroke-width="2"/>`;
+            svg += `<text x="60" y="${midY + 80}" fill="#fbbf24" font-size="14" font-weight="bold">GND</text>`;
+
+            // Labels
+            svg += `<text x="20" y="${60 + maxDraw * 14}" fill="#6b7280" font-size="10">R_high</text>`;
+            svg += `<text x="20" y="${midY + 44}" fill="#6b7280" font-size="10">R_low</text>`;
+            svg += `<text x="130" y="${60 + maxDraw * 14}" fill="#f59e0b" font-size="10">${engUnit(rPerPieceStd)}Ω×${numSeries}</text>`;
+            svg += `<text x="130" y="${midY + 44}" fill="#22c55e" font-size="10">${engUnit(rlowStd)}Ω</text>`;
+            svg += `<line x1="200" y1="${midY + 15}" x2="250" y2="${midY + 15}" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,4"/>`;
+            svg += `<text x="260" y="${midY + 19}" fill="#fbbf24" font-size="12">Vout ≈ ${actualVout.toFixed(2)}V</text>`;
+
+            svg += `</svg>`;
+            sch.innerHTML = svg;
+        });
+
+        // Init tab 1
+        document.getElementById('div-calc').click();
+
+        // ==================== TAB 2: RC 充放电 ====================
+        let rcChart = null;
+        document.getElementById('rc-calc').addEventListener('click', () => {
+            const R = parseFloat(document.getElementById('rc-r').value) * parseFloat(document.getElementById('rc-r-unit').value);
+            const C = parseFloat(document.getElementById('rc-c').value) * parseFloat(document.getElementById('rc-c-unit').value);
+            const Vs = parseFloat(document.getElementById('rc-vs').value) * parseFloat(document.getElementById('rc-vs-unit').value);
+            const mode = document.getElementById('rc-mode').value;
+
+            const tau = R * C;
+            const t50 = tau * Math.log(2);
+            const t90 = tau * Math.log(10);
+            const t99 = tau * Math.log(100);
+            const t5tau = 5 * tau;
+
+            // Ripple for half-wave rectifier
+            const f = 50; // Hz
+            const ripple = Vs / (2 * f * R * C);
+
+            document.getElementById('rc-result').innerHTML = `
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-gray-700/50 rounded-lg p-2.5">
+                        <span class="text-xs text-gray-500">时间常数 τ</span>
+                        <div class="text-lg font-bold text-amber-400">${engUnit(tau)}s</div>
+                    </div>
+                    <div class="bg-gray-700/50 rounded-lg p-2.5">
+                        <span class="text-xs text-gray-500">5τ (99.3%)</span>
+                        <div class="text-lg font-bold text-amber-400">${engUnit(t5tau)}s</div>
+                    </div>
+                    <div class="bg-gray-700/50 rounded-lg p-2.5">
+                        <span class="text-xs text-gray-500">50% 时间</span>
+                        <div class="text-sm font-bold text-cyan-400">${engUnit(t50)}s</div>
+                    </div>
+                    <div class="bg-gray-700/50 rounded-lg p-2.5">
+                        <span class="text-xs text-gray-500">90% 时间</span>
+                        <div class="text-sm font-bold text-cyan-400">${engUnit(t90)}s</div>
+                    </div>
+                    <div class="bg-gray-700/50 rounded-lg p-2.5">
+                        <span class="text-xs text-gray-500">99% 时间</span>
+                        <div class="text-sm font-bold text-cyan-400">${engUnit(t99)}s</div>
+                    </div>
+                    <div class="bg-gray-700/50 rounded-lg p-2.5">
+                        <span class="text-xs text-gray-500">纹波 (50Hz 半波)</span>
+                        <div class="text-sm font-bold ${ripple / Vs > 0.1 ? 'text-red-400' : 'text-green-400'}">${engUnit(ripple)}V</div>
+                    </div>
+                </div>
+                <div class="text-xs text-gray-600 mt-2">
+                    截止频率 fc = 1/(2πRC) = <span class="text-gray-400">${engUnit(1/(2*Math.PI*tau))}Hz</span>
+                </div>
+            `;
+
+            // Chart
+            const labels = [];
+            const data = [];
+            const steps = 50;
+            const tMax = t5tau * 1.2;
+            for (let i = 0; i <= steps; i++) {
+                const t = (i / steps) * tMax;
+                labels.push(engUnit(t) + 's');
+                if (mode === 'charge') {
+                    data.push(Vs * (1 - Math.exp(-t / tau)));
+                } else {
+                    data.push(Vs * Math.exp(-t / tau));
+                }
+            }
+
+            const ctx = document.getElementById('rc-chart').getContext('2d');
+            if (rcChart) rcChart.destroy();
+            rcChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: mode === 'charge' ? '充电曲线' : '放电曲线',
+                        data: data,
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245,158,11,0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#9ca3af', font: { size: 11 } } } },
+                    scales: {
+                        x: { ticks: { color: '#6b7280', font: { size: 9 }, maxTicksLimit: 6 }, grid: { color: '#374151' } },
+                        y: { ticks: { color: '#6b7280', font: { size: 9 }, callback: v => engUnit(v) + 'V' }, grid: { color: '#374151' } }
+                    }
+                }
+            });
+        });
+        document.getElementById('rc-calc').click();
+
+        // ==================== TAB 3: 功率热耗散 ====================
+        function updatePwrInputs() {
+            const mode = document.getElementById('pwr-mode').value;
+            const div = document.getElementById('pwr-inputs');
+            if (mode === 'vr') {
+                div.innerHTML = `
+                    <div><label class="block text-xs text-gray-400 mb-1">电压 V</label>
+                        <div class="flex gap-2"><input type="number" id="pwr-v" value="1000" class="input-focus flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white outline-none transition-all">
+                        <select id="pwr-v-unit" class="bg-gray-700 border border-gray-600 rounded-lg px-2 py-2 text-sm text-white outline-none"><option value="1000" selected>kV</option><option value="1">V</option></select></div></div>
+                    <div><label class="block text-xs text-gray-400 mb-1">电阻 R</label>
+                        <div class="flex gap-2"><input type="number" id="pwr-r" value="10" class="input-focus flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white outline-none transition-all">
+                        <select id="pwr-r-unit" class="bg-gray-700 border border-gray-600 rounded-lg px-2 py-2 text-sm text-white outline-none"><option value="1e6" selected>MΩ</option><option value="1e3">kΩ</option><option value="1">Ω</option></select></div></div>`;
+            } else if (mode === 'vi') {
+                div.innerHTML = `
+                    <div><label class="block text-xs text-gray-400 mb-1">电压 V</label>
+                        <div class="flex gap-2"><input type="number" id="pwr-v" value="1000" class="input-focus flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white outline-none transition-all">
+                        <select id="pwr-v-unit" class="bg-gray-700 border border-gray-600 rounded-lg px-2 py-2 text-sm text-white outline-none"><option value="1000" selected>kV</option><option value="1">V</option></select></div></div>
+                    <div><label class="block text-xs text-gray-400 mb-1">电流 I</label>
+                        <div class="flex gap-2"><input type="number" id="pwr-i" value="1" class="input-focus flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white outline-none transition-all">
+                        <select id="pwr-i-unit" class="bg-gray-700 border border-gray-600 rounded-lg px-2 py-2 text-sm text-white outline-none"><option value="0.001" selected>mA</option><option value="1">A</option><option value="1e-6">μA</option></select></div></div>`;
+            } else {
+                div.innerHTML = `
+                    <div><label class="block text-xs text-gray-400 mb-1">电流 I</label>
+                        <div class="flex gap-2"><input type="number" id="pwr-i" value="1" class="input-focus flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white outline-none transition-all">
+                        <select id="pwr-i-unit" class="bg-gray-700 border border-gray-600 rounded-lg px-2 py-2 text-sm text-white outline-none"><option value="0.001" selected>mA</option><option value="1">A</option><option value="1e-6">μA</option></select></div></div>
+                    <div><label class="block text-xs text-gray-400 mb-1">电阻 R</label>
+                        <div class="flex gap-2"><input type="number" id="pwr-r" value="10" class="input-focus flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white outline-none transition-all">
+                        <select id="pwr-r-unit" class="bg-gray-700 border border-gray-600 rounded-lg px-2 py-2 text-sm text-white outline-none"><option value="1e6" selected>MΩ</option><option value="1e3">kΩ</option><option value="1">Ω</option></select></div></div>`;
+            }
+        }
+        updatePwrInputs();
+        document.getElementById('pwr-mode').addEventListener('change', updatePwrInputs);
+
+        document.getElementById('pwr-calc').addEventListener('click', () => {
+            const mode = document.getElementById('pwr-mode').value;
+            const Ta = parseFloat(document.getElementById('pwr-ta').value);
+            const cooling = document.getElementById('pwr-cooling').value;
+            const rth = { still: 60, copper: 30, forced: 15 }[cooling];
+
+            let V, I, R, P;
+            if (mode === 'vr') {
+                V = parseFloat(document.getElementById('pwr-v').value) * parseFloat(document.getElementById('pwr-v-unit').value);
+                R = parseFloat(document.getElementById('pwr-r').value) * parseFloat(document.getElementById('pwr-r-unit').value);
+                I = V / R;
+                P = V * I;
+            } else if (mode === 'vi') {
+                V = parseFloat(document.getElementById('pwr-v').value) * parseFloat(document.getElementById('pwr-v-unit').value);
+                I = parseFloat(document.getElementById('pwr-i').value) * parseFloat(document.getElementById('pwr-i-unit').value);
+                R = V / I;
+                P = V * I;
+            } else {
+                I = parseFloat(document.getElementById('pwr-i').value) * parseFloat(document.getElementById('pwr-i-unit').value);
+                R = parseFloat(document.getElementById('pwr-r').value) * parseFloat(document.getElementById('pwr-r-unit').value);
+                V = I * R;
+                P = I * I * R;
+            }
+
+            const Tj = Ta + P * rth;
+            const pSafety = dangerLevel(P, 1);
+
+            document.getElementById('pwr-result').innerHTML = `
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div class="bg-gray-700/50 rounded-lg p-3">
+                        <span class="text-xs text-gray-500">功率 P</span>
+                        <div class="text-xl font-bold ${P > 0.5 ? 'text-red-400' : 'text-amber-400'}">${engUnit(P)}W</div>
+                    </div>
+                    <div class="bg-gray-700/50 rounded-lg p-3">
+                        <span class="text-xs text-gray-500">结温 Tj</span>
+                        <div class="text-xl font-bold ${Tj > 125 ? 'text-red-400' : Tj > 85 ? 'text-amber-400' : 'text-green-400'}">${Tj.toFixed(1)}°C</div>
+                    </div>
+                    <div class="bg-gray-700/50 rounded-lg p-3">
+                        <span class="text-xs text-gray-500">电压 V</span>
+                        <div class="text-sm font-bold text-white">${engUnit(V)}V</div>
+                    </div>
+                    <div class="bg-gray-700/50 rounded-lg p-3">
+                        <span class="text-xs text-gray-500">电流 I</span>
+                        <div class="text-sm font-bold text-white">${engUnit(I)}A</div>
+                    </div>
+                </div>
+                <div class="bg-gray-700/30 rounded-lg p-3 space-y-1.5 text-xs">
+                    <div class="flex justify-between"><span class="text-gray-500">等效电阻</span><span class="text-white font-mono">${engUnit(R)}Ω</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">热阻 RθJA</span><span class="text-white">${rth}°C/W</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">温升 ΔT</span><span class="text-white">${(P * rth).toFixed(1)}°C</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">功率安全</span><span class="text-xs px-2 py-0.5 rounded-full text-white ${pSafety.cls}">${pSafety.text}</span></div>
+                </div>
+                ${Tj > 125 ? '<p class="text-red-400 text-xs mt-2">⚠️ 结温超过 125°C，需改善散热或降额使用！</p>' : ''}
+                ${Tj > 85 && Tj <= 125 ? '<p class="text-amber-400 text-xs mt-2">⚡ 结温偏高，建议增大封装或加强散热</p>' : ''}
+            `;
+        });
+        document.getElementById('pwr-calc').click();
+
+        // ==================== TAB 4: 电容储能 ====================
+        document.getElementById('cap-calc').addEventListener('click', () => {
+            const C = parseFloat(document.getElementById('cap-c').value) * parseFloat(document.getElementById('cap-c-unit').value);
+            const V = parseFloat(document.getElementById('cap-v').value) * parseFloat(document.getElementById('cap-v-unit').value);
+            const Rd_raw = document.getElementById('cap-rd').value;
+
+            const energy = 0.5 * C * V * V;
+            // 1g TNT ≈ 4184 J
+            const tntEq = energy / 4184;
+
+            let result = `
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div class="bg-gray-700/50 rounded-lg p-3">
+                        <span class="text-xs text-gray-500">储存能量</span>
+                        <div class="text-xl font-bold ${energy > 10 ? 'text-red-400' : energy > 1 ? 'text-amber-400' : 'text-green-400'}">
+                            ${energy >= 1 ? energy.toFixed(2) + ' J' : (energy * 1000).toFixed(2) + ' mJ'}
+                        </div>
+                    </div>
+                    <div class="bg-gray-700/50 rounded-lg p-3">
+                        <span class="text-xs text-gray-500">TNT 当量</span>
+                        <div class="text-xl font-bold ${energy > 100 ? 'text-red-400' : 'text-gray-300'}">
+                            ${tntEq >= 0.001 ? tntEq.toFixed(3) + ' g' : (tntEq * 1000).toFixed(1) + ' mg'}
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-700/30 rounded-lg p-3 space-y-1.5 text-xs">
+                    <div class="flex justify-between"><span class="text-gray-500">电容</span><span class="text-white font-mono">${engUnit(C)}F</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">电压</span><span class="text-white font-mono">${(V/1000).toFixed(1)}kV</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">电荷 Q = CV</span><span class="text-white font-mono">${engUnit(C*V)}C</span></div>
+            `;
+
+            if (Rd_raw) {
+                const Rd = parseFloat(Rd_raw) * parseFloat(document.getElementById('cap-rd-unit').value);
+                const tau = Rd * C;
+                const t50 = tau * Math.log(2);
+                const t90 = tau * Math.log(10);
+                result += `
+                    <hr class="border-gray-700 my-1.5">
+                    <div class="flex justify-between"><span class="text-gray-500">放电 τ = Rd·C</span><span class="text-white font-mono">${engUnit(tau)}s</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">放电至 50%</span><span class="text-white font-mono">${engUnit(t50)}s</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">放电至 10%</span><span class="text-white font-mono">${engUnit(t90)}s</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">初始放电电流</span><span class="text-white font-mono">${engUnit(V/Rd)}A</span></div>
+                `;
+            }
+
+            result += `</div>`;
+
+            if (energy > 50) {
+                result += `<p class="text-red-400 text-xs mt-3">⚠️ 高危！${energy.toFixed(0)}J 能量相当于 ${tntEq.toFixed(2)}g TNT，操作务必放电！</p>`;
+            } else if (energy > 1) {
+                result += `<p class="text-amber-400 text-xs mt-3">⚡ 注意安全，触碰前确保电容已充分放电</p>`;
+            } else {
+                result += `<p class="text-green-400 text-xs mt-3">✅ 低压安全范围内</p>`;
+            }
+
+            document.getElementById('cap-result').innerHTML = result;
+        });
+        document.getElementById('cap-calc').click();
+    </script>
+</body>
+</html>
