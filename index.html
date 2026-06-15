@@ -8,528 +8,432 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-        /* ================================================================
-           赛博朋克主题 (默认)
-           ================================================================ */
+        /* ===== Theme: Cyberpunk (default) ===== */
         :root {
-            --bg: #0a0a0f;
-            --card-bg: rgba(15, 15, 25, 0.85);
-            --card-bg-solid: #0f0f19;
-            --border: rgba(255, 255, 255, 0.06);
-            --border-hover: rgba(255, 255, 255, 0.15);
-            --text: #e0e0e0;
-            --text-dim: #8888a0;
-            --tag-bg: rgba(255, 255, 255, 0.04);
-            --tag-border: rgba(255, 255, 255, 0.06);
-            --tag-border-hover: rgba(255, 255, 255, 0.15);
-            --stat-bg: rgba(255, 255, 255, 0.03);
-            --stat-border: rgba(255, 255, 255, 0.05);
-            --footer-text: #555;
-            --footer-border: rgba(255, 255, 255, 0.04);
-            --card-glow-opacity: 0.15;
-            --card-shadow: 0 15px 40px rgba(0,0,0,0.4);
-            --card-hover-y: -8px;
-            --hero-grad-1: rgba(120,80,255,0.15);
-            --hero-grad-2: rgba(0,180,255,0.12);
-            --hero-grad-3: rgba(255,80,180,0.08);
-            --title-grad-1: #c084fc;
-            --title-grad-2: #60a5fa;
-            --title-grad-3: #34d399;
-            --hover-arrow-color: var(--card-accent, #60a5fa);
-            --card-name-color: #e8e8f0;
-            --card-blur: 20px;
+            --bg: #0a0a0f; --bg-fixed: #0a0a0f;
+            --card-bg: rgba(15,15,25,0.85); --card-bg-solid: #0f0f19;
+            --border: rgba(255,255,255,0.06); --border-hover: rgba(255,255,255,0.15);
+            --text: #e0e0e0; --text-dim: #8888a0;
+            --tag-bg: rgba(255,255,255,0.04); --tag-border: rgba(255,255,255,0.06); --tag-border-hover: rgba(255,255,255,0.15);
+            --stat-bg: rgba(255,255,255,0.03); --stat-border: rgba(255,255,255,0.05);
+            --footer-text: #555; --footer-border: rgba(255,255,255,0.04);
+            --card-glow-opacity: 0.15; --card-shadow: 0 15px 40px rgba(0,0,0,0.4); --card-hover-y: -8px;
+            --hero-grad-1: rgba(120,80,255,0.15); --hero-grad-2: rgba(0,180,255,0.12); --hero-grad-3: rgba(255,80,180,0.08);
+            --title-grad-1: #c084fc; --title-grad-2: #60a5fa; --title-grad-3: #34d399;
+            --hover-arrow-color: var(--card-accent, #60a5fa); --card-name-color: #e8e8f0; --card-blur: 20px;
+            --glow-color: rgba(100,130,255,0.12); --glow-size: 300px;
+            --hero-icon-glow: radial-gradient(circle, rgba(139,92,246,0.3), transparent);
+            --card-before: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02), rgba(255,255,255,0.08));
+            --corner-opacity: 0.4; --corner-w: 6px; --corner-h: 6px; --corner-radius: 50%;
         }
 
-        /* ================================================================
-           少女心主题
-           ================================================================ */
+        /* ===== Theme: Kawaii ===== */
         body.theme-kawaii {
-            --bg: linear-gradient(135deg, #fef5f9 0%, #fdf2f8 25%, #faf5ff 50%, #f0f9ff 75%, #fef5f9 100%);
-            --card-bg: rgba(255, 255, 255, 0.75);
-            --card-bg-solid: #ffffff;
-            --border: rgba(236, 72, 153, 0.15);
-            --border-hover: rgba(236, 72, 153, 0.35);
-            --text: #4a2c3e;
-            --text-dim: #b0849b;
-            --tag-bg: rgba(236, 72, 153, 0.08);
-            --tag-border: rgba(236, 72, 153, 0.12);
-            --tag-border-hover: rgba(236, 72, 153, 0.3);
-            --stat-bg: rgba(255, 255, 255, 0.6);
-            --stat-border: rgba(236, 72, 153, 0.15);
-            --footer-text: #c4a0b4;
-            --footer-border: rgba(236, 72, 153, 0.1);
-            --card-glow-opacity: 0.08;
-            --card-shadow: 0 8px 30px rgba(236, 72, 153, 0.12);
-            --card-hover-y: -6px;
-            --hero-grad-1: rgba(236,72,153,0.12);
-            --hero-grad-2: rgba(168,85,247,0.1);
-            --hero-grad-3: rgba(251,146,60,0.08);
-            --title-grad-1: #ec4899;
-            --title-grad-2: #a855f7;
-            --title-grad-3: #fb923c;
-            --hover-arrow-color: #ec4899;
-            --card-name-color: #3b1f30;
-            --card-blur: 12px;
+            --bg: linear-gradient(135deg, #fef5f9, #fdf2f8, #faf5ff, #f0f9ff, #fef5f9); --bg-fixed: #fef5f9;
+            --card-bg: rgba(255,255,255,0.75); --card-bg-solid: #fff;
+            --border: rgba(236,72,153,0.15); --border-hover: rgba(236,72,153,0.35);
+            --text: #4a2c3e; --text-dim: #b0849b;
+            --tag-bg: rgba(236,72,153,0.08); --tag-border: rgba(236,72,153,0.12); --tag-border-hover: rgba(236,72,153,0.3);
+            --stat-bg: rgba(255,255,255,0.6); --stat-border: rgba(236,72,153,0.15);
+            --footer-text: #c4a0b4; --footer-border: rgba(236,72,153,0.1);
+            --card-glow-opacity: 0.08; --card-shadow: 0 8px 30px rgba(236,72,153,0.12); --card-hover-y: -6px;
+            --hero-grad-1: rgba(236,72,153,0.12); --hero-grad-2: rgba(168,85,247,0.1); --hero-grad-3: rgba(251,146,60,0.08);
+            --title-grad-1: #ec4899; --title-grad-2: #a855f7; --title-grad-3: #fb923c;
+            --hover-arrow-color: #ec4899; --card-name-color: #3b1f30; --card-blur: 12px;
+            --glow-color: rgba(236,72,153,0.08); --glow-size: 300px;
+            --hero-icon-glow: radial-gradient(circle, rgba(236,72,153,0.2), transparent);
+            --card-before: linear-gradient(135deg, rgba(236,72,153,0.18), rgba(168,85,247,0.1), rgba(251,146,60,0.12));
+            --corner-opacity: 0.25; --corner-w: 8px; --corner-h: 8px; --corner-radius: 50%;
+            --kawaii-card-radius: 16px;
         }
 
-        /* ================================================================
-           通用基础
-           ================================================================ */
+        /* ===== Theme: Zen Ink ===== */
+        body.theme-zen {
+            --bg: #f5f0e8; --bg-fixed: #f5f0e8;
+            --card-bg: rgba(255,255,255,0.7); --card-bg-solid: #fffef9;
+            --border: rgba(0,0,0,0.06); --border-hover: rgba(0,0,0,0.15);
+            --text: #3a352f; --text-dim: #9a948a;
+            --tag-bg: rgba(0,0,0,0.03); --tag-border: rgba(0,0,0,0.06); --tag-border-hover: rgba(0,0,0,0.15);
+            --stat-bg: rgba(0,0,0,0.02); --stat-border: rgba(0,0,0,0.05);
+            --footer-text: #b5b0a8; --footer-border: rgba(0,0,0,0.04);
+            --card-glow-opacity: 0.02; --card-shadow: 0 4px 20px rgba(0,0,0,0.06); --card-hover-y: -4px;
+            --hero-grad-1: rgba(0,0,0,0.03); --hero-grad-2: rgba(0,0,0,0.02); --hero-grad-3: rgba(0,0,0,0.01);
+            --title-grad-1: #2c2c2a; --title-grad-2: #5f5e5a; --title-grad-3: #888780;
+            --hover-arrow-color: var(--card-accent, #5f5e5a); --card-name-color: #2c2c2a; --card-blur: 8px;
+            --glow-color: rgba(0,0,0,0.03); --glow-size: 200px;
+            --hero-icon-glow: radial-gradient(circle, rgba(0,0,0,0.08), transparent);
+            --card-before: linear-gradient(135deg, rgba(0,0,0,0.04), rgba(0,0,0,0.01), rgba(0,0,0,0.04));
+            --corner-opacity: 0.2; --corner-w: 4px; --corner-h: 4px; --corner-radius: 50%;
+        }
+
+        /* ===== Theme: 8-bit Retro ===== */
+        body.theme-retro {
+            --bg: #0f380f; --bg-fixed: #0f380f;
+            --card-bg: rgba(48,98,48,0.9); --card-bg-solid: #306230;
+            --border: rgba(155,188,15,0.15); --border-hover: rgba(155,188,15,0.4);
+            --text: #9bbc0f; --text-dim: #8bac0f;
+            --tag-bg: rgba(155,188,15,0.08); --tag-border: rgba(155,188,15,0.12); --tag-border-hover: rgba(155,188,15,0.35);
+            --stat-bg: rgba(48,98,48,0.5); --stat-border: rgba(155,188,15,0.12);
+            --footer-text: #306230; --footer-border: rgba(155,188,15,0.08);
+            --card-glow-opacity: 0.2; --card-shadow: 0 8px 0 rgba(0,0,0,0.3); --card-hover-y: -6px;
+            --hero-grad-1: rgba(155,188,15,0.08); --hero-grad-2: rgba(139,172,15,0.06); --hero-grad-3: rgba(48,98,48,0.04);
+            --title-grad-1: #9bbc0f; --title-grad-2: #8bac0f; --title-grad-3: #306230;
+            --hover-arrow-color: var(--card-accent, #9bbc0f); --card-name-color: #9bbc0f; --card-blur: 0px;
+            --glow-color: rgba(155,188,15,0.06); --glow-size: 250px;
+            --hero-icon-glow: radial-gradient(circle, rgba(155,188,15,0.2), transparent);
+            --card-before: none;
+            --corner-opacity: 0; --corner-w: 4px; --corner-h: 4px;
+            --retro: 1;
+        }
+
+        /* ===== Theme: Vaporwave ===== */
+        body.theme-vaporwave {
+            --bg: linear-gradient(180deg, #1a0533 0%, #2d1b69 40%, #4a1942 70%, #0f0f2e 100%); --bg-fixed: #1a0533;
+            --card-bg: rgba(20,10,40,0.8); --card-bg-solid: #140a28;
+            --border: rgba(255,105,180,0.12); --border-hover: rgba(0,255,255,0.3);
+            --text: #ffb8d4; --text-dim: #b880b0;
+            --tag-bg: rgba(255,105,180,0.08); --tag-border: rgba(0,255,255,0.1); --tag-border-hover: rgba(0,255,255,0.3);
+            --stat-bg: rgba(20,10,40,0.5); --stat-border: rgba(255,105,180,0.1);
+            --footer-text: #6b4b7a; --footer-border: rgba(255,105,180,0.08);
+            --card-glow-opacity: 0.12; --card-shadow: 0 12px 35px rgba(255,105,180,0.1); --card-hover-y: -6px;
+            --hero-grad-1: rgba(255,105,180,0.1); --hero-grad-2: rgba(0,255,255,0.08); --hero-grad-3: rgba(138,43,226,0.08);
+            --title-grad-1: #ff69b4; --title-grad-2: #00ffff; --title-grad-3: #8a2be2;
+            --hover-arrow-color: var(--card-accent, #00ffff); --card-name-color: #ffb8d4; --card-blur: 16px;
+            --glow-color: rgba(255,105,180,0.06); --glow-size: 280px;
+            --hero-icon-glow: radial-gradient(circle, rgba(255,105,180,0.2), transparent);
+            --card-before: linear-gradient(135deg, rgba(255,105,180,0.15), rgba(0,255,255,0.1), rgba(138,43,226,0.1));
+            --corner-opacity: 0.3; --corner-w: 6px; --corner-h: 6px; --corner-radius: 2px;
+        }
+
+        /* ===== Theme: Ocean Breeze ===== */
+        body.theme-ocean {
+            --bg: linear-gradient(180deg, #e3f2fd 0%, #bbdefb 40%, #e8f5f9 70%, #f5faff 100%); --bg-fixed: #e3f2fd;
+            --card-bg: rgba(255,255,255,0.65); --card-bg-solid: #fff;
+            --border: rgba(30,136,229,0.12); --border-hover: rgba(30,136,229,0.3);
+            --text: #0d47a1; --text-dim: #64b5f6;
+            --tag-bg: rgba(30,136,229,0.06); --tag-border: rgba(30,136,229,0.1); --tag-border-hover: rgba(30,136,229,0.25);
+            --stat-bg: rgba(255,255,255,0.5); --stat-border: rgba(30,136,229,0.1);
+            --footer-text: #90caf9; --footer-border: rgba(30,136,229,0.08);
+            --card-glow-opacity: 0.02; --card-shadow: 0 6px 25px rgba(30,136,229,0.08); --card-hover-y: -5px;
+            --hero-grad-1: rgba(30,136,229,0.06); --hero-grad-2: rgba(66,165,245,0.04); --hero-grad-3: rgba(100,180,255,0.03);
+            --title-grad-1: #1565c0; --title-grad-2: #1e88e5; --title-grad-3: #42a5f5;
+            --hover-arrow-color: var(--card-accent, #1e88e5); --card-name-color: #0d47a1; --card-blur: 10px;
+            --glow-color: rgba(30,136,229,0.04); --glow-size: 250px;
+            --hero-icon-glow: radial-gradient(circle, rgba(30,136,229,0.15), transparent);
+            --card-before: linear-gradient(135deg, rgba(30,136,229,0.1), rgba(100,180,255,0.06), rgba(30,136,229,0.1));
+            --corner-opacity: 0.2; --corner-w: 6px; --corner-h: 6px; --corner-radius: 50%;
+        }
+
+        /* ===== Theme: Sunset Warm ===== */
+        body.theme-sunset {
+            --bg: linear-gradient(180deg, #fff8e1 0%, #ffecb3 25%, #ffe0b2 55%, #ffccbc 100%); --bg-fixed: #fff8e1;
+            --card-bg: rgba(255,255,255,0.6); --card-bg-solid: #fffef8;
+            --border: rgba(230,81,0,0.1); --border-hover: rgba(230,81,0,0.25);
+            --text: #bf360c; --text-dim: #ffab91;
+            --tag-bg: rgba(230,81,0,0.06); --tag-border: rgba(230,81,0,0.08); --tag-border-hover: rgba(230,81,0,0.22);
+            --stat-bg: rgba(255,255,255,0.5); --stat-border: rgba(230,81,0,0.08);
+            --footer-text: #ffab91; --footer-border: rgba(230,81,0,0.06);
+            --card-glow-opacity: 0.02; --card-shadow: 0 6px 25px rgba(230,81,0,0.06); --card-hover-y: -5px;
+            --hero-grad-1: rgba(255,152,0,0.08); --hero-grad-2: rgba(230,81,0,0.05); --hero-grad-3: rgba(255,183,77,0.04);
+            --title-grad-1: #e65100; --title-grad-2: #ff6d00; --title-grad-3: #ff9100;
+            --hover-arrow-color: var(--card-accent, #e65100); --card-name-color: #bf360c; --card-blur: 8px;
+            --glow-color: rgba(255,152,0,0.05); --glow-size: 280px;
+            --hero-icon-glow: radial-gradient(circle, rgba(255,152,0,0.15), transparent);
+            --card-before: linear-gradient(135deg, rgba(230,81,0,0.08), rgba(255,152,0,0.05), rgba(230,81,0,0.08));
+            --corner-opacity: 0.15; --corner-w: 5px; --corner-h: 5px; --corner-radius: 50%;
+        }
+
+        /* ===== Theme: Forest Nature ===== */
+        body.theme-forest {
+            --bg: linear-gradient(180deg, #e8f5e9 0%, #c8e6c9 30%, #dcedc8 65%, #f1f8e9 100%); --bg-fixed: #e8f5e9;
+            --card-bg: rgba(255,255,255,0.55); --card-bg-solid: #f8fbf6;
+            --border: rgba(46,125,50,0.1); --border-hover: rgba(46,125,50,0.25);
+            --text: #1b5e20; --text-dim: #81c784;
+            --tag-bg: rgba(46,125,50,0.05); --tag-border: rgba(46,125,50,0.08); --tag-border-hover: rgba(46,125,50,0.2);
+            --stat-bg: rgba(255,255,255,0.45); --stat-border: rgba(46,125,50,0.08);
+            --footer-text: #a5d6a7; --footer-border: rgba(46,125,50,0.06);
+            --card-glow-opacity: 0.0; --card-shadow: 0 5px 22px rgba(0,0,0,0.04); --card-hover-y: -4px;
+            --hero-grad-1: rgba(76,175,80,0.06); --hero-grad-2: rgba(129,199,132,0.04); --hero-grad-3: rgba(165,214,167,0.03);
+            --title-grad-1: #2e7d32; --title-grad-2: #43a047; --title-grad-3: #66bb6a;
+            --hover-arrow-color: var(--card-accent, #43a047); --card-name-color: #1b5e20; --card-blur: 6px;
+            --glow-color: rgba(76,175,80,0.04); --glow-size: 220px;
+            --hero-icon-glow: radial-gradient(circle, rgba(76,175,80,0.12), transparent);
+            --card-before: linear-gradient(135deg, rgba(76,175,80,0.06), rgba(139,195,74,0.04), rgba(76,175,80,0.06));
+            --corner-opacity: 0.15; --corner-w: 5px; --corner-h: 5px; --corner-radius: 50%;
+        }
+
+        /* ===== Theme: Neon Night ===== */
+        body.theme-neon {
+            --bg: #0a0a14; --bg-fixed: #0a0a14;
+            --card-bg: rgba(15,15,30,0.85); --card-bg-solid: #0f0f1e;
+            --border: rgba(255,100,180,0.08); --border-hover: rgba(255,230,50,0.3);
+            --text: #e0d8f0; --text-dim: #7b6b9a;
+            --tag-bg: rgba(255,100,180,0.06); --tag-border: rgba(255,230,50,0.08); --tag-border-hover: rgba(255,230,50,0.25);
+            --stat-bg: rgba(15,15,30,0.5); --stat-border: rgba(255,100,180,0.08);
+            --footer-text: #4a3a6a; --footer-border: rgba(255,100,180,0.06);
+            --card-glow-opacity: 0.18; --card-shadow: 0 0 35px rgba(255,100,180,0.08), 0 10px 30px rgba(0,0,0,0.5); --card-hover-y: -8px;
+            --hero-grad-1: rgba(255,100,180,0.1); --hero-grad-2: rgba(255,230,50,0.06); --hero-grad-3: rgba(0,255,200,0.05);
+            --title-grad-1: #ff64b4; --title-grad-2: #ffe632; --title-grad-3: #00ffc8;
+            --hover-arrow-color: var(--card-accent, #ffe632); --card-name-color: #e0d8f0; --card-blur: 16px;
+            --glow-color: rgba(255,100,180,0.08); --glow-size: 320px;
+            --hero-icon-glow: radial-gradient(circle, rgba(255,100,180,0.25), transparent);
+            --card-before: linear-gradient(135deg, rgba(255,100,180,0.12), rgba(255,230,50,0.06), rgba(0,255,200,0.08));
+            --corner-opacity: 0; --corner-w: 8px; --corner-h: 2px; --corner-radius: 1px;
+            --neon: 1;
+        }
+
+        /* ===== Theme: Candy Pop ===== */
+        body.theme-candy {
+            --bg: linear-gradient(135deg, #fff0f5 0%, #f0e6ff 20%, #e6f9ff 40%, #fffbf0 60%, #f5ffe6 80%, #fff0f5 100%); --bg-fixed: #fff0f5;
+            --card-bg: rgba(255,255,255,0.65); --card-bg-solid: #fff;
+            --border: rgba(255,87,34,0.12); --border-hover: rgba(171,71,188,0.3);
+            --text: #5d3a6b; --text-dim: #ce93d8;
+            --tag-bg: rgba(255,87,34,0.07); --tag-border: rgba(171,71,188,0.1); --tag-border-hover: rgba(38,198,218,0.25);
+            --stat-bg: rgba(255,255,255,0.55); --stat-border: rgba(255,202,40,0.1);
+            --footer-text: #ce93d8; --footer-border: rgba(255,87,34,0.08);
+            --card-glow-opacity: 0.02; --card-shadow: 0 8px 28px rgba(171,71,188,0.06); --card-hover-y: -6px;
+            --hero-grad-1: rgba(255,87,34,0.08); --hero-grad-2: rgba(171,71,188,0.06); --hero-grad-3: rgba(38,198,218,0.05);
+            --title-grad-1: #ff5722; --title-grad-2: #ab47bc; --title-grad-3: #26c6da;
+            --hover-arrow-color: var(--card-accent, #ff5722); --card-name-color: #5d3a6b; --card-blur: 8px;
+            --glow-color: rgba(255,87,34,0.05); --glow-size: 260px;
+            --hero-icon-glow: radial-gradient(circle, rgba(255,87,34,0.15), transparent);
+            --card-before: linear-gradient(135deg, rgba(255,87,34,0.08), rgba(171,71,188,0.06), rgba(38,198,218,0.06));
+            --corner-opacity: 0.2; --corner-w: 10px; --corner-h: 10px; --corner-radius: 50%;
+            --candy: 1;
+        }
+
+        /* ===== Common base ===== */
         * { box-sizing: border-box; }
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            margin: 0;
-            overflow-x: hidden;
+            margin: 0; overflow-x: hidden;
             color: var(--text);
             transition: color 0.6s;
         }
-        body.theme-cyberpunk { background: var(--bg); }
-        body.theme-kawaii {
-            background: linear-gradient(135deg, #fef5f9 0%, #fdf2f8 25%, #faf5ff 50%, #f0f9ff 75%, #fef5f9 100%);
-            background-attachment: fixed;
+        body.theme-cyberpunk, body.theme-zen, body.theme-retro, body.theme-neon { background: var(--bg-fixed); }
+        body.theme-kawaii, body.theme-vaporwave, body.theme-ocean, body.theme-sunset, body.theme-forest, body.theme-candy {
+            background: var(--bg); background-attachment: fixed;
         }
 
-        /* ======== Canvas 粒子背景 ======== */
-        #particleCanvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            z-index: 0;
-            pointer-events: none;
+        /* Retro: pixel border on body */
+        body.theme-retro {
+            image-rendering: pixelated;
+            box-shadow: inset 0 0 0 2px #306230;
         }
 
-        /* ======== 鼠标光晕 ======== */
+        /* Canvas */
+        #particleCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
+
+        /* Cursor glow */
         .cursor-glow {
-            position: fixed;
-            width: 300px; height: 300px;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 1;
-            transform: translate(-50%, -50%);
-            transition: opacity 0.4s;
-        }
-        body.theme-cyberpunk .cursor-glow {
-            background: radial-gradient(circle, rgba(100, 130, 255, 0.12) 0%, transparent 70%);
-        }
-        body.theme-kawaii .cursor-glow {
-            background: radial-gradient(circle, rgba(236, 72, 153, 0.08) 0%, transparent 70%);
+            position: fixed; width: var(--glow-size); height: var(--glow-size);
+            border-radius: 50%; pointer-events: none; z-index: 1;
+            transform: translate(-50%, -50%); transition: opacity 0.4s;
+            background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%);
         }
 
-        /* ======== Hero 区块 ======== */
-        .hero-section {
-            position: relative;
-            z-index: 2;
-            padding: 5rem 1rem 4rem;
-            text-align: center;
-            overflow: hidden;
-            transition: all 0.6s;
-        }
+        /* Hero */
+        .hero-section { position: relative; z-index: 2; padding: 5rem 1rem 4rem; text-align: center; overflow: hidden; transition: all 0.6s; }
         .hero-section::before {
-            content: '';
-            position: absolute;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: 
-                radial-gradient(ellipse at 30% 20%, var(--hero-grad-1) 0%, transparent 50%),
-                radial-gradient(ellipse at 70% 60%, var(--hero-grad-2) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 80%, var(--hero-grad-3) 0%, transparent 50%);
-            animation: heroPulse 8s ease-in-out infinite;
-            z-index: -1;
-            transition: background 0.6s;
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(ellipse at 30% 20%, var(--hero-grad-1) 0%, transparent 50%),
+                        radial-gradient(ellipse at 70% 60%, var(--hero-grad-2) 0%, transparent 50%),
+                        radial-gradient(ellipse at 50% 80%, var(--hero-grad-3) 0%, transparent 50%);
+            animation: heroPulse 8s ease-in-out infinite; z-index: -1; transition: background 0.6s;
         }
-        @keyframes heroPulse {
-            0%, 100% { opacity: 0.6; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.08); }
-        }
+        @keyframes heroPulse { 0%,100% { opacity:0.6; transform:scale(1); } 50% { opacity:1; transform:scale(1.08); } }
 
         .hero-title {
-            font-size: clamp(2.5rem, 6vw, 4rem);
-            font-weight: 800;
-            letter-spacing: -0.03em;
+            font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; letter-spacing: -0.03em;
             background: linear-gradient(135deg, var(--title-grad-1), var(--title-grad-2), var(--title-grad-3));
             background-size: 200% 200%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
             animation: titleShimmer 4s ease-in-out infinite;
         }
-        @keyframes titleShimmer {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
+        @keyframes titleShimmer { 0%,100% { background-position:0% 50%; } 50% { background-position:100% 50%; } }
+        .hero-subtitle { font-size: 1.1rem; max-width: 32rem; margin: 1rem auto 0; line-height: 1.7; color: var(--text-dim); transition: color 0.6s; }
 
-        .hero-subtitle {
-            font-size: 1.1rem;
-            max-width: 32rem;
-            margin: 1rem auto 0;
-            line-height: 1.7;
-            color: var(--text-dim);
-            transition: color 0.6s;
-        }
-
-        .hero-icon {
-            width: 64px; height: 64px;
-            margin: 0 auto 1.5rem;
-            position: relative;
-        }
+        .hero-icon { width: 64px; height: 64px; margin: 0 auto 1.5rem; position: relative; }
         .hero-icon::after {
-            content: '';
-            position: absolute;
-            inset: -12px;
-            border-radius: 50%;
-            animation: iconGlow 3s ease-in-out infinite;
-            transition: background 0.6s;
+            content: ''; position: absolute; inset: -12px; border-radius: 50%;
+            background: var(--hero-icon-glow);
+            animation: iconGlow 3s ease-in-out infinite; transition: background 0.6s;
         }
-        body.theme-cyberpunk .hero-icon::after {
-            background: radial-gradient(circle, rgba(139, 92, 246, 0.3), transparent);
-        }
-        body.theme-kawaii .hero-icon::after {
-            background: radial-gradient(circle, rgba(236, 72, 153, 0.2), transparent);
-        }
-        @keyframes iconGlow {
-            0%, 100% { transform: scale(1); opacity: 0.6; }
-            50% { transform: scale(1.3); opacity: 1; }
-        }
+        @keyframes iconGlow { 0%,100% { transform:scale(1); opacity:0.6; } 50% { transform:scale(1.3); opacity:1; } }
 
-        /* ======== 工具网格 ======== */
-        .main-content {
-            position: relative; z-index: 2;
-            max-width: 1200px; margin: -3rem auto 0;
-            padding: 0 1.5rem 4rem;
-        }
-        .tools-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 1.25rem;
-        }
+        /* Grid */
+        .main-content { position: relative; z-index: 2; max-width: 1200px; margin: -3rem auto 0; padding: 0 1.5rem 4rem; }
+        .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.25rem; }
 
-        /* ======== 卡片 ======== */
+        /* Cards */
         .tool-card {
-            position: relative;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-            overflow: hidden;
-            backdrop-filter: blur(var(--card-blur));
-            -webkit-backdrop-filter: blur(var(--card-blur));
+            position: relative; background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 16px; padding: 1.5rem; cursor: pointer; text-decoration: none; color: inherit;
+            transition: all 0.5s cubic-bezier(0.23,1,0.32,1); overflow: hidden;
+            backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur));
         }
         .tool-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 16px;
-            padding: 1px;
+            content: ''; position: absolute; inset: 0; border-radius: 16px; padding: 1px;
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            opacity: 0;
-            transition: opacity 0.5s;
+            -webkit-mask-composite: xor; mask-composite: exclude;
+            opacity: 0; transition: opacity 0.5s;
         }
-        body.theme-cyberpunk .tool-card::before {
-            background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02), rgba(255,255,255,0.08));
-        }
-        body.theme-kawaii .tool-card::before {
-            background: linear-gradient(135deg, rgba(236,72,153,0.18), rgba(168,85,247,0.1), rgba(251,146,60,0.12));
-        }
+        .tool-card::before { background: var(--card-before); }
         .tool-card:hover {
             transform: translateY(var(--card-hover-y));
             border-color: var(--border-hover);
-            box-shadow: 0 0 30px color-mix(in srgb, var(--card-accent, #60a5fa) var(--card-glow-opacity), transparent),
-                        var(--card-shadow);
-            background: var(--card-bg-solid);
+            box-shadow: 0 0 30px color-mix(in srgb, var(--card-accent, #60a5fa) var(--card-glow-opacity), transparent), var(--card-shadow);
         }
+        .tool-card:hover { background: var(--card-bg-solid); }
         .tool-card:hover::before { opacity: 1; }
 
-        /* 赛博: 四角光点 / 少女: 圆角装饰 */
+        /* Retro card: pixelated border */
+        body.theme-retro .tool-card { border: 2px solid #306230; border-radius: 0; }
+        body.theme-retro .tool-card:hover { border-color: #9bbc0f; box-shadow: 6px 6px 0 #0f380f, 0 0 15px rgba(155,188,15,0.3); }
+        body.theme-retro .tool-card::before { display: none; }
+        body.theme-retro .tool-tag { border-radius: 0; border: 1px solid #306230; }
+
+        /* Neon: glowing border on hover */
+        body.theme-neon .tool-card:hover {
+            box-shadow: 0 0 12px rgba(255,100,180,0.2), 0 0 28px rgba(255,230,50,0.1), var(--card-shadow);
+            border-color: rgba(255,100,180,0.4);
+        }
+        body.theme-neon .card-corner-dot { border-radius: 1px; height: 2px; width: 20px; opacity: 0; }
+        body.theme-neon .tool-card:hover .card-corner-dot { opacity: 0.7; box-shadow: 0 0 12px var(--card-accent,#ff64b4), 0 0 24px var(--card-accent,#ff64b4); }
+
+        /* Candy: extra round */
+        body.theme-candy .tool-card { border-radius: 20px; }
+        body.theme-candy .tool-card::before { border-radius: 20px; }
+        body.theme-candy .tool-tag { border-radius: 16px; font-weight: 500; }
+
+        /* Card corner dots */
         .card-corner-dot {
-            position: absolute;
-            width: 6px; height: 6px;
-            border-radius: 50%;
+            position: absolute; border-radius: var(--corner-radius);
+            width: var(--corner-w); height: var(--corner-h);
             background: var(--card-accent, #60a5fa);
             box-shadow: 0 0 10px var(--card-accent, #60a5fa);
-            transition: all 0.5s;
-            opacity: 0;
+            transition: all 0.5s; opacity: var(--corner-opacity);
             animation: cornerPulse 3s ease-in-out infinite;
         }
-        body.theme-cyberpunk .card-corner-dot { opacity: 0.4; }
-        body.theme-kawaii .card-corner-dot {
-            width: 8px; height: 8px;
-            opacity: 0.25;
-            border-radius: 50%;
-            box-shadow: 0 0 6px var(--card-accent, #f9a8d4);
-        }
-        @keyframes cornerPulse {
-            0%, 100% { opacity: 0.4; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.3); }
-        }
-        .tool-card:hover .card-corner-dot {
-            opacity: 1;
-            box-shadow: 0 0 20px var(--card-accent, #60a5fa), 0 0 40px var(--card-accent, #60a5fa);
-        }
-        .card-corner-dot:nth-child(1) { top: 12px; left: 12px; animation-delay: 0s; }
-        .card-corner-dot:nth-child(2) { top: 12px; right: 12px; animation-delay: 0.75s; }
-        .card-corner-dot:nth-child(3) { bottom: 12px; left: 12px; animation-delay: 1.5s; }
-        .card-corner-dot:nth-child(4) { bottom: 12px; right: 12px; animation-delay: 2.25s; }
+        body.theme-retro .card-corner-dot { display: none; }
+        @keyframes cornerPulse { 0%,100% { opacity:var(--corner-opacity); transform:scale(1); } 50% { opacity:calc(var(--corner-opacity)*2); transform:scale(1.3); } }
+        .tool-card:hover .card-corner-dot { opacity: 1; box-shadow: 0 0 20px var(--card-accent,#60a5fa), 0 0 40px var(--card-accent,#60a5fa); }
+        .card-corner-dot:nth-child(1) { top:12px; left:12px; animation-delay:0s; }
+        .card-corner-dot:nth-child(2) { top:12px; right:12px; animation-delay:0.75s; }
+        .card-corner-dot:nth-child(3) { bottom:12px; left:12px; animation-delay:1.5s; }
+        .card-corner-dot:nth-child(4) { bottom:12px; right:12px; animation-delay:2.25s; }
 
-        /* 卡片图标 */
-        .card-icon-wrap {
-            width: 48px; height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            flex-shrink: 0;
-            transition: all 0.5s;
-        }
-        body.theme-kawaii .card-icon-wrap {
-            border-radius: 16px;
-        }
-        .card-icon-wrap::after {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border-radius: 16px;
-            background: var(--card-accent, #60a5fa);
-            opacity: 0;
-            filter: blur(12px);
-            transition: opacity 0.5s;
-        }
-        .tool-card:hover .card-icon-wrap::after { opacity: 0.4; }
+        /* Icon wrap */
+        .card-icon-wrap { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; position:relative; flex-shrink:0; transition:all 0.5s; }
+        body.theme-retro .card-icon-wrap { border-radius: 0; border: 2px solid var(--card-accent,#9bbc0f); }
+        body.theme-candy .card-icon-wrap { border-radius: 18px; }
+        .card-icon-wrap::after { content:''; position:absolute; inset:-4px; border-radius:16px; background:var(--card-accent,#60a5fa); opacity:0; filter:blur(12px); transition:opacity 0.5s; }
+        .tool-card:hover .card-icon-wrap::after { opacity:0.4; }
 
-        /* 标签 */
-        .tool-tag {
-            font-size: 0.7rem;
-            padding: 3px 10px;
-            border-radius: 999px;
-            background: var(--tag-bg);
-            border: 1px solid var(--tag-border);
-            color: var(--text-dim);
-            transition: all 0.4s;
-        }
-        .tool-card:hover .tool-tag {
-            border-color: var(--tag-border-hover);
-            color: var(--card-name-color);
-        }
-        body.theme-kawaii .tool-tag {
-            border-radius: 12px;
-            font-size: 0.68rem;
-        }
+        /* Tags */
+        .tool-tag { font-size:0.7rem; padding:3px 10px; border-radius:999px; background:var(--tag-bg); border:1px solid var(--tag-border); color:var(--text-dim); transition:all 0.4s; }
+        .tool-card:hover .tool-tag { border-color:var(--tag-border-hover); color:var(--card-name-color); }
 
-        /* 箭头 */
-        .card-arrow {
-            transition: all 0.4s;
-            opacity: 0.3;
-            color: var(--text-dim);
-        }
-        .tool-card:hover .card-arrow {
-            opacity: 1;
-            transform: translateX(4px);
-            color: var(--hover-arrow-color);
-        }
+        /* Arrow */
+        .card-arrow { transition:all 0.4s; opacity:0.3; color:var(--text-dim); }
+        .tool-card:hover .card-arrow { opacity:1; transform:translateX(4px); color:var(--hover-arrow-color); }
+        .card-name { font-size:1.05rem; font-weight:600; margin:0; transition:color 0.4s; color:var(--card-name-color); }
 
-        /* 卡片名称 */
-        .card-name {
-            font-size: 1.05rem;
-            font-weight: 600;
-            margin: 0;
-            transition: color 0.4s;
-            color: var(--card-name-color);
-        }
-
-        /* ======== 主题切换按钮 ======== */
-        .theme-toggle-wrap {
-            position: fixed;
-            bottom: 24px; right: 24px;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 8px;
-        }
+        /* ===== Theme Switcher Panel ===== */
+        .theme-switcher { position:fixed; bottom:24px; right:24px; z-index:100; }
         .theme-toggle-btn {
-            width: 48px; height: 48px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            font-size: 1.4rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            position: relative;
+            width:52px; height:52px; border-radius:50%; border:none; cursor:pointer;
+            font-size:1.5rem; display:flex; align-items:center; justify-content:center;
+            transition:all 0.4s cubic-bezier(0.23,1,0.32,1);
+            backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+            background:var(--card-bg); border:1px solid var(--border);
+            color:var(--hover-arrow-color);
         }
-        body.theme-cyberpunk .theme-toggle-btn {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #60a5fa;
-            box-shadow: 0 0 20px rgba(100, 130, 255, 0.15);
-        }
-        body.theme-cyberpunk .theme-toggle-btn:hover {
-            background: rgba(255, 255, 255, 0.12);
-            box-shadow: 0 0 30px rgba(100, 130, 255, 0.3);
-            transform: scale(1.1);
-        }
-        body.theme-kawaii .theme-toggle-btn {
-            background: rgba(255, 255, 255, 0.65);
-            border: 1px solid rgba(236, 72, 153, 0.2);
-            color: #ec4899;
-            box-shadow: 0 4px 20px rgba(236, 72, 153, 0.12);
-        }
-        body.theme-kawaii .theme-toggle-btn:hover {
-            background: rgba(255, 255, 255, 0.9);
-            box-shadow: 0 6px 25px rgba(236, 72, 153, 0.2);
-            transform: scale(1.1) rotate(15deg);
-        }
-        .theme-toggle-tooltip {
-            font-size: 0.7rem;
-            padding: 5px 12px;
-            border-radius: 12px;
-            white-space: nowrap;
-            opacity: 0;
-            transform: translateY(8px);
-            transition: all 0.3s;
-            pointer-events: none;
-        }
-        body.theme-cyberpunk .theme-toggle-tooltip {
-            background: rgba(255,255,255,0.08);
-            color: #888;
-            border: 1px solid rgba(255,255,255,0.06);
-        }
-        body.theme-kawaii .theme-toggle-tooltip {
-            background: rgba(255,255,255,0.7);
-            color: #b0849b;
-            border: 1px solid rgba(236,72,153,0.15);
-        }
-        .theme-toggle-wrap:hover .theme-toggle-tooltip {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .theme-toggle-btn:hover { transform:scale(1.1); border-color:var(--border-hover); }
 
-        /* ======== 统计条 ======== */
-        .stats-bar {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 2rem;
-            font-size: 0.85rem;
-            color: var(--text-dim);
-            transition: color 0.6s;
+        /* Panel */
+        .theme-panel {
+            position:absolute; bottom:60px; right:0;
+            background:var(--card-bg-solid); border:1px solid var(--border);
+            border-radius:16px; padding:12px;
+            display:grid; grid-template-columns:repeat(5, 1fr); gap:8px;
+            backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+            opacity:0; transform:translateY(12px) scale(0.92);
+            pointer-events:none; transition:all 0.3s cubic-bezier(0.23,1,0.32,1);
+            box-shadow:0 12px 40px rgba(0,0,0,0.15);
+            z-index:99;
         }
-        .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.4rem 1rem;
-            background: var(--stat-bg);
-            border-radius: 999px;
-            border: 1px solid var(--stat-border);
-            transition: all 0.4s;
-        }
-        .stat-dot {
-            width: 6px; height: 6px;
-            border-radius: 50%;
-            animation: statBlink 2s ease-in-out infinite;
-        }
-        body.theme-cyberpunk .stat-dot {
-            background: #60a5fa;
-            box-shadow: 0 0 6px #60a5fa;
-        }
-        body.theme-kawaii .stat-dot {
-            background: #ec4899;
-            box-shadow: 0 0 6px #ec4899;
-        }
-        @keyframes statBlink {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 1; }
-        }
+        .theme-panel.open { opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
 
-        /* ======== Footer ======== */
-        .site-footer {
-            position: relative; z-index: 2;
-            text-align: center;
-            padding: 2rem 1rem;
-            font-size: 0.8rem;
-            border-top: 1px solid var(--footer-border);
-            color: var(--footer-text);
-            transition: all 0.6s;
+        .theme-chip {
+            width:44px; height:44px; border-radius:12px; border:2px solid transparent;
+            cursor:pointer; display:flex; align-items:center; justify-content:center;
+            font-size:1.2rem; transition:all 0.25s;
+            position:relative;
         }
+        .theme-chip:hover { transform:scale(1.15); }
+        .theme-chip.active { border-color:var(--hover-arrow-color); box-shadow:0 0 14px var(--hover-arrow-color); }
+        .theme-chip .chip-label {
+            position:absolute; bottom:-20px; left:50%; transform:translateX(-50%);
+            font-size:9px; white-space:nowrap; color:var(--text-dim);
+            opacity:0; transition:opacity 0.2s; pointer-events:none;
+        }
+        .theme-chip:hover .chip-label { opacity:1; }
 
-        /* ======== 滚动入场动画 ======== */
-        .reveal {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        body.theme-retro .theme-panel { border-radius: 0; border: 2px solid #306230; }
+        body.theme-retro .theme-chip { border-radius: 0; }
+        body.theme-candy .theme-panel { border-radius: 20px; }
+        body.theme-candy .theme-chip { border-radius: 16px; }
 
-        /* ======== 响应式 ======== */
-        @media (max-width: 768px) {
-            .tools-grid { grid-template-columns: 1fr; }
-            .main-content { margin-top: -2rem; padding: 0 0.75rem 3rem; }
-            .theme-toggle-wrap { bottom: 16px; right: 16px; }
-            .theme-toggle-btn { width: 42px; height: 42px; font-size: 1.2rem; }
+        /* Stats bar */
+        .stats-bar { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-top:2rem; font-size:0.85rem; color:var(--text-dim); transition:color 0.6s; }
+        .stat-item { display:flex; align-items:center; gap:0.4rem; padding:0.4rem 1rem; background:var(--stat-bg); border-radius:999px; border:1px solid var(--stat-border); transition:all 0.4s; }
+        .stat-dot { width:6px; height:6px; border-radius:50%; background:var(--hover-arrow-color); box-shadow:0 0 6px var(--hover-arrow-color); animation:statBlink 2s ease-in-out infinite; }
+        @keyframes statBlink { 0%,100% { opacity:0.3; } 50% { opacity:1; } }
+
+        /* Footer */
+        .site-footer { position:relative; z-index:2; text-align:center; padding:2rem 1rem; font-size:0.8rem; border-top:1px solid var(--footer-border); color:var(--footer-text); transition:all 0.6s; }
+
+        /* Reveal */
+        .reveal { opacity:0; transform:translateY(30px); transition:all 0.6s cubic-bezier(0.23,1,0.32,1); }
+        .reveal.visible { opacity:1; transform:translateY(0); }
+
+        /* Responsive */
+        @media (max-width:768px) {
+            .tools-grid { grid-template-columns:1fr; }
+            .main-content { margin-top:-2rem; padding:0 0.75rem 3rem; }
+            .theme-switcher { bottom:16px; right:12px; }
+            .theme-toggle-btn { width:44px; height:44px; font-size:1.2rem; }
+            .theme-panel { grid-template-columns:repeat(5,1fr); gap:6px; padding:8px; }
+            .theme-chip { width:36px; height:36px; font-size:1rem; }
         }
     </style>
 </head>
 <body class="theme-cyberpunk">
 
-    <!-- 粒子背景 -->
     <canvas id="particleCanvas"></canvas>
-
-    <!-- 鼠标光晕 -->
     <div class="cursor-glow" id="cursorGlow"></div>
 
-    <!-- Hero -->
     <header class="hero-section">
         <div class="hero-icon">
             <svg id="heroIconSvg" width="64" height="64" fill="none" stroke-width="1.5" viewBox="0 0 24 24" style="position:relative;z-index:1">
-                <defs>
-                    <linearGradient id="heroSvgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#c084fc"/>
-                        <stop offset="50%" stop-color="#60a5fa"/>
-                        <stop offset="100%" stop-color="#34d399"/>
-                    </linearGradient>
-                    <linearGradient id="heroSvgKawaii" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#ec4899"/>
-                        <stop offset="50%" stop-color="#a855f7"/>
-                        <stop offset="100%" stop-color="#fb923c"/>
-                    </linearGradient>
-                </defs>
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
             </svg>
         </div>
         <h1 class="hero-title">My Tools</h1>
         <p class="hero-subtitle">高效在线工具箱 · 所有工具浏览器本地运行 · 数据不外传</p>
-
         <div class="stats-bar">
             <span class="stat-item"><span class="stat-dot"></span> 6 个工具</span>
-            <span class="stat-item" data-emoji="🔒">🔒 本地运行</span>
-            <span class="stat-item" data-emoji="⚡">⚡ 即开即用</span>
-            <span class="stat-item" data-emoji="🎨">🎨 2026</span>
+            <span class="stat-item">🔒 本地运行</span>
+            <span class="stat-item">⚡ 即开即用</span>
+            <span class="stat-item">🎨 <span id="themeCount">10</span> 款主题</span>
         </div>
     </header>
 
-    <!-- 工具网格 -->
     <main class="main-content">
         <div class="tools-grid" id="toolsGrid"></div>
-
         <div id="emptyState" class="hidden" style="text-align:center;padding:4rem 0;">
-            <svg width="64" height="64" style="margin:0 auto 1rem;opacity:0.2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
-            </svg>
-            <p style="color:#555;">暂无工具，快去添加吧</p>
+            <p style="color:var(--text-dim);">暂无工具，快去添加吧</p>
         </div>
     </main>
 
@@ -537,125 +441,121 @@
         My Tools &copy; 2026 — 所有工具均在浏览器本地运行，安全可靠
     </footer>
 
-    <!-- 主题切换按钮 -->
-    <div class="theme-toggle-wrap">
-        <button class="theme-toggle-btn" id="themeToggle" title="切换主题" aria-label="切换主题">
-            <span id="themeToggleIcon">🌸</span>
+    <div class="theme-switcher">
+        <div class="theme-panel" id="themePanel">
+            <!-- populated by JS -->
+        </div>
+        <button class="theme-toggle-btn" id="themeToggle" title="切换主题">
+            <span id="themeToggleIcon">🎨</span>
         </button>
-        <span class="theme-toggle-tooltip" id="themeToggleLabel">切换到少女心</span>
     </div>
 
     <script>
-        // ==================== 工具注册表 ====================
+        // ==================== Theme Definitions ====================
+        const THEMES = [
+            { id:'cyberpunk', icon:'👾', label:'赛博朋克', cssVars:{} },
+            { id:'kawaii',    icon:'🌸', label:'少女心', cssVars:{} },
+            { id:'zen',       icon:'🖌️', label:'水墨禅意', cssVars:{} },
+            { id:'retro',     icon:'📟', label:'复古像素', cssVars:{} },
+            { id:'vaporwave', icon:'🌴', label:'蒸汽波', cssVars:{} },
+            { id:'ocean',     icon:'🌊', label:'海洋清爽', cssVars:{} },
+            { id:'sunset',    icon:'🌅', label:'日落暖橙', cssVars:{} },
+            { id:'forest',    icon:'🌿', label:'自然森林', cssVars:{} },
+            { id:'neon',      icon:'🌃', label:'霓虹都市', cssVars:{} },
+            { id:'candy',     icon:'🍬', label:'糖果缤纷', cssVars:{} },
+        ];
+
+        // ==================== Particle color palettes per theme ====================
+        const PARTICLE_PALETTES = {
+            cyberpunk: { hues:[{h:220,w:60},{h:260,w:40},{h:180,w:40}], sat:60, lit:65, size:[0.6,2.4], speed:[0.2,0.8] },
+            kawaii:    { hues:[{h:335,w:30},{h:275,w:30},{h:35,w:20},{h:195,w:30}], sat:55, lit:75, size:[2,6], speed:[0.15,0.5] },
+            zen:       { hues:[{h:30,w:20},{h:40,w:30},{h:20,w:30},{h:45,w:20}], sat:5, lit:55, size:[2,8], speed:[0.1,0.3] },
+            retro:     { hues:[{h:72,w:30},{h:68,w:30},{h:75,w:20},{h:80,w:20}], sat:80, lit:55, size:[3,6], speed:[0.4,1.2] },
+            vaporwave: { hues:[{h:320,w:30},{h:180,w:30},{h:280,w:20},{h:350,w:20}], sat:70, lit:60, size:[1.5,4], speed:[0.2,0.6] },
+            ocean:     { hues:[{h:200,w:40},{h:210,w:30},{h:190,w:30}], sat:50, lit:68, size:[2,7], speed:[0.1,0.4] },
+            sunset:    { hues:[{h:25,w:30},{h:15,w:30},{h:35,w:20},{h:45,w:20}], sat:65, lit:65, size:[1.5,4.5], speed:[0.08,0.3] },
+            forest:    { hues:[{h:100,w:30},{h:120,w:30},{h:140,w:20},{h:80,w:20}], sat:45, lit:50, size:[2,7], speed:[0.08,0.35] },
+            neon:      { hues:[{h:330,w:30},{h:54,w:30},{h:160,w:20},{h:290,w:20}], sat:90, lit:70, size:[1,3], speed:[0.3,1] },
+            candy:     { hues:[{h:15,w:20},{h:290,w:20},{h:190,w:20},{h:45,w:20},{h:340,w:20},{h:140,w:20}], sat:75, lit:68, size:[3,9], speed:[0.3,0.8] },
+        };
+
+        // ==================== Tool Registry ====================
         const tools = [
             {
-                name: "文件 Hash 两两对比",
-                desc: "批量上传文件，计算 MD5/SHA-1/SHA-256 哈希值，自动两两对比快速找出重复文件",
-                icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>',
-                path: "tools/hash-compare/index.html",
-                accent: "#60a5fa",
-                kawaiiAccent: "#93c5fd",
-                tags: ["文件", "哈希", "对比"]
-            },
-            {
-                name: "取色器",
-                desc: "可视化拾取颜色，色相/饱和度/明度调节，透明度控制，HEX/RGB/HSL 格式切换，屏幕取色和颜色历史记录",
-                icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>',
-                path: "tools/color-picker/index.html",
-                accent: "#c084fc",
-                kawaiiAccent: "#d8b4fe",
-                tags: ["颜色", "取色", "设计"]
-            },
-            {
-                name: "二维码生成器",
-                desc: "输入文字或链接实时生成二维码，支持尺寸/颜色/纠错级别调节、Wi-Fi/名片等快捷模板，可下载 PNG",
-                icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2.48a2.5 2.5 0 00-4.52 0H4m16 0v-4a2 2 0 00-2-2h-1.5m2 6H20M4 15v-4a2 2 0 012-2h1.5M4 15h1.5M12 9v4m-4-6h8M8 3v2m8-2v2"/>',
-                path: "tools/qrcode-generator/index.html",
-                accent: "#818cf8",
-                kawaiiAccent: "#a5b4fc",
-                tags: ["二维码", "生成", "分享"]
-            },
-            {
-                name: "JSON 格式化工具",
-                desc: "在线 JSON 格式化/压缩/校验，语法高亮、Key 排序、自定义缩进、节点统计，Ctrl+Enter 快捷格式化",
-                icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>',
-                path: "tools/json-formatter/index.html",
-                accent: "#f59e0b",
-                kawaiiAccent: "#fcd34d",
-                tags: ["JSON", "格式化", "开发"]
-            },
-            {
-                name: "高压电源设计工具箱",
-                desc: "硬件工程师专属：分压器设计(自动算串联数/功耗)、RC充放电曲线、功率热耗散结温、电容储能TNT当量",
-                icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>',
-                path: "tools/hv-design/index.html",
-                accent: "#f87171",
-                kawaiiAccent: "#fca5a5",
-                tags: ["高压", "分压器", "RC", "硬件"]
-            },
-            {
-                name: "BOM 整理工具",
-                desc: "粘贴物料清单自动分类(电阻/电容/IC等19类)、排序筛选、统计概览，支持导出CSV/Excel和复制表格",
-                icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>',
-                path: "tools/bom-organizer/index.html",
-                accent: "#2dd4bf",
-                kawaiiAccent: "#99f6e4",
-                tags: ["BOM", "物料", "硬件"]
+                name:"文件 Hash 两两对比", desc:"批量上传文件，计算 MD5/SHA-1/SHA-256 哈希值，自动两两对比快速找出重复文件",
+                icon:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>',
+                path:"tools/hash-compare/index.html",
+                accents:{cyberpunk:'#60a5fa',kawaii:'#93c5fd',zen:'#6b7280',retro:'#9bbc0f',vaporwave:'#00ffff',ocean:'#1e88e5',sunset:'#ff6d00',forest:'#43a047',neon:'#ffe632',candy:'#ff5722'},
+                tags:["文件","哈希","对比"]
+            },{
+                name:"取色器", desc:"可视化拾取颜色，色相/饱和度/明度调节，透明度控制，HEX/RGB/HSL 格式切换，屏幕取色和颜色历史记录",
+                icon:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>',
+                path:"tools/color-picker/index.html",
+                accents:{cyberpunk:'#c084fc',kawaii:'#d8b4fe',zen:'#78716c',retro:'#8bac0f',vaporwave:'#ff69b4',ocean:'#42a5f5',sunset:'#e65100',forest:'#66bb6a',neon:'#ff64b4',candy:'#ab47bc'},
+                tags:["颜色","取色","设计"]
+            },{
+                name:"二维码生成器", desc:"输入文字或链接实时生成二维码，支持尺寸/颜色/纠错级别调节、Wi-Fi/名片等快捷模板，可下载 PNG",
+                icon:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2.48a2.5 2.5 0 00-4.52 0H4m16 0v-4a2 2 0 00-2-2h-1.5m2 6H20M4 15v-4a2 2 0 012-2h1.5M4 15h1.5M12 9v4m-4-6h8M8 3v2m8-2v2"/>',
+                path:"tools/qrcode-generator/index.html",
+                accents:{cyberpunk:'#818cf8',kawaii:'#a5b4fc',zen:'#57534e',retro:'#306230',vaporwave:'#8a2be2',ocean:'#1565c0',sunset:'#ff9100',forest:'#2e7d32',neon:'#00ffc8',candy:'#26c6da'},
+                tags:["二维码","生成","分享"]
+            },{
+                name:"JSON 格式化工具", desc:"在线 JSON 格式化/压缩/校验，语法高亮、Key 排序、自定义缩进、节点统计，Ctrl+Enter 快捷格式化",
+                icon:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>',
+                path:"tools/json-formatter/index.html",
+                accents:{cyberpunk:'#f59e0b',kawaii:'#fcd34d',zen:'#a8a29e',retro:'#9bbc0f',vaporwave:'#ffb347',ocean:'#64b5f6',sunset:'#ff7043',forest:'#81c784',neon:'#ffcc00',candy:'#ffca28'},
+                tags:["JSON","格式化","开发"]
+            },{
+                name:"高压电源设计工具箱", desc:"硬件工程师专属：分压器设计(自动算串联数/功耗)、RC充放电曲线、功率热耗散结温、电容储能TNT当量",
+                icon:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>',
+                path:"tools/hv-design/index.html",
+                accents:{cyberpunk:'#f87171',kawaii:'#fca5a5',zen:'#92400e',retro:'#9bbc0f',vaporwave:'#ff3366',ocean:'#ef5350',sunset:'#d84315',forest:'#e53935',neon:'#ff4444',candy:'#ff7043'},
+                tags:["高压","分压器","RC","硬件"]
+            },{
+                name:"BOM 整理工具", desc:"粘贴物料清单自动分类(电阻/电容/IC等19类)、排序筛选、统计概览，支持导出CSV/Excel和复制表格",
+                icon:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>',
+                path:"tools/bom-organizer/index.html",
+                accents:{cyberpunk:'#2dd4bf',kawaii:'#99f6e4',zen:'#14b8a6',retro:'#9bbc0f',vaporwave:'#00ffcc',ocean:'#26c6da',sunset:'#ffb74d',forest:'#4caf50',neon:'#00ff88',candy:'#38ef7d'},
+                tags:["BOM","物料","硬件"]
             }
         ];
 
-        // ==================== 主题管理 ====================
-        let currentTheme = 'cyberpunk'; // 'cyberpunk' | 'kawaii'
+        // ==================== Theme Manager ====================
+        const allThemeClasses = THEMES.map(t=>'theme-'+t.id);
+        let currentTheme = 'cyberpunk';
         let themeSwitchCooldown = false;
+        let panelOpen = false;
 
         function setTheme(theme) {
             if (themeSwitchCooldown || theme === currentTheme) return;
             themeSwitchCooldown = true;
 
             const body = document.body;
-            body.classList.remove('theme-cyberpunk', 'theme-kawaii');
+            body.classList.remove(...allThemeClasses);
             body.classList.add('theme-' + theme);
             currentTheme = theme;
 
-            // 更新切换按钮
-            const toggleIcon = document.getElementById('themeToggleIcon');
-            const toggleLabel = document.getElementById('themeToggleLabel');
-            const heroSvg = document.getElementById('heroIconSvg').querySelector('path');
+            document.getElementById('themeToggleIcon').textContent = THEMES.find(t=>t.id===theme).icon;
 
-            if (theme === 'kawaii') {
-                toggleIcon.textContent = '💜';
-                toggleLabel.textContent = '切换到赛博朋克';
-                heroSvg.setAttribute('stroke', 'url(#heroSvgKawaii)');
-            } else {
-                toggleIcon.textContent = '🌸';
-                toggleLabel.textContent = '切换到少女心';
-                heroSvg.setAttribute('stroke', 'url(#heroSvgGrad)');
-            }
+            // Update panel active states
+            document.querySelectorAll('.theme-chip').forEach(chip => {
+                chip.classList.toggle('active', chip.dataset.theme === theme);
+            });
 
-            // 更新卡片 accent 颜色
             updateCardAccents();
-
-            // 重启粒子
-            if (window._animFrame) cancelAnimationFrame(window._animFrame);
-            particles = [];
-            for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Particle());
-            if (window._animFrame) animateParticles();
-
-            // 更新光晕
+            resetParticles();
             initCursorGlow();
 
-            // 保存主题
             try { localStorage.setItem('tools-theme', theme); } catch(e) {}
 
             setTimeout(() => { themeSwitchCooldown = false; }, 600);
         }
 
         function updateCardAccents() {
-            document.querySelectorAll('.tool-card').forEach((card, i) => {
+            document.querySelectorAll('.tool-card').forEach((card,i) => {
                 const tool = tools[i];
-                const accent = currentTheme === 'kawaii' ? tool.kawaiiAccent : tool.accent;
+                const accent = tool.accents[currentTheme] || tool.accents.cyberpunk;
                 card.style.setProperty('--card-accent', accent);
-                card.style.setProperty('--card-glow', accent + (currentTheme === 'kawaii' ? '22' : '33'));
                 card.querySelectorAll('.card-corner-dot').forEach(dot => {
                     dot.style.background = accent;
                     dot.style.boxShadow = '0 0 10px ' + accent;
@@ -663,258 +563,265 @@
             });
         }
 
-        // 切换按钮
-        document.getElementById('themeToggle').addEventListener('click', () => {
-            setTheme(currentTheme === 'cyberpunk' ? 'kawaii' : 'cyberpunk');
-        });
-
-        // 恢复上次主题
         function restoreTheme() {
             try {
                 const saved = localStorage.getItem('tools-theme');
-                if (saved && (saved === 'kawaii' || saved === 'cyberpunk')) {
-                    document.body.classList.remove('theme-cyberpunk');
+                if (saved && THEMES.some(t=>t.id===saved)) {
+                    document.body.classList.remove(...allThemeClasses);
                     document.body.classList.add('theme-' + saved);
                     currentTheme = saved;
-                    const toggleIcon = document.getElementById('themeToggleIcon');
-                    const toggleLabel = document.getElementById('themeToggleLabel');
-                    const heroSvg = document.getElementById('heroIconSvg').querySelector('path');
-                    if (saved === 'kawaii') {
-                        toggleIcon.textContent = '💜';
-                        toggleLabel.textContent = '切换到赛博朋克';
-                        heroSvg.setAttribute('stroke', 'url(#heroSvgKawaii)');
-                    }
+                    document.getElementById('themeToggleIcon').textContent = THEMES.find(t=>t.id===saved).icon;
                 }
             } catch(e) {}
         }
 
-        // ==================== 渲染卡片 ====================
+        // ==================== Theme Panel ====================
+        function buildThemePanel() {
+            const panel = document.getElementById('themePanel');
+            panel.innerHTML = THEMES.map(t => `
+                <button class="theme-chip${t.id===currentTheme?' active':''}" data-theme="${t.id}" title="${t.label}">
+                    ${t.icon}
+                    <span class="chip-label">${t.label}</span>
+                </button>
+            `).join('');
+
+            panel.querySelectorAll('.theme-chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    setTheme(chip.dataset.theme);
+                    closePanel();
+                });
+            });
+        }
+
+        function togglePanel() {
+            const panel = document.getElementById('themePanel');
+            panelOpen = !panelOpen;
+            panel.classList.toggle('open', panelOpen);
+        }
+
+        function closePanel() {
+            panelOpen = false;
+            document.getElementById('themePanel').classList.remove('open');
+        }
+
+        document.getElementById('themeToggle').addEventListener('click', togglePanel);
+        document.addEventListener('click', (e) => {
+            if (panelOpen && !e.target.closest('.theme-switcher')) closePanel();
+        });
+
+        // ==================== Render Cards ====================
         function renderTools() {
             const grid = document.getElementById('toolsGrid');
-            const emptyState = document.getElementById('emptyState');
+            const empty = document.getElementById('emptyState');
+            if (tools.length === 0) { grid.style.display='none'; empty.classList.remove('hidden'); return; }
+            grid.style.display=''; empty.classList.add('hidden');
 
-            if (tools.length === 0) {
-                grid.style.display = 'none';
-                emptyState.classList.remove('hidden');
-                return;
-            }
-
-            grid.style.display = '';
-            emptyState.classList.add('hidden');
-
-            const accentAttr = currentTheme === 'kawaii' ? 'kawaiiAccent' : 'accent';
-
-            grid.innerHTML = tools.map((tool, i) => `
-                <a href="${tool.path}" class="tool-card reveal"
-                   style="--card-accent: ${tool[accentAttr]}; --card-glow: ${tool[accentAttr]}${currentTheme === 'kawaii' ? '22' : '33'}; transition-delay: ${i * 0.06}s">
-                    <span class="card-corner-dot" style="background:${tool[accentAttr]};box-shadow:0 0 10px ${tool[accentAttr]}"></span>
-                    <span class="card-corner-dot" style="background:${tool[accentAttr]};box-shadow:0 0 10px ${tool[accentAttr]}"></span>
-                    <span class="card-corner-dot" style="background:${tool[accentAttr]};box-shadow:0 0 10px ${tool[accentAttr]}"></span>
-                    <span class="card-corner-dot" style="background:${tool[accentAttr]};box-shadow:0 0 10px ${tool[accentAttr]}"></span>
-
+            grid.innerHTML = tools.map((tool,i) => {
+                const a = tool.accents[currentTheme] || tool.accents.cyberpunk;
+                return `<a href="${tool.path}" class="tool-card reveal" style="--card-accent:${a};transition-delay:${i*0.06}s">
+                    <span class="card-corner-dot" style="background:${a};box-shadow:0 0 10px ${a}"></span>
+                    <span class="card-corner-dot" style="background:${a};box-shadow:0 0 10px ${a}"></span>
+                    <span class="card-corner-dot" style="background:${a};box-shadow:0 0 10px ${a}"></span>
+                    <span class="card-corner-dot" style="background:${a};box-shadow:0 0 10px ${a}"></span>
                     <div style="display:flex;align-items:flex-start;gap:1rem;">
-                        <div class="card-icon-wrap" style="background:${tool[accentAttr]}22;color:${tool[accentAttr]}">
-                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                ${tool.icon}
-                            </svg>
+                        <div class="card-icon-wrap" style="background:${a}22;color:${a}">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">${tool.icon}</svg>
                         </div>
                         <div style="flex:1;min-width:0;">
                             <div style="display:flex;align-items:center;justify-content:space-between;">
                                 <h3 class="card-name">${tool.name}</h3>
-                                <svg class="card-arrow" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="flex-shrink:0;">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                                </svg>
+                                <svg class="card-arrow" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                             </div>
-                            <p style="font-size:0.8rem;color:var(--text-dim);line-height:1.5;margin:0.5rem 0 0.75rem;transition:color 0.4s;">${tool.desc}</p>
-                            <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                                ${tool.tags.map(tag => `<span class="tool-tag">${tag}</span>`).join('')}
-                            </div>
+                            <p style="font-size:0.8rem;color:var(--text-dim);line-height:1.5;margin:0.5rem 0 0.75rem;">${tool.desc}</p>
+                            <div style="display:flex;flex-wrap:wrap;gap:6px;">${tool.tags.map(t=>`<span class="tool-tag">${t}</span>`).join('')}</div>
                         </div>
                     </div>
-                </a>
-            `).join('');
+                </a>`;
+            }).join('');
 
             observeReveal();
         }
 
-        // ==================== 滚动入场动画 ====================
         function observeReveal() {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-
-            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+            const obs = new IntersectionObserver(entries => {
+                entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+            }, { threshold:0.1, rootMargin:'0px 0px -40px 0px' });
+            document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
         }
 
-        // ==================== 粒子背景 ====================
+        // ==================== Particle System ====================
         const PARTICLE_COUNT = 120;
         let particles = [];
         const canvas = document.getElementById('particleCanvas');
         const ctx = canvas.getContext('2d');
-        let mouse = { x: -999, y: -999 };
+        let mouse = { x:-999, y:-999 };
 
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+        function resize() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+        resize(); window.addEventListener('resize', resize);
+
+        function getPalette() {
+            return PARTICLE_PALETTES[currentTheme] || PARTICLE_PALETTES.cyberpunk;
         }
-        resize();
-        window.addEventListener('resize', resize);
 
-        // 少女心形状绘制
-        function drawHeart(cx, cy, size) {
-            ctx.beginPath();
-            const s = size * 1.2;
-            ctx.moveTo(cx, cy + s * 0.3);
-            ctx.bezierCurveTo(cx, cy, cx - s, cy, cx - s, cy - s * 0.4);
-            ctx.bezierCurveTo(cx - s, cy - s * 0.9, cx - s * 0.4, cy - s, cx, cy - s * 0.4);
-            ctx.bezierCurveTo(cx + s * 0.4, cy - s, cx + s, cy - s * 0.9, cx + s, cy - s * 0.4);
-            ctx.bezierCurveTo(cx + s, cy, cx, cy, cx, cy + s * 0.3);
+        // ---- Shape drawers ----
+        function drawHeart(cx,cy,size) {
+            ctx.beginPath(); const s=size*1.2;
+            ctx.moveTo(cx,cy+s*0.3);
+            ctx.bezierCurveTo(cx,cy,cx-s,cy,cx-s,cy-s*0.4);
+            ctx.bezierCurveTo(cx-s,cy-s*0.9,cx-s*0.4,cy-s,cx,cy-s*0.4);
+            ctx.bezierCurveTo(cx+s*0.4,cy-s,cx+s,cy-s*0.9,cx+s,cy-s*0.4);
+            ctx.bezierCurveTo(cx+s,cy,cx,cy,cx,cy+s*0.3);
             ctx.closePath();
         }
-
-        function drawStar(cx, cy, size) {
-            ctx.beginPath();
-            const spikes = 5;
-            const outer = size * 1.3;
-            const inner = size * 0.5;
-            for (let i = 0; i < spikes * 2; i++) {
-                const r = i % 2 === 0 ? outer : inner;
-                const angle = (Math.PI * 2 * i) / (spikes * 2) - Math.PI / 2;
-                const x = cx + Math.cos(angle) * r;
-                const y = cy + Math.sin(angle) * r;
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
+        function drawStar(cx,cy,size) {
+            ctx.beginPath(); const spi=5,o=size*1.3,inn=size*0.5;
+            for(let i=0;i<spi*2;i++) {
+                const r=i%2===0?o:inn;
+                const angle=(Math.PI*2*i)/(spi*2)-Math.PI/2;
+                const x=cx+Math.cos(angle)*r, y=cy+Math.sin(angle)*r;
+                i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
             }
             ctx.closePath();
         }
-
-        function drawSparkle(cx, cy, size) {
-            ctx.beginPath();
-            const len = size * 2;
-            // 四角星
-            for (let i = 0; i < 4; i++) {
-                const angle = (Math.PI / 2) * i;
-                const x1 = cx + Math.cos(angle) * len;
-                const y1 = cy + Math.sin(angle) * len;
-                const xm = cx + Math.cos(angle + 0.3) * len * 0.35;
-                const ym = cy + Math.sin(angle + 0.3) * len * 0.35;
-                ctx.moveTo(cx, cy);
-                ctx.lineTo(xm, ym);
-                ctx.lineTo(x1, y1);
-                ctx.lineTo(cx + Math.cos(angle - 0.3) * len * 0.35, cy + Math.sin(angle - 0.3) * len * 0.35);
-                ctx.lineTo(cx, cy);
+        function drawSparkle(cx,cy,size) {
+            ctx.beginPath(); const len=size*2;
+            for(let i=0;i<4;i++) {
+                const a=(Math.PI/2)*i;
+                ctx.moveTo(cx,cy);
+                ctx.lineTo(cx+Math.cos(a+0.3)*len*0.35,cy+Math.sin(a+0.3)*len*0.35);
+                ctx.lineTo(cx+Math.cos(a)*len,cy+Math.sin(a)*len);
+                ctx.lineTo(cx+Math.cos(a-0.3)*len*0.35,cy+Math.sin(a-0.3)*len*0.35);
+                ctx.lineTo(cx,cy);
             }
             ctx.closePath();
+        }
+        function drawLeaf(cx,cy,size) {
+            ctx.beginPath();
+            ctx.ellipse(cx,cy-size*0.15,size*0.35,size*0.7,0.3,0,Math.PI*2);
+            ctx.fill(); ctx.beginPath();
+            ctx.moveTo(cx,cy-size*0.8); ctx.lineTo(cx,cy+size*0.6);
+            ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth=0.5; ctx.stroke();
         }
 
         class Particle {
-            constructor() {
-                this.reset(true);
-            }
-            reset(init = false) {
-                this.x = init ? Math.random() * canvas.width : (Math.random() < 0.5 ? -30 : canvas.width + 30);
-                this.y = Math.random() * canvas.height;
-                this.vx = (Math.random() - 0.5) * 0.6;
-                this.vy = (Math.random() - 0.5) * 0.4;
-                this.size = Math.random() * 2 + 0.8;
-                this.opacity = Math.random() * 0.45 + 0.12;
-                this.rotSpeed = (Math.random() - 0.5) * 0.03;
-                this.rotation = Math.random() * Math.PI * 2;
+            constructor() { this.reset(true); }
+            reset(init){
+                const pal = getPalette();
+                this.x = init ? Math.random()*canvas.width : (Math.random()<0.5?-30:canvas.width+30);
+                this.y = init ? Math.random()*canvas.height : -30;
+                const [minS,maxS] = pal.size;
+                this.size = minS + Math.random()*(maxS-minS);
+                this.opacity = Math.random()*0.4+0.1;
+                this.rotation = Math.random()*Math.PI*2;
+                this.rotSpeed = (Math.random()-0.5)*0.04;
+                const [minSp,maxSp] = pal.speed;
+                const sp = minSp+Math.random()*(maxSp-minSp);
+                const angle = Math.random()*Math.PI*2;
+                this.vx = Math.cos(angle)*sp;
+                this.vy = Math.sin(angle)*sp-0.1;
+                this.shape = 'dot';
+                const hueGroup = pal.hues[Math.floor(Math.random()*pal.hues.length)];
+                this.hue = hueGroup.h + (Math.random()-0.5)*hueGroup.w;
+                this.sat = pal.sat + Math.random()*15;
+                this.lit = pal.lit + (Math.random()-0.5)*20;
 
-                if (currentTheme === 'kawaii') {
-                    this.shape = Math.random() < 0.45 ? 'heart' : (Math.random() < 0.5 ? 'star' : 'sparkle');
-                    this.hue = Math.random() < 0.35 ? 330 + Math.random() * 30   // pink
-                              : Math.random() < 0.5 ? 270 + Math.random() * 30  // purple
-                              : Math.random() < 0.5 ? 30 + Math.random() * 20   // peach/orange
-                              : 190 + Math.random() * 30; // mint
-                    this.size = Math.random() * 4 + 2;
-                } else {
-                    this.shape = 'dot';
-                    this.hue = Math.random() < 0.4 ? 220 + Math.random() * 60
-                              : Math.random() < 0.5 ? 260 + Math.random() * 40
-                              : 160 + Math.random() * 40;
-                    this.size = Math.random() * 1.8 + 0.6;
+                if(currentTheme==='kawaii') this.shape = ['heart','heart','star','sparkle'][Math.floor(Math.random()*4)];
+                if(currentTheme==='retro') { this.shape='pixel'; this.size=Math.max(3,this.size); }
+                if(currentTheme==='vaporwave') this.shape = ['dot','dot','dot','sparkle'][Math.floor(Math.random()*4)];
+                if(currentTheme==='ocean') this.shape = 'bubble';
+                if(currentTheme==='forest') this.shape = Math.random()<0.3?'leaf':'dot';
+                if(currentTheme==='sunset') { this.vy=-0.15-(Math.random()*0.25); this.vx=(Math.random()-0.5)*0.3; }
+                if(currentTheme==='neon') this.opacity = Math.random()*0.55+0.25;
+                if(currentTheme==='candy') this.shape='dot';
+                if(currentTheme==='zen') { this.opacity=Math.random()*0.2+0.04; this.size=Math.random()*6+2; this.vy=-0.02-(Math.random()*0.06); }
+            }
+            update(){
+                this.x+=this.vx; this.y+=this.vy; this.rotation+=this.rotSpeed;
+                const dx=mouse.x-this.x, dy=mouse.y-this.y, dist=Math.sqrt(dx*dx+dy*dy);
+                if(dist<180){ const f=(180-dist)/180; this.vx+=(dx/dist)*f*0.02; this.vy+=(dy/dist)*f*0.02; }
+                this.vx*=0.999; this.vy*=0.999;
+                const speed=Math.sqrt(this.vx*this.vx+this.vy*this.vy);
+                if(speed>2){ this.vx=(this.vx/speed)*2; this.vy=(this.vy/speed)*2; }
+                // Retro: fall down
+                if(currentTheme==='retro'){ this.vy+=0.03; if(this.y>canvas.height+20){this.y=-20;this.x=Math.random()*canvas.width;this.vy=0.5+Math.random()*0.8;} }
+                // Ocean: float up
+                if(currentTheme==='ocean'){ this.vy-=0.005; if(this.y<-20){this.y=canvas.height+20;this.x=Math.random()*canvas.width;this.vy=-(0.1+Math.random()*0.25);} }
+                // Forest: gentle fall
+                if(currentTheme==='forest'&&this.shape==='leaf'){ this.vy+=0.003; this.vx+=Math.sin(this.rotation)*0.005; if(this.y>canvas.height+30){this.y=-30;this.x=Math.random()*canvas.width;this.vy=0.05+Math.random()*0.2;} }
+                // Sunset: particles rise gently
+                if(currentTheme==='sunset'){ if(this.y<-20||this.y>canvas.height+20){this.y=canvas.height+20;this.x=Math.random()*canvas.width;this.vy=-0.1-Math.random()*0.3;this.vx=(Math.random()-0.5)*0.3;} }
+                // Wrap
+                if(this.x<-50)this.x=canvas.width+50; if(this.x>canvas.width+50)this.x=-50;
+                if(!['retro','ocean','forest','sunset'].includes(currentTheme)){
+                    if(this.y<-50)this.y=canvas.height+50; if(this.y>canvas.height+50)this.y=-50;
                 }
             }
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                this.rotation += this.rotSpeed;
+            draw(ctx){
+                ctx.save(); ctx.translate(this.x,this.y); ctx.rotate(this.rotation);
+                const color = `hsla(${this.hue},${this.sat}%,${this.lit}%,${this.opacity})`;
+                ctx.fillStyle = color;
 
-                const dx = mouse.x - this.x;
-                const dy = mouse.y - this.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 180) {
-                    const force = (180 - dist) / 180;
-                    this.vx += (dx / dist) * force * 0.02;
-                    this.vy += (dy / dist) * force * 0.02;
+                if(this.shape==='heart'){ drawHeart(0,0,this.size); ctx.fill(); }
+                else if(this.shape==='star'){ drawStar(0,0,this.size); ctx.fill(); }
+                else if(this.shape==='sparkle'){ drawSparkle(0,0,this.size); ctx.fill(); }
+                else if(this.shape==='pixel'){ ctx.fillRect(-this.size/2,-this.size/2,this.size,this.size); }
+                else if(this.shape==='bubble'){
+                    ctx.beginPath(); ctx.arc(0,0,this.size,0,Math.PI*2);
+                    ctx.fillStyle=`hsla(${this.hue},${this.sat}%,${this.lit}%,${this.opacity*0.5})`;
+                    ctx.fill();
+                    ctx.strokeStyle=`hsla(${this.hue},${this.sat}%,90%,${this.opacity*0.8})`; ctx.lineWidth=0.5; ctx.stroke();
+                    // bubble highlight
+                    ctx.beginPath(); ctx.arc(-this.size*0.25,-this.size*0.35,this.size*0.2,0,Math.PI*2);
+                    ctx.fillStyle=`rgba(255,255,255,${this.opacity*0.4})`; ctx.fill();
                 }
-
-                this.vx *= 0.999;
-                this.vy *= 0.999;
-                const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-                if (speed > 1.5) {
-                    this.vx = (this.vx / speed) * 1.5;
-                    this.vy = (this.vy / speed) * 1.5;
-                }
-
-                if (this.x < -50) this.x = canvas.width + 50;
-                if (this.x > canvas.width + 50) this.x = -50;
-                if (this.y < -50) this.y = canvas.height + 50;
-                if (this.y > canvas.height + 50) this.y = -50;
-            }
-            draw(ctx) {
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.rotation);
-                ctx.fillStyle = `hsla(${this.hue}, 60%, ${currentTheme === 'kawaii' ? '75' : '65'}%, ${this.opacity})`;
-
-                if (this.shape === 'heart') {
-                    drawHeart(0, 0, this.size);
-                    ctx.fill();
-                } else if (this.shape === 'star') {
-                    drawStar(0, 0, this.size);
-                    ctx.fill();
-                } else if (this.shape === 'sparkle') {
-                    drawSparkle(0, 0, this.size);
-                    ctx.fill();
-                } else {
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
-                    ctx.fill();
+                else if(this.shape==='leaf'){ drawLeaf(0,0,this.size); ctx.fillStyle=color; ctx.fill(); }
+                else {
+                    // Zen: soft ink blob
+                    if(currentTheme==='zen'){
+                        ctx.beginPath(); ctx.arc(0,0,this.size,0,Math.PI*2);
+                        ctx.fill();
+                        ctx.beginPath(); ctx.arc(this.size*0.3,this.size*0.2,this.size*0.6,0,Math.PI*2);
+                        ctx.fillStyle=`hsla(${this.hue},${this.sat}%,${this.lit}%,${this.opacity*0.5})`; ctx.fill();
+                    }
+                    // Neon: glow effect
+                    else if(currentTheme==='neon'){
+                        ctx.shadowColor = color; ctx.shadowBlur = 8;
+                        ctx.beginPath(); ctx.arc(0,0,this.size,0,Math.PI*2); ctx.fill();
+                        ctx.shadowBlur = 0;
+                    }
+                    else {
+                        ctx.beginPath(); ctx.arc(0,0,this.size,0,Math.PI*2); ctx.fill();
+                    }
                 }
                 ctx.restore();
             }
         }
 
-        function initParticles() {
-            for (let i = 0; i < PARTICLE_COUNT; i++) {
-                particles.push(new Particle());
-            }
+        function resetParticles() {
+            if (window._animFrame) cancelAnimationFrame(window._animFrame);
+            particles = [];
+            for (let i=0;i<PARTICLE_COUNT;i++) particles.push(new Particle());
+            animateParticles();
         }
 
         function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => { p.update(); p.draw(ctx); });
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            particles.forEach(p=>{p.update();p.draw(ctx);});
 
-            // 连线（仅赛博主题）
-            if (currentTheme === 'cyberpunk') {
-                for (let i = 0; i < particles.length; i++) {
-                    for (let j = i + 1; j < particles.length; j++) {
-                        const dx = particles[i].x - particles[j].x;
-                        const dy = particles[i].y - particles[j].y;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        if (dist < 120) {
-                            ctx.beginPath();
-                            ctx.moveTo(particles[i].x, particles[i].y);
-                            ctx.lineTo(particles[j].x, particles[j].y);
-                            ctx.strokeStyle = `rgba(100,140,255,${(1 - dist / 120) * 0.08})`;
-                            ctx.lineWidth = 0.5;
-                            ctx.stroke();
+            // Connections vary by theme
+            const maxDist = currentTheme==='kawaii'?0:currentTheme==='vaporwave'?90:currentTheme==='zen'?60:currentTheme==='neon'?100:120;
+            const lineOpacity = currentTheme==='vaporwave'?0.06:currentTheme==='neon'?0.1:currentTheme==='zen'?0.04:0.08;
+
+            if (!['kawaii','retro','ocean','sunset','forest','candy'].includes(currentTheme)) {
+                for(let i=0;i<particles.length;i++){
+                    for(let j=i+1;j<particles.length;j++){
+                        const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y;
+                        const dist=Math.sqrt(dx*dx+dy*dy);
+                        if(dist<maxDist){
+                            ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y); ctx.lineTo(particles[j].x,particles[j].y);
+                            const t = currentTheme==='vaporwave'?'255,105,180':currentTheme==='neon'?'255,100,180':currentTheme==='zen'?'0,0,0':'100,140,255';
+                            ctx.strokeStyle=`rgba(${t},${(1-dist/maxDist)*lineOpacity})`;
+                            ctx.lineWidth=0.5; ctx.stroke();
                         }
                     }
                 }
@@ -923,41 +830,37 @@
             window._animFrame = requestAnimationFrame(animateParticles);
         }
 
-        // ==================== 鼠标光晕 ====================
-        function initCursorGlow() {
-            // stored as event handler ref
-        }
-        document.addEventListener('mousemove', (e) => {
-            const glow = document.getElementById('cursorGlow');
-            glow.style.left = e.clientX + 'px';
-            glow.style.top = e.clientY + 'px';
-            glow.style.opacity = '1';
+        // ==================== Cursor Glow ====================
+        function initCursorGlow() {}
+        document.addEventListener('mousemove', e => {
+            const g=document.getElementById('cursorGlow');
+            g.style.left=e.clientX+'px'; g.style.top=e.clientY+'px'; g.style.opacity='1';
         });
-        document.addEventListener('mouseleave', () => {
-            document.getElementById('cursorGlow').style.opacity = '0';
+        document.addEventListener('mouseleave', ()=>{
+            document.getElementById('cursorGlow').style.opacity='0';
         });
 
-        // ==================== 卡片 tilt 效果 ====================
+        // ==================== Card Tilt ====================
         function initCardTilt() {
-            document.addEventListener('mousemove', (e) => {
+            document.addEventListener('mousemove', e => {
                 document.querySelectorAll('.tool-card:hover').forEach(card => {
-                    const rect = card.getBoundingClientRect();
-                    const x = (e.clientX - rect.left) / rect.width - 0.5;
-                    const y = (e.clientY - rect.top) / rect.height - 0.5;
-                    const tiltIntensity = currentTheme === 'kawaii' ? 3 : 6;
-                    card.style.transform = `translateY(${currentTheme === 'kawaii' ? '-6px' : '-8px'}) perspective(800px) rotateY(${x * tiltIntensity}deg) rotateX(${-y * 4}deg)`;
+                    const r=card.getBoundingClientRect();
+                    const x=(e.clientX-r.left)/r.width-0.5;
+                    const y=(e.clientY-r.top)/r.height-0.5;
+                    const ti = ['kawaii','zen','ocean','sunset','forest','candy','vaporwave'].includes(currentTheme)?3:6;
+                    card.style.transform = `translateY(${currentTheme==='kawaii'||currentTheme==='zen'?'-4px':'-8px'}) perspective(800px) rotateY(${x*ti}deg) rotateX(${-y*4}deg)`;
                 });
             });
-            document.addEventListener('mouseleave', () => {
-                document.querySelectorAll('.tool-card').forEach(card => { card.style.transform = ''; });
-            }, true);
+            document.addEventListener('mouseleave',()=>{
+                document.querySelectorAll('.tool-card').forEach(c=>c.style.transform='');
+            },true);
         }
 
-        // ==================== 启动 ====================
+        // ==================== Boot ====================
         restoreTheme();
+        buildThemePanel();
         renderTools();
-        initParticles();
-        animateParticles();
+        resetParticles();
         initCardTilt();
     </script>
 </body>
