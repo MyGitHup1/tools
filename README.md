@@ -17,7 +17,9 @@ tools/
     │   └── index.html
     └── json-formatter/         # JSON 格式化工具
         └── index.html
-    └── hv-design/              # 高压电源设计工具箱
+    ├── hv-design/              # 高压电源设计工具箱
+    │   └── index.html
+    └── bom-organizer/          # BOM 整理工具
         └── index.html
 ```
 
@@ -47,3 +49,4 @@ tools/
 | [二维码生成器](tools/qrcode-generator/index.html) | 输入文字/链接实时生成二维码，支持尺寸颜色调节、Wi-Fi 名片等快捷模板、PNG 下载 |
 | [JSON 格式化工具](tools/json-formatter/index.html) | 在线 JSON 格式化/压缩/校验，语法高亮，Key 排序，节点统计，Ctrl+Enter 快捷格式化 |
 | [高压电源设计工具箱](tools/hv-design/index.html) | 四大模块：分压器设计(自动算串联数/标准阻值/功耗)、RC充放电曲线、功率热耗散结温、电容储能TNT当量 |
+| [BOM 整理工具](tools/bom-organizer/index.html) | 粘贴物料清单自动分类排序(19类)、统计概览、分类筛选，支持导出CSV/Excel和复制表格 |
