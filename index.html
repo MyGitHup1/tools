@@ -4,17 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>文件批量 Hash 两两对比工具</title>
-    <!-- 引入Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入CryptoJS 计算哈希 -->
     <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
     <style>
-        /* 拖拽高亮样式 */
         .drag-over {
             border-color: #3b82f6 !important;
             background-color: #eff6ff !important;
         }
-        /* 表格滚动 */
         .table-wrap {
             max-height: 400px;
             overflow: auto;
@@ -23,9 +19,8 @@
 </head>
 <body class="bg-gray-100 min-h-screen p-4 md:p-8">
     <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8">
-        <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-6">文件批量 Hash 两两对比工具1</h1>
+        <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-6">文件批量 Hash 两两对比工具</h1>
 
-        <!-- 哈希算法选择 -->
         <div class="mb-6">
             <label class="block text-gray-700 font-medium mb-2">选择哈希算法：</label>
             <div class="flex gap-4 flex-wrap">
@@ -39,16 +34,14 @@
                     <input type="radio" name="hashType" value="SHA256" class="mr-2"> SHA-256
                 </label>
             </div>
-            <p class="text-sm text-gray-500 mt-2">提示：多次上传文件会<strong>追加</strong>到列表，切换算法后点击计算可重新求值</p>
+            <p class="text-sm text-gray-500 mt-2">多次上传追加文件，切换算法后点击计算刷新结果</p>
         </div>
 
-        <!-- 文件上传区域 -->
         <div id="dropArea" class="border-2 border-dashed border-gray-300 rounded-lg p-10 text-center cursor-pointer mb-6 transition-all">
             <p class="text-gray-500 text-lg">点击选择文件 或 拖拽文件到此处（支持多文件、多次追加）</p>
             <input type="file" id="fileInput" multiple class="hidden">
         </div>
 
-        <!-- 操作按钮 -->
         <div class="flex gap-4 mb-6 flex-wrap">
             <button id="calcBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors">
                 计算Hash并两两对比
@@ -58,10 +51,8 @@
             </button>
         </div>
 
-        <!-- 状态提示 -->
         <div id="status" class="mb-4 text-gray-600 h-6"></div>
 
-        <!-- 文件Hash列表 -->
         <h2 class="text-xl font-semibold text-gray-700 mb-3">文件 Hash 列表</h2>
         <div class="table-wrap mb-8 border rounded-lg">
             <table class="w-full text-sm">
@@ -77,7 +68,6 @@
             </table>
         </div>
 
-        <!-- 两两对比结果 -->
         <h2 class="text-xl font-semibold text-gray-700 mb-3">两两文件对比结果</h2>
         <div class="table-wrap border rounded-lg">
             <table class="w-full text-sm">
@@ -94,7 +84,6 @@
     </div>
 
     <script>
-        // 全局变量
         const dropArea = document.getElementById('dropArea');
         const fileInput = document.getElementById('fileInput');
         const calcBtn = document.getElementById('calcBtn');
@@ -102,9 +91,10 @@
         const status = document.getElementById('status');
         const hashTableBody = document.getElementById('hashTableBody');
         const compareTableBody = document.getElementById('compareTableBody');
+
         let fileList = [];
-        // 额外保存原始 File 对象，用于切换算法后重算
         let rawFileList = [];
+        const CHUNK_SIZE = 1024 * 1024; // 分片 1MB
 
         // 格式化文件大小
         function formatFileSize(bytes) {
@@ -115,33 +105,41 @@
             return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
         }
 
-        // 计算文件哈希
-        async function getFileHash(file, type) {
+        // 分片计算哈希（优化大文件）
+        function getFileHashByChunk(file, type) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
-                reader.readAsArrayBuffer(file);
-                reader.onload = function (e) {
-                    const wordArray = CryptoJS.lib.WordArray.create(e.target.result);
-                    let hash;
-                    switch (type) {
-                        case 'MD5':
-                            hash = CryptoJS.MD5(wordArray).toString();
-                            break;
-                        case 'SHA1':
-                            hash = CryptoJS.SHA1(wordArray).toString();
-                            break;
-                        case 'SHA256':
-                            hash = CryptoJS.SHA256(wordArray).toString();
-                            break;
-                        default:
-                            hash = CryptoJS.MD5(wordArray).toString();
+                let offset = 0;
+                const total = file.size;
+                let hashObj;
+
+                switch (type) {
+                    case 'MD5': hashObj = CryptoJS.algo.MD5.create(); break;
+                    case 'SHA1': hashObj = CryptoJS.algo.SHA1.create(); break;
+                    case 'SHA256': hashObj = CryptoJS.algo.SHA256.create(); break;
+                    default: hashObj = CryptoJS.algo.MD5.create();
+                }
+
+                function readNext() {
+                    if (offset >= total) {
+                        const hash = hashObj.finalize().toString();
+                        resolve(hash);
+                        return;
                     }
-                    resolve(hash);
+                    const slice = file.slice(offset, offset + CHUNK_SIZE);
+                    reader.readAsArrayBuffer(slice);
+                }
+
+                reader.onload = e => {
+                    const wordArr = CryptoJS.lib.WordArray.create(e.target.result);
+                    hashObj.update(wordArr);
+                    offset += CHUNK_SIZE;
+                    readNext();
                 };
+                readNext();
             });
         }
 
-        // 渲染文件哈希列表
         function renderHashList() {
             hashTableBody.innerHTML = '';
             fileList.forEach((item, index) => {
@@ -157,7 +155,6 @@
             });
         }
 
-        // 两两对比并渲染结果
         function renderCompareResult() {
             compareTableBody.innerHTML = '';
             const len = fileList.length;
@@ -185,72 +182,63 @@
             }
         }
 
-        // 核心：根据原始文件列表，重新计算全部哈希
+        // 并行批量计算所有文件哈希
         async function recalcAllHash() {
             if (rawFileList.length === 0) {
                 status.textContent = '暂无文件可计算！';
                 status.className = 'mb-4 text-red-600 h-6';
                 return;
             }
-            status.textContent = '正在重新计算哈希，请稍候...';
+            status.textContent = '正在计算哈希，请稍候...';
             status.className = 'mb-4 text-orange-600 h-6';
 
             const hashType = document.querySelector('input[name="hashType"]:checked').value;
             fileList = [];
 
-            for (const file of rawFileList) {
-                const hash = await getFileHash(file, hashType);
-                fileList.push({
+            // 并行发起所有计算任务
+            const tasks = rawFileList.map(async file => {
+                const hash = await getFileHashByChunk(file, hashType);
+                return {
                     name: file.name,
                     size: formatFileSize(file.size),
-                    hash: hash
-                });
-            }
+                    hash
+                };
+            });
+
+            const results = await Promise.all(tasks);
+            fileList = results;
 
             renderHashList();
             renderCompareResult();
-            status.textContent = `算法切换完成，当前总计 ${rawFileList.length} 个文件`;
+            status.textContent = `计算完成，共 ${rawFileList.length} 个文件`;
             status.className = 'mb-4 text-green-600 h-6';
         }
 
-        // 处理新增文件：追加原始文件 + 计算哈希
         async function handleNewFiles(files) {
             if (files.length === 0) return;
-            // 保存原始 File 对象，用于后续重算
-            for (const f of files) {
-                rawFileList.push(f);
-            }
-            // 统一重算全部
+            rawFileList.push(...files);
             await recalcAllHash();
             fileInput.value = '';
         }
 
-        // 点击上传区域触发文件选择
+        // 拖拽&选择事件
         dropArea.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', e => handleNewFiles(e.target.files));
 
-        // 选择文件
-        fileInput.addEventListener('change', (e) => {
-            handleNewFiles(e.target.files);
-        });
-
-        // 拖拽相关事件
-        dropArea.addEventListener('dragover', (e) => {
+        dropArea.addEventListener('dragover', e => {
             e.preventDefault();
             dropArea.classList.add('drag-over');
         });
         dropArea.addEventListener('dragleave', () => {
             dropArea.classList.remove('drag-over');
         });
-        dropArea.addEventListener('drop', (e) => {
+        dropArea.addEventListener('drop', e => {
             e.preventDefault();
             dropArea.classList.remove('drag-over');
             handleNewFiles(e.dataTransfer.files);
         });
 
-        // 计算按钮：触发全局重算（切换算法后点这里生效）
         calcBtn.addEventListener('click', recalcAllHash);
-
-        // 清空按钮：彻底重置
         clearBtn.addEventListener('click', () => {
             fileList = [];
             rawFileList = [];
