@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件批量 Hash 两两对比工具</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入CryptoJS 计算哈希 -->
+    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
+    <style>
+        /* 拖拽高亮样式 */
+        .drag-over {
+            border-color: #3b82f6 !important;
+            background-color: #eff6ff !important;
+        }
+        /* 表格滚动 */
+        .table-wrap {
+            max-height: 400px;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 md:p-8">
+    <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8">
+        <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-6">文件批量 Hash 两两对比工具</h1>
+
+        <!-- 哈希算法选择 -->
+        <div class="mb-6">
+            <label class="block text-gray-700 font-medium mb-2">选择哈希算法：</label>
+            <div class="flex gap-4 flex-wrap">
+                <label class="inline-flex items-center">
+                    <input type="radio" name="hashType" value="MD5" checked class="mr-2"> MD5
+                </label>
+                <label class="inline-flex items-center">
+                    <input type="radio" name="hashType" value="SHA1" class="mr-2"> SHA-1
+                </label>
+                <label class="inline-flex items-center">
+                    <input type="radio" name="hashType" value="SHA256" class="mr-2"> SHA-256
+                </label>
+            </div>
+            <p class="text-sm text-gray-500 mt-2">提示：多次上传文件会<strong>追加</strong>到列表，不会覆盖原有文件</p>
+        </div>
+
+        <!-- 文件上传区域 -->
+        <div id="dropArea" class="border-2 border-dashed border-gray-300 rounded-lg p-10 text-center cursor-pointer mb-6 transition-all">
+            <p class="text-gray-500 text-lg">点击选择文件 或 拖拽文件到此处（支持多文件、多次追加）</p>
+            <input type="file" id="fileInput" multiple class="hidden">
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="flex gap-4 mb-6 flex-wrap">
+            <button id="calcBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors">
+                计算Hash并两两对比
+            </button>
+            <button id="clearBtn" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors">
+                清空所有文件与结果
+            </button>
+        </div>
+
+        <!-- 状态提示 -->
+        <div id="status" class="mb-4 text-gray-600 h-6"></div>
+
+        <!-- 文件Hash列表 -->
+        <h2 class="text-xl font-semibold text-gray-700 mb-3">文件 Hash 列表</h2>
+        <div class="table-wrap mb-8 border rounded-lg">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-200 sticky top-0">
+                    <tr>
+                        <th class="px-4 py-2 text-left w-16">序号</th>
+                        <th class="px-4 py-2 text-left">文件名</th>
+                        <th class="px-4 py-2 text-left">文件大小</th>
+                        <th class="px-4 py-2 text-left">Hash 值</th>
+                    </tr>
+                </thead>
+                <tbody id="hashTableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- 两两对比结果 -->
+        <h2 class="text-xl font-semibold text-gray-700 mb-3">两两文件对比结果</h2>
+        <div class="table-wrap border rounded-lg">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-200 sticky top-0">
+                    <tr>
+                        <th class="px-4 py-2 text-left">对比文件 A</th>
+                        <th class="px-4 py-2 text-left">对比文件 B</th>
+                        <th class="px-4 py-2 text-left">Hash 一致性</th>
+                    </tr>
+                </thead>
+                <tbody id="compareTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('fileInput');
+        const calcBtn = document.getElementById('calcBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const status = document.getElementById('status');
+        const hashTableBody = document.getElementById('hashTableBody');
+        const compareTableBody = document.getElementById('compareTableBody');
+        // 全局文件列表：用于累加，不再每次清空
+        let fileList = [];
+
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+        }
+
+        // 计算文件哈希
+        async function getFileHash(file, type) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsArrayBuffer(file);
+                reader.onload = function (e) {
+                    const wordArray = CryptoJS.lib.WordArray.create(e.target.result);
+                    let hash;
+                    switch (type) {
+                        case 'MD5':
+                            hash = CryptoJS.MD5(wordArray).toString();
+                            break;
+                        case 'SHA1':
+                            hash = CryptoJS.SHA1(wordArray).toString();
+                            break;
+                        case 'SHA256':
+                            hash = CryptoJS.SHA256(wordArray).toString();
+                            break;
+                        default:
+                            hash = CryptoJS.MD5(wordArray).toString();
+                    }
+                    resolve(hash);
+                };
+            });
+        }
+
+        // 渲染文件哈希列表
+        function renderHashList() {
+            hashTableBody.innerHTML = '';
+            fileList.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                tr.innerHTML = `
+                    <td class="px-4 py-2">${index + 1}</td>
+                    <td class="px-4 py-2">${item.name}</td>
+                    <td class="px-4 py-2">${item.size}</td>
+                    <td class="px-4 py-2 font-mono text-blue-600 break-all">${item.hash}</td>
+                `;
+                hashTableBody.appendChild(tr);
+            });
+        }
+
+        // 两两对比并渲染结果
+        function renderCompareResult() {
+            compareTableBody.innerHTML = '';
+            const len = fileList.length;
+            // 双重循环实现两两组合 (i < j 避免重复对比)
+            for (let i = 0; i < len; i++) {
+                for (let j = i + 1; j < len; j++) {
+                    const fileA = fileList[i];
+                    const fileB = fileList[j];
+                    const isSame = fileA.hash === fileB.hash;
+                    const tr = document.createElement('tr');
+                    tr.className = (i + j) % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                    tr.innerHTML = `
+                        <td class="px-4 py-2">${fileA.name}</td>
+                        <td class="px-4 py-2">${fileB.name}</td>
+                        <td class="px-4 py-2 ${isSame ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}">
+                            ${isSame ? '✅ 哈希一致（文件相同）' : '❌ 哈希不同（文件不同）'}
+                        </td>
+                    `;
+                    compareTableBody.appendChild(tr);
+                }
+            }
+            if (len < 2) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="3" class="px-4 py-4 text-center text-gray-400">请至少上传2个文件进行对比</td>';
+                compareTableBody.appendChild(tr);
+            }
+        }
+
+        // 处理新增文件：追加到列表，不覆盖旧数据
+        async function handleNewFiles(files) {
+            if (files.length === 0) return;
+            status.textContent = '正在计算哈希，请稍候...';
+            status.className = 'mb-4 text-orange-600 h-6';
+
+            // 获取选中的哈希算法
+            const hashType = document.querySelector('input[name="hashType"]:checked').value;
+            let addCount = 0;
+
+            // 遍历新文件，追加到全局列表
+            for (const file of files) {
+                const hash = await getFileHash(file, hashType);
+                fileList.push({
+                    name: file.name,
+                    size: formatFileSize(file.size),
+                    hash: hash
+                });
+                addCount++;
+            }
+
+            // 重新渲染列表和对比结果
+            renderHashList();
+            renderCompareResult();
+            status.textContent = `成功追加 ${addCount} 个文件，当前总计 ${fileList.length} 个文件`;
+            status.className = 'mb-4 text-green-600 h-6';
+
+            // 清空 fileInput，允许下次继续选择同批文件
+            fileInput.value = '';
+        }
+
+        // 点击上传区域触发文件选择
+        dropArea.addEventListener('click', () => fileInput.click());
+
+        // 选择文件
+        fileInput.addEventListener('change', (e) => {
+            handleNewFiles(e.target.files);
+        });
+
+        // 拖拽相关事件
+        dropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropArea.classList.add('drag-over');
+        });
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.classList.remove('drag-over');
+        });
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropArea.classList.remove('drag-over');
+            handleNewFiles(e.dataTransfer.files);
+        });
+
+        // 计算按钮（重新计算/刷新对比）
+        calcBtn.addEventListener('click', () => {
+            if (fileList.length === 0) {
+                status.textContent = '请先上传文件！';
+                status.className = 'mb-4 text-red-600 h-6';
+                return;
+            }
+            // 重新渲染（切换哈希算法后可刷新）
+            handleNewFiles([]);
+            renderHashList();
+            renderCompareResult();
+            status.textContent = `已刷新，当前总计 ${fileList.length} 个文件`;
+            status.className = 'mb-4 text-green-600 h-6';
+        });
+
+        // 清空按钮：彻底重置所有数据
+        clearBtn.addEventListener('click', () => {
+            fileList = [];
+            fileInput.value = '';
+            hashTableBody.innerHTML = '';
+            compareTableBody.innerHTML = '';
+            status.textContent = '已清空所有文件及对比结果';
+            status.className = 'mb-4 text-gray-600 h-6';
+        });
+    </script>
+</body>
+</html>
