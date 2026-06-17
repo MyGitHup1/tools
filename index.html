@@ -581,6 +581,13 @@
         .stat-dot { width:6px; height:6px; border-radius:50%; background:var(--hover-arrow-color); box-shadow:0 0 6px var(--hover-arrow-color); animation:statBlink 2s ease-in-out infinite; }
         @keyframes statBlink { 0%,100% { opacity:0.3; } 50% { opacity:1; } }
 
+        /* Last-update badge */
+        .update-badge { display:flex; align-items:center; gap:0.35rem; padding:0.35rem 0.9rem; background:var(--stat-bg); border-radius:999px; border:1px solid var(--stat-border); font-size:0.75rem; color:var(--text-dim); white-space:nowrap; transition:all 0.4s; cursor:default; }
+        .update-badge .update-dot { width:6px; height:6px; border-radius:50%; background:var(--hover-arrow-color); animation:updatePulse 1.6s ease-in-out infinite; flex-shrink:0; }
+        @keyframes updatePulse { 0%,100% { opacity:0.5; box-shadow:0 0 4px var(--hover-arrow-color); } 50% { opacity:1; box-shadow:0 0 10px var(--hover-arrow-color); } }
+        .update-badge .dot-fresh { background:#3fb950; box-shadow:0 0 8px #3fb950; }
+        .update-badge .dot-old   { background:var(--text-dim); box-shadow:none; animation:none; }
+
         /* Footer */
         .site-footer { position:relative; z-index:2; text-align:center; padding:2rem 1rem; font-size:0.8rem; border-top:1px solid var(--footer-border); color:var(--footer-text); transition:all 0.6s; }
 
@@ -613,10 +620,14 @@
         <h1 class="hero-title">My Tools</h1>
         <p class="hero-subtitle">高效在线工具箱 · 所有工具浏览器本地运行 · 数据不外传</p>
         <div class="stats-bar">
-            <span class="stat-item"><span class="stat-dot"></span> 6 个工具</span>
+            <span class="stat-item"><span class="stat-dot"></span> <span id="toolCount">7</span> 个工具</span>
             <span class="stat-item">🔒 本地运行</span>
             <span class="stat-item">⚡ 即开即用</span>
             <span class="stat-item">🎨 <span id="themeCount">20</span> 款主题</span>
+            <span class="update-badge" id="updateBadge">
+                <span class="update-dot dot-fresh" id="updateDot"></span>
+                <span id="updateText">更新于...</span>
+            </span>
         </div>
     </header>
 
@@ -789,6 +800,42 @@
                     document.getElementById('themeToggleIcon').textContent = THEMES.find(t=>t.id===saved).icon;
                 }
             } catch(e) {}
+        }
+
+        // ==================== Last Update Badge ====================
+        // ⚠️ 每次推送前更新这个时间戳！
+        const LAST_UPDATE = new Date('2026-06-17T18:55:00+08:00');
+
+        function renderUpdateBadge() {
+            const badge = document.getElementById('updateBadge');
+            const dot   = document.getElementById('updateDot');
+            const text  = document.getElementById('updateText');
+            if (!badge || !dot || !text) return;
+
+            const now  = new Date();
+            const diff = now - LAST_UPDATE; // ms
+            const mins = Math.floor(diff / 60000);
+            const hrs  = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            let label;
+            if (mins < 1)  label = '刚刚更新';
+            else if (mins < 60) label = mins + ' 分钟前';
+            else if (hrs  < 24) label = hrs  + ' 小时前';
+            else if (days < 7)  label = days + ' 天前';
+            else label = LAST_UPDATE.getMonth()+1 + '月' + LAST_UPDATE.getDate() + '日';
+
+            text.textContent = '更新于 ' + label;
+            text.title = '推送时间：' + LAST_UPDATE.toLocaleString('zh-CN');
+
+            // Green dot if within 24h
+            if (diff < 86400000) {
+                dot.className = 'update-dot dot-fresh';
+                badge.style.borderColor = 'rgba(63,185,80,0.25)';
+            } else {
+                dot.className = 'update-dot dot-old';
+                badge.style.borderColor = '';
+            }
         }
 
         // ==================== Theme Panel ====================
@@ -1172,6 +1219,7 @@
         renderTools();
         resetParticles();
         initCardTilt();
+        renderUpdateBadge();
     </script>
 </body>
 </html>
