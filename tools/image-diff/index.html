@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图片差异对比</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --border-hover: #58a6ff;
+    --text: #c9d1d9;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --accent2: #f78166;
+    --cursor-a: #58a6ff;
+    --cursor-b: #f78166;
+    --diff-color: #ff6e40;
+    --match-color: #3fb950;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    padding: 24px 20px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin-bottom: 28px;
+  }
+
+  /* ===== Controls bar ===== */
+  .controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .btn {
+    padding: 8px 18px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #0d1117; font-weight: 600; }
+  .btn.primary:hover { background: #79b8ff; }
+
+  .slider-group {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--text-dim); font-size: 0.82rem;
+  }
+  .slider-group input[type=range] { width: 100px; accent-color: var(--accent); cursor: pointer; }
+
+  .toggle-wrap {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.82rem; color: var(--text-dim); cursor: pointer;
+  }
+  .toggle-wrap input { accent-color: var(--accent); cursor: pointer; width: 16px; height: 16px; }
+
+  /* ===== Layout ===== */
+  .workspace {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  @media(max-width: 700px) { .workspace { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel-header {
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+    font-weight: 600;
+    gap: 10px;
+  }
+  .panel-header .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    display: inline-block; margin-right: 6px; flex-shrink: 0;
+  }
+  .panel-a .dot { background: var(--cursor-a); box-shadow: 0 0 8px var(--cursor-a); }
+  .panel-b .dot { background: var(--cursor-b); box-shadow: 0 0 8px var(--cursor-b); }
+
+  .panel-header .file-name {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+  }
+
+  .upload-btn {
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .2s;
+    flex-shrink: 0;
+  }
+  .upload-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ===== Canvas wrapper ===== */
+  .canvas-wrap {
+    position: relative;
+    flex: 1;
+    min-height: 300px;
+    background: repeating-conic-gradient(#1e2430 0% 25%, #232b38 0% 50%) 0 0 / 20px 20px;
+    overflow: hidden;
+    cursor: crosshair;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .canvas-wrap canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 480px;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* Drop overlay */
+  .drop-hint {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--text-dim);
+    pointer-events: none;
+    transition: opacity .2s;
+  }
+  .drop-hint svg { opacity: .35; }
+  .drop-hint p { font-size: 0.9rem; }
+  .drop-hint .sub { font-size: 0.75rem; opacity: .6; }
+
+  .canvas-wrap.has-image .drop-hint { opacity: 0; }
+  .canvas-wrap.drag-over { border: 2px dashed var(--accent); }
+
+  /* ===== Sync Cursor overlay (rendered ON canvas via absolutely-positioned div) ===== */
+  .sync-cursor {
+    position: absolute;
+    pointer-events: none;
+    z-index: 10;
+    transform: translate(-50%, -50%);
+    display: none;
+  }
+  .sync-cursor .crosshair-h {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 28px; height: 1px;
+    transform: translate(-50%, -50%);
+  }
+  .sync-cursor .crosshair-v {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 1px; height: 28px;
+    transform: translate(-50%, -50%);
+  }
+  .sync-cursor .dot {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .sync-cursor .ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: ring-pulse 1.2s ease-out infinite;
+  }
+  @keyframes ring-pulse {
+    0%   { width:20px; height:20px; opacity:.9; }
+    100% { width:44px; height:44px; opacity:0; }
+  }
+
+  /* Panel A = blue cursor, Panel B = orange cursor */
+  .panel-a .sync-cursor .crosshair-h,
+  .panel-a .sync-cursor .crosshair-v { background: var(--cursor-a); }
+  .panel-a .sync-cursor .dot         { background: var(--cursor-a); box-shadow: 0 0 6px var(--cursor-a); }
+  .panel-a .sync-cursor .ring        { border: 1.5px solid var(--cursor-a); }
+
+  .panel-b .sync-cursor .crosshair-h,
+  .panel-b .sync-cursor .crosshair-v { background: var(--cursor-b); }
+  .panel-b .sync-cursor .dot         { background: var(--cursor-b); box-shadow: 0 0 6px var(--cursor-b); }
+  .panel-b .sync-cursor .ring        { border: 1.5px solid var(--cursor-b); }
+
+  /* ===== Diff canvas ===== */
+  #diffWrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .diff-header {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .diff-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+    background: repeating-conic-gradient(#1e2430 0% 25%, #232b38 0% 50%) 0 0 / 20px 20px;
+    min-height: 200px;
+  }
+  #diffCanvas { max-width: 100%; display: block; border-radius: 6px; }
+  .diff-hint { color: var(--text-dim); font-size: 0.85rem; text-align: center; padding: 30px; }
+
+  /* ===== Stats bar ===== */
+  .stats {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.82rem;
+  }
+  .stat-item { display: flex; align-items: center; gap: 6px; }
+  .stat-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .stat-label { color: var(--text-dim); }
+  .stat-val { font-weight: 600; }
+
+  /* ===== Pixel loupe (magnifier) ===== */
+  #loupe {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    display: none;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    box-shadow: 0 4px 20px rgba(0,0,0,.6);
+    overflow: hidden;
+    width: 120px; height: 120px;
+  }
+
+  /* ===== Scrollbar ===== */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  input[type=file] { display: none; }
+</style>
+</head>
+<body>
+
+<h1>🔍 图片差异对比</h1>
+<p class="subtitle">上传两张同尺寸图片 · 鼠标悬停任意图自动在另一张同步光标 · 差异像素高亮</p>
+
+<!-- Controls -->
+<div class="controls">
+  <button class="btn primary" id="btnCompare" disabled>▶ 计算差异</button>
+
+  <label class="toggle-wrap">
+    <input type="checkbox" id="showLoupe"> 放大镜
+  </label>
+
+  <label class="toggle-wrap">
+    <input type="checkbox" id="showDiffOverlay" checked> 差异叠加
+  </label>
+
+  <div class="slider-group">
+    <span>灵敏度</span>
+    <input type="range" id="threshold" min="1" max="80" value="15">
+    <span id="thresholdVal">15</span>
+  </div>
+
+  <div class="slider-group">
+    <span>叠加透明度</span>
+    <input type="range" id="overlayOpacity" min="10" max="100" value="60">
+    <span id="opacityVal">60%</span>
+  </div>
+
+  <button class="btn" id="btnSaveDiff">⬇ 保存差异图</button>
+  <a href="../../index.html" class="btn">← 返回首页</a>
+</div>
+
+<!-- Stats -->
+<div class="stats" id="statsBar" style="display:none">
+  <div class="stat-item">
+    <div class="stat-dot" style="background:#3fb950"></div>
+    <span class="stat-label">相同像素：</span>
+    <span class="stat-val" id="statMatch">-</span>
+  </div>
+  <div class="stat-item">
+    <div class="stat-dot" style="background:#f78166"></div>
+    <span class="stat-label">差异像素：</span>
+    <span class="stat-val" id="statDiff">-</span>
+  </div>
+  <div class="stat-item">
+    <div class="stat-dot" style="background:#d29922"></div>
+    <span class="stat-label">差异率：</span>
+    <span class="stat-val" id="statPct">-</span>
+  </div>
+  <div class="stat-item">
+    <div class="stat-dot" style="background:#8b949e"></div>
+    <span class="stat-label">图像尺寸：</span>
+    <span class="stat-val" id="statSize">-</span>
+  </div>
+</div>
+
+<!-- Dual panels -->
+<div class="workspace">
+  <!-- Panel A -->
+  <div class="panel panel-a" id="panelA">
+    <div class="panel-header">
+      <div style="display:flex;align-items:center;">
+        <span class="dot"></span>图片 A
+      </div>
+      <span class="file-name" id="nameA">未上传</span>
+      <label class="upload-btn" for="fileA">选择文件</label>
+      <input type="file" id="fileA" accept="image/*">
+    </div>
+    <div class="canvas-wrap" id="wrapA">
+      <canvas id="canvasA"></canvas>
+      <div class="drop-hint">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <p>点击右上角选择 / 拖拽图片到此</p>
+        <p class="sub">PNG · JPG · WEBP · GIF 等</p>
+      </div>
+      <!-- Sync cursor shown here (reflects where mouse is on panel B) -->
+      <div class="sync-cursor" id="cursorOnA">
+        <div class="crosshair-h"></div>
+        <div class="crosshair-v"></div>
+        <div class="dot"></div>
+        <div class="ring"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel B -->
+  <div class="panel panel-b" id="panelB">
+    <div class="panel-header">
+      <div style="display:flex;align-items:center;">
+        <span class="dot"></span>图片 B
+      </div>
+      <span class="file-name" id="nameB">未上传</span>
+      <label class="upload-btn" for="fileB">选择文件</label>
+      <input type="file" id="fileB" accept="image/*">
+    </div>
+    <div class="canvas-wrap" id="wrapB">
+      <canvas id="canvasB"></canvas>
+      <div class="drop-hint">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <p>点击右上角选择 / 拖拽图片到此</p>
+        <p class="sub">PNG · JPG · WEBP · GIF 等</p>
+      </div>
+      <!-- Sync cursor shown here (reflects where mouse is on panel A) -->
+      <div class="sync-cursor" id="cursorOnB">
+        <div class="crosshair-h"></div>
+        <div class="crosshair-v"></div>
+        <div class="dot"></div>
+        <div class="ring"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Diff result -->
+<div id="diffWrap">
+  <div class="diff-header">
+    🎯 差异高亮图
+    <span style="font-size:.78rem;color:var(--text-dim);font-weight:400">红色区域为像素差异点</span>
+  </div>
+  <div class="diff-body">
+    <div class="diff-hint" id="diffHint">上传两张图片后点击「计算差异」</div>
+    <canvas id="diffCanvas" style="display:none"></canvas>
+  </div>
+</div>
+
+<!-- Loupe -->
+<div id="loupe"><canvas id="loupeCanvas" width="120" height="120"></canvas></div>
+
+<script>
+// ===================== State =====================
+const state = {
+  imgA: null, imgB: null,
+  diffData: null,
+  threshold: 15,
+  overlayOpacity: 0.6,
+  showLoupe: false,
+  showDiffOverlay: true
+};
+
+// ===================== Elements =====================
+const canvasA  = document.getElementById('canvasA');
+const canvasB  = document.getElementById('canvasB');
+const ctxA     = canvasA.getContext('2d');
+const ctxB     = canvasB.getContext('2d');
+const wrapA    = document.getElementById('wrapA');
+const wrapB    = document.getElementById('wrapB');
+const cursorOnA = document.getElementById('cursorOnA'); // mirror of B mouse
+const cursorOnB = document.getElementById('cursorOnB'); // mirror of A mouse
+const diffCanvas = document.getElementById('diffCanvas');
+const diffCtx  = diffCanvas.getContext('2d');
+const loupeEl  = document.getElementById('loupe');
+const loupeCanvas = document.getElementById('loupeCanvas');
+const loupeCtx = loupeCanvas.getContext('2d');
+
+// ===================== Image loading =====================
+function loadImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+function drawImageFit(canvas, ctx, img) {
+  // Draw image centered, scaled to fit canvas display area
+  // We'll use natural size on the offscreen buffer, display via CSS max
+  canvas.width  = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  ctx.drawImage(img, 0, 0);
+}
+
+async function handleFileA(file) {
+  const img = await loadImage(file);
+  state.imgA = img;
+  document.getElementById('nameA').textContent = file.name;
+  drawImageFit(canvasA, ctxA, img);
+  wrapA.classList.add('has-image');
+  tryEnableCompare();
+}
+
+async function handleFileB(file) {
+  const img = await loadImage(file);
+  state.imgB = img;
+  document.getElementById('nameB').textContent = file.name;
+  drawImageFit(canvasB, ctxB, img);
+  wrapB.classList.add('has-image');
+  tryEnableCompare();
+}
+
+function tryEnableCompare() {
+  document.getElementById('btnCompare').disabled = !(state.imgA && state.imgB);
+}
+
+document.getElementById('fileA').addEventListener('change', e => {
+  if (e.target.files[0]) handleFileA(e.target.files[0]);
+});
+document.getElementById('fileB').addEventListener('change', e => {
+  if (e.target.files[0]) handleFileB(e.target.files[0]);
+});
+
+// Drag & drop for both panels
+function setupDrop(wrap, handler) {
+  wrap.addEventListener('dragover', e => { e.preventDefault(); wrap.classList.add('drag-over'); });
+  wrap.addEventListener('dragleave', () => wrap.classList.remove('drag-over'));
+  wrap.addEventListener('drop', e => {
+    e.preventDefault();
+    wrap.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) handler(file);
+  });
+}
+setupDrop(wrapA, handleFileA);
+setupDrop(wrapB, handleFileB);
+
+// ===================== Diff computation =====================
+function computeDiff() {
+  const a = state.imgA, b = state.imgB;
+  if (!a || !b) return;
+
+  // Warn if sizes differ
+  if (a.naturalWidth !== b.naturalWidth || a.naturalHeight !== b.naturalHeight) {
+    const proceed = confirm(
+      `图片尺寸不一致！\n图片A: ${a.naturalWidth}×${a.naturalHeight}\n图片B: ${b.naturalWidth}×${b.naturalHeight}\n\n将以较小尺寸对比，继续？`
+    );
+    if (!proceed) return;
+  }
+
+  const W = Math.min(a.naturalWidth,  b.naturalWidth);
+  const H = Math.min(a.naturalHeight, b.naturalHeight);
+
+  // Offscreen canvases to read pixel data
+  const offA = document.createElement('canvas');
+  offA.width = W; offA.height = H;
+  offA.getContext('2d').drawImage(a, 0, 0, W, H);
+  const dataA = offA.getContext('2d').getImageData(0, 0, W, H);
+
+  const offB = document.createElement('canvas');
+  offB.width = W; offB.height = H;
+  offB.getContext('2d').drawImage(b, 0, 0, W, H);
+  const dataB = offB.getContext('2d').getImageData(0, 0, W, H);
+
+  // Build diff mask
+  const diffMask = new Uint8ClampedArray(W * H); // 0=same, 1=diff
+  const t = state.threshold;
+  let diffCount = 0;
+
+  for (let i = 0; i < W * H; i++) {
+    const o = i * 4;
+    const dr = Math.abs(dataA.data[o]   - dataB.data[o]);
+    const dg = Math.abs(dataA.data[o+1] - dataB.data[o+1]);
+    const db = Math.abs(dataA.data[o+2] - dataB.data[o+2]);
+    const da = Math.abs(dataA.data[o+3] - dataB.data[o+3]);
+    if (dr + dg + db + da > t * 4) {
+      diffMask[i] = 1;
+      diffCount++;
+    }
+  }
+
+  state.diffData = { diffMask, W, H, diffCount };
+
+  // Render diff image
+  renderDiff();
+
+  // Stats
+  const total = W * H;
+  document.getElementById('statMatch').textContent = (total - diffCount).toLocaleString();
+  document.getElementById('statDiff').textContent  = diffCount.toLocaleString();
+  document.getElementById('statPct').textContent   = ((diffCount / total) * 100).toFixed(2) + '%';
+  document.getElementById('statSize').textContent  = `${W} × ${H} px`;
+  document.getElementById('statsBar').style.display = 'flex';
+
+  // Also redraw main canvases with diff overlay if enabled
+  redrawCanvases();
+}
+
+function renderDiff() {
+  if (!state.diffData) return;
+  const { diffMask, W, H } = state.diffData;
+
+  diffCanvas.width  = W;
+  diffCanvas.height = H;
+  diffCtx.drawImage(state.imgA, 0, 0, W, H);
+
+  // Highlight diff pixels
+  const id = diffCtx.getImageData(0, 0, W, H);
+  for (let i = 0; i < W * H; i++) {
+    if (diffMask[i]) {
+      const o = i * 4;
+      id.data[o]   = 255; // R
+      id.data[o+1] = 80;  // G
+      id.data[o+2] = 50;  // B
+      id.data[o+3] = 255;
+    }
+  }
+  diffCtx.putImageData(id, 0, 0);
+  diffCanvas.style.display = 'block';
+  document.getElementById('diffHint').style.display = 'none';
+}
+
+function redrawCanvases() {
+  if (!state.imgA || !state.imgB) return;
+  const { imgA, imgB } = state;
+  drawImageFit(canvasA, ctxA, imgA);
+  drawImageFit(canvasB, ctxB, imgB);
+
+  if (state.showDiffOverlay && state.diffData) {
+    overlayDiff(ctxA, state.diffData, state.overlayOpacity);
+    overlayDiff(ctxB, state.diffData, state.overlayOpacity);
+  }
+}
+
+function overlayDiff(ctx, { diffMask, W, H }, opacity) {
+  const id = ctx.getImageData(0, 0, W, H);
+  for (let i = 0; i < W * H; i++) {
+    if (diffMask[i]) {
+      const o = i * 4;
+      // Blend red onto existing pixel
+      id.data[o]   = Math.round(id.data[o]   * (1 - opacity) + 255 * opacity);
+      id.data[o+1] = Math.round(id.data[o+1] * (1 - opacity) + 80  * opacity);
+      id.data[o+2] = Math.round(id.data[o+2] * (1 - opacity) + 50  * opacity);
+    }
+  }
+  ctx.putImageData(id, 0, 0);
+}
+
+document.getElementById('btnCompare').addEventListener('click', computeDiff);
+
+// ===================== Save diff =====================
+document.getElementById('btnSaveDiff').addEventListener('click', () => {
+  if (!state.diffData) { alert('请先计算差异'); return; }
+  const link = document.createElement('a');
+  link.download = 'diff-result.png';
+  link.href = diffCanvas.toDataURL();
+  link.click();
+});
+
+// ===================== Controls =====================
+const thresholdInput = document.getElementById('threshold');
+const thresholdVal   = document.getElementById('thresholdVal');
+thresholdInput.addEventListener('input', () => {
+  state.threshold = +thresholdInput.value;
+  thresholdVal.textContent = thresholdInput.value;
+});
+
+const overlayOpacityInput = document.getElementById('overlayOpacity');
+const opacityVal = document.getElementById('opacityVal');
+overlayOpacityInput.addEventListener('input', () => {
+  state.overlayOpacity = +overlayOpacityInput.value / 100;
+  opacityVal.textContent = overlayOpacityInput.value + '%';
+  redrawCanvases();
+});
+
+document.getElementById('showDiffOverlay').addEventListener('change', e => {
+  state.showDiffOverlay = e.target.checked;
+  redrawCanvases();
+});
+
+document.getElementById('showLoupe').addEventListener('change', e => {
+  state.showLoupe = e.target.checked;
+  if (!e.target.checked) loupeEl.style.display = 'none';
+});
+
+// ===================== Sync Cursor + Loupe =====================
+/**
+ * Given a mouse event on a canvas-wrap, compute the *image-space* coordinate
+ * (relative to bottom-left of image, as specified).
+ * The canvas may be displayed smaller than its natural size (CSS max-width etc.).
+ */
+function getImageCoord(wrap, canvas, e) {
+  const wrapRect = wrap.getBoundingClientRect();
+  const canvasRect = canvas.getBoundingClientRect();
+
+  // Mouse relative to wrap
+  const mx = e.clientX - wrapRect.left;
+  const my = e.clientY - wrapRect.top;
+
+  // Mouse relative to displayed canvas
+  const cx = e.clientX - canvasRect.left;
+  const cy = e.clientY - canvasRect.top;
+
+  // Scale factor: canvas natural size / displayed size
+  const scaleX = canvas.width / canvasRect.width;
+  const scaleY = canvas.height / canvasRect.height;
+
+  // Image pixel coord (0,0 = top-left of image)
+  const imgX = cx * scaleX;
+  const imgY = cy * scaleY;
+
+  return { mx, my, imgX, imgY, wrapRect, canvasRect, scaleX, scaleY };
+}
+
+/**
+ * Given image-space pixel coord, convert back to wrap-space px for cursor placement.
+ * targetCanvas is the OTHER panel's canvas.
+ */
+function imgCoordToWrapSpace(targetCanvas, targetWrap, imgX, imgY) {
+  const canvasRect = targetCanvas.getBoundingClientRect();
+  const wrapRect   = targetWrap.getBoundingClientRect();
+
+  const scaleX = canvasRect.width  / targetCanvas.width;
+  const scaleY = canvasRect.height / targetCanvas.height;
+
+  // Position within canvas display
+  const dispX = imgX * scaleX;
+  const dispY = imgY * scaleY;
+
+  // Position within wrap
+  const wrapX = (canvasRect.left - wrapRect.left) + dispX;
+  const wrapY = (canvasRect.top  - wrapRect.top)  + dispY;
+
+  return { wrapX, wrapY };
+}
+
+function showSyncCursor(cursorEl, x, y) {
+  cursorEl.style.left   = x + 'px';
+  cursorEl.style.top    = y + 'px';
+  cursorEl.style.display = 'block';
+}
+
+function hideSyncCursor(cursorEl) {
+  cursorEl.style.display = 'none';
+}
+
+// Draw loupe at cursor position on given canvas
+function drawLoupe(sourceCanvas, imgX, imgY, clientX, clientY) {
+  if (!state.showLoupe) return;
+  const zoom = 4;
+  const half = 15; // pixels to sample each side
+  loupeCtx.clearRect(0, 0, 120, 120);
+  loupeCtx.drawImage(
+    sourceCanvas,
+    imgX - half, imgY - half, half * 2, half * 2,
+    0, 0, 120, 120
+  );
+  // crosshair in loupe
+  loupeCtx.strokeStyle = 'rgba(255,255,255,0.7)';
+  loupeCtx.lineWidth = 1;
+  loupeCtx.beginPath();
+  loupeCtx.moveTo(60, 0); loupeCtx.lineTo(60, 120);
+  loupeCtx.moveTo(0, 60); loupeCtx.lineTo(120, 60);
+  loupeCtx.stroke();
+
+  loupeEl.style.left    = (clientX + 20) + 'px';
+  loupeEl.style.top     = (clientY - 60) + 'px';
+  loupeEl.style.display = 'block';
+}
+
+// Panel A mouse events → sync cursor on Panel B
+wrapA.addEventListener('mousemove', e => {
+  if (!state.imgA) return;
+  const { mx, my, imgX, imgY } = getImageCoord(wrapA, canvasA, e);
+
+  // Show sync cursor on panel B at same image coord
+  if (state.imgB) {
+    const { wrapX, wrapY } = imgCoordToWrapSpace(canvasB, wrapB, imgX, imgY);
+    // Only show if within bounds
+    const inBounds = wrapX >= 0 && wrapY >= 0 &&
+                     wrapX <= wrapB.offsetWidth && wrapY <= wrapB.offsetHeight;
+    if (inBounds) showSyncCursor(cursorOnB, wrapX, wrapY);
+    else hideSyncCursor(cursorOnB);
+  }
+  hideSyncCursor(cursorOnA);
+
+  drawLoupe(canvasA, imgX, imgY, e.clientX, e.clientY);
+});
+
+wrapA.addEventListener('mouseleave', () => {
+  hideSyncCursor(cursorOnB);
+  loupeEl.style.display = 'none';
+});
+
+// Panel B mouse events → sync cursor on Panel A
+wrapB.addEventListener('mousemove', e => {
+  if (!state.imgB) return;
+  const { imgX, imgY } = getImageCoord(wrapB, canvasB, e);
+
+  if (state.imgA) {
+    const { wrapX, wrapY } = imgCoordToWrapSpace(canvasA, wrapA, imgX, imgY);
+    const inBounds = wrapX >= 0 && wrapY >= 0 &&
+                     wrapX <= wrapA.offsetWidth && wrapY <= wrapA.offsetHeight;
+    if (inBounds) showSyncCursor(cursorOnA, wrapX, wrapY);
+    else hideSyncCursor(cursorOnA);
+  }
+  hideSyncCursor(cursorOnB);
+
+  drawLoupe(canvasB, imgX, imgY, e.clientX, e.clientY);
+});
+
+wrapB.addEventListener('mouseleave', () => {
+  hideSyncCursor(cursorOnA);
+  loupeEl.style.display = 'none';
+});
+
+// Also show local cursor indicator when hovering (thin outline on own panel)
+// so the user always knows which pixel they're on
+
+// ===================== Keyboard shortcuts =====================
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    if (!document.getElementById('btnCompare').disabled) computeDiff();
+  }
+  if (e.key === 'l' || e.key === 'L') {
+    const cb = document.getElementById('showLoupe');
+    cb.checked = !cb.checked;
+    cb.dispatchEvent(new Event('change'));
+  }
+  if (e.key === 'd' || e.key === 'D') {
+    const cb = document.getElementById('showDiffOverlay');
+    cb.checked = !cb.checked;
+    cb.dispatchEvent(new Event('change'));
+  }
+});
+</script>
+</body>
+</html>
