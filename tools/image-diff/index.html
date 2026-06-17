@@ -131,6 +131,14 @@
     max-width: 160px;
   }
 
+  .panel-header .file-size {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    opacity: 0.7;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
   .upload-btn {
     padding: 4px 10px;
     border: 1px solid var(--border);
@@ -305,7 +313,7 @@
 <body>
 
 <h1>🔍 图片差异对比</h1>
-<p class="subtitle">上传两张同尺寸图片 · 鼠标悬停任意图自动在另一张同步光标 · 差异像素高亮</p>
+<p class="subtitle">上传两张图片 · 比例相同即可 · 鼠标悬停自动同步光标位置（按百分比定位）· 差异像素高亮</p>
 
 <!-- Controls -->
 <div class="controls">
@@ -368,6 +376,7 @@
         <span class="dot"></span>图片 A
       </div>
       <span class="file-name" id="nameA">未上传</span>
+      <span class="file-size" id="sizeA"></span>
       <label class="upload-btn" for="fileA">选择文件</label>
       <input type="file" id="fileA" accept="image/*">
     </div>
@@ -399,6 +408,7 @@
         <span class="dot"></span>图片 B
       </div>
       <span class="file-name" id="nameB">未上传</span>
+      <span class="file-size" id="sizeB"></span>
       <label class="upload-btn" for="fileB">选择文件</label>
       <input type="file" id="fileB" accept="image/*">
     </div>
@@ -487,6 +497,7 @@ async function handleFileA(file) {
   const img = await loadImage(file);
   state.imgA = img;
   document.getElementById('nameA').textContent = file.name;
+  document.getElementById('sizeA').textContent = img.naturalWidth + '\u00d7' + img.naturalHeight + ' px';
   drawImageFit(canvasA, ctxA, img);
   wrapA.classList.add('has-image');
   tryEnableCompare();
@@ -496,6 +507,7 @@ async function handleFileB(file) {
   const img = await loadImage(file);
   state.imgB = img;
   document.getElementById('nameB').textContent = file.name;
+  document.getElementById('sizeB').textContent = img.naturalWidth + '\u00d7' + img.naturalHeight + ' px';
   drawImageFit(canvasB, ctxB, img);
   wrapB.classList.add('has-image');
   tryEnableCompare();
@@ -531,18 +543,11 @@ function computeDiff() {
   const a = state.imgA, b = state.imgB;
   if (!a || !b) return;
 
-  // Warn if sizes differ
-  if (a.naturalWidth !== b.naturalWidth || a.naturalHeight !== b.naturalHeight) {
-    const proceed = confirm(
-      `图片尺寸不一致！\n图片A: ${a.naturalWidth}×${a.naturalHeight}\n图片B: ${b.naturalWidth}×${b.naturalHeight}\n\n将以较小尺寸对比，继续？`
-    );
-    if (!proceed) return;
-  }
+  // Use the larger resolution for comparison, scale both to match
+  const W = Math.max(a.naturalWidth,  b.naturalWidth);
+  const H = Math.max(a.naturalHeight, b.naturalHeight);
 
-  const W = Math.min(a.naturalWidth,  b.naturalWidth);
-  const H = Math.min(a.naturalHeight, b.naturalHeight);
-
-  // Offscreen canvases to read pixel data
+  // Offscreen canvases — draw both images scaled to the common resolution
   const offA = document.createElement('canvas');
   offA.width = W; offA.height = H;
   offA.getContext('2d').drawImage(a, 0, 0, W, H);
@@ -570,7 +575,10 @@ function computeDiff() {
     }
   }
 
-  state.diffData = { diffMask, W, H, diffCount };
+  state.diffData = { diffMask, W, H, diffCount,
+    imgA_SrcW: a.naturalWidth, imgA_SrcH: a.naturalHeight,
+    imgB_SrcW: b.naturalWidth, imgB_SrcH: b.naturalHeight
+  };
 
   // Render diff image
   renderDiff();
@@ -580,7 +588,7 @@ function computeDiff() {
   document.getElementById('statMatch').textContent = (total - diffCount).toLocaleString();
   document.getElementById('statDiff').textContent  = diffCount.toLocaleString();
   document.getElementById('statPct').textContent   = ((diffCount / total) * 100).toFixed(2) + '%';
-  document.getElementById('statSize').textContent  = `${W} × ${H} px`;
+  document.getElementById('statSize').textContent  = a.naturalWidth + '\u00d7' + a.naturalHeight + ' / ' + b.naturalWidth + '\u00d7' + b.naturalHeight + ' px';
   document.getElementById('statsBar').style.display = 'flex';
 
   // Also redraw main canvases with diff overlay if enabled
@@ -618,20 +626,28 @@ function redrawCanvases() {
   drawImageFit(canvasB, ctxB, imgB);
 
   if (state.showDiffOverlay && state.diffData) {
-    overlayDiff(ctxA, state.diffData, state.overlayOpacity);
-    overlayDiff(ctxB, state.diffData, state.overlayOpacity);
+    const d = state.diffData;
+    overlayDiff(ctxA, canvasA.width, canvasA.height, d, state.overlayOpacity);
+    overlayDiff(ctxB, canvasB.width, canvasB.height, d, state.overlayOpacity);
   }
 }
 
-function overlayDiff(ctx, { diffMask, W, H }, opacity) {
-  const id = ctx.getImageData(0, 0, W, H);
-  for (let i = 0; i < W * H; i++) {
-    if (diffMask[i]) {
-      const o = i * 4;
-      // Blend red onto existing pixel
-      id.data[o]   = Math.round(id.data[o]   * (1 - opacity) + 255 * opacity);
-      id.data[o+1] = Math.round(id.data[o+1] * (1 - opacity) + 80  * opacity);
-      id.data[o+2] = Math.round(id.data[o+2] * (1 - opacity) + 50  * opacity);
+function overlayDiff(ctx, cw, ch, { diffMask, W, H }, opacity) {
+  const id = ctx.getImageData(0, 0, cw, ch);
+  const scaleX = W / cw;
+  const scaleY = H / ch;
+  for (let y = 0; y < ch; y++) {
+    for (let x = 0; x < cw; x++) {
+      // Map canvas pixel (x,y) back to diffMask coords
+      const dx = Math.floor(x * scaleX);
+      const dy = Math.floor(y * scaleY);
+      const di = dy * W + dx;
+      if (di < diffMask.length && diffMask[di]) {
+        const o = (y * cw + x) * 4;
+        id.data[o]   = Math.round(id.data[o]   * (1 - opacity) + 255 * opacity);
+        id.data[o+1] = Math.round(id.data[o+1] * (1 - opacity) + 80  * opacity);
+        id.data[o+2] = Math.round(id.data[o+2] * (1 - opacity) + 50  * opacity);
+      }
     }
   }
   ctx.putImageData(id, 0, 0);
@@ -676,54 +692,30 @@ document.getElementById('showLoupe').addEventListener('change', e => {
 
 // ===================== Sync Cursor + Loupe =====================
 /**
- * Given a mouse event on a canvas-wrap, compute the *image-space* coordinate
- * (relative to bottom-left of image, as specified).
- * The canvas may be displayed smaller than its natural size (CSS max-width etc.).
+ * Get mouse position as percentage (0-1) relative to the image display area.
  */
-function getImageCoord(wrap, canvas, e) {
-  const wrapRect = wrap.getBoundingClientRect();
+function getImagePercent(wrap, canvas, e) {
   const canvasRect = canvas.getBoundingClientRect();
-
-  // Mouse relative to wrap
-  const mx = e.clientX - wrapRect.left;
-  const my = e.clientY - wrapRect.top;
-
-  // Mouse relative to displayed canvas
   const cx = e.clientX - canvasRect.left;
   const cy = e.clientY - canvasRect.top;
-
-  // Scale factor: canvas natural size / displayed size
-  const scaleX = canvas.width / canvasRect.width;
-  const scaleY = canvas.height / canvasRect.height;
-
-  // Image pixel coord (0,0 = top-left of image)
-  const imgX = cx * scaleX;
-  const imgY = cy * scaleY;
-
-  return { mx, my, imgX, imgY, wrapRect, canvasRect, scaleX, scaleY };
+  return {
+    px: clamp(cx / canvasRect.width,  0, 1),
+    py: clamp(cy / canvasRect.height, 0, 1)
+  };
 }
 
 /**
- * Given image-space pixel coord, convert back to wrap-space px for cursor placement.
- * targetCanvas is the OTHER panel's canvas.
+ * Convert percentage position to wrap-local pixel coords for the target canvas.
  */
-function imgCoordToWrapSpace(targetCanvas, targetWrap, imgX, imgY) {
+function percentToWrapPos(targetWrap, targetCanvas, px, py) {
   const canvasRect = targetCanvas.getBoundingClientRect();
   const wrapRect   = targetWrap.getBoundingClientRect();
-
-  const scaleX = canvasRect.width  / targetCanvas.width;
-  const scaleY = canvasRect.height / targetCanvas.height;
-
-  // Position within canvas display
-  const dispX = imgX * scaleX;
-  const dispY = imgY * scaleY;
-
-  // Position within wrap
-  const wrapX = (canvasRect.left - wrapRect.left) + dispX;
-  const wrapY = (canvasRect.top  - wrapRect.top)  + dispY;
-
+  const wrapX = (canvasRect.left - wrapRect.left) + px * canvasRect.width;
+  const wrapY = (canvasRect.top  - wrapRect.top)  + py * canvasRect.height;
   return { wrapX, wrapY };
 }
+
+function clamp(v, min, max) { return v < min ? min : v > max ? max : v; }
 
 function showSyncCursor(cursorEl, x, y) {
   cursorEl.style.left   = x + 'px';
@@ -735,18 +727,22 @@ function hideSyncCursor(cursorEl) {
   cursorEl.style.display = 'none';
 }
 
-// Draw loupe at cursor position on given canvas
-function drawLoupe(sourceCanvas, imgX, imgY, clientX, clientY) {
+// Draw loupe at percentage position on given canvas
+function drawLoupe(sourceCanvas, px, py, clientX, clientY) {
   if (!state.showLoupe) return;
   const zoom = 4;
   const half = 15; // pixels to sample each side
+
+  // Convert percentage back to pixel coords on the source canvas
+  const imgX = px * sourceCanvas.width;
+  const imgY = py * sourceCanvas.height;
+  const sx = Math.max(0, imgX - half);
+  const sy = Math.max(0, imgY - half);
+  const sw = Math.min(sourceCanvas.width - sx, half * 2);
+  const sh = Math.min(sourceCanvas.height - sy, half * 2);
+
   loupeCtx.clearRect(0, 0, 120, 120);
-  loupeCtx.drawImage(
-    sourceCanvas,
-    imgX - half, imgY - half, half * 2, half * 2,
-    0, 0, 120, 120
-  );
-  // crosshair in loupe
+  loupeCtx.drawImage(sourceCanvas, sx, sy, sw, sh, 0, 0, 120, 120);
   loupeCtx.strokeStyle = 'rgba(255,255,255,0.7)';
   loupeCtx.lineWidth = 1;
   loupeCtx.beginPath();
@@ -759,23 +755,18 @@ function drawLoupe(sourceCanvas, imgX, imgY, clientX, clientY) {
   loupeEl.style.display = 'block';
 }
 
-// Panel A mouse events → sync cursor on Panel B
+// Panel A mouse events — sync cursor on Panel B at same percentage
 wrapA.addEventListener('mousemove', e => {
   if (!state.imgA) return;
-  const { mx, my, imgX, imgY } = getImageCoord(wrapA, canvasA, e);
+  const { px, py } = getImagePercent(wrapA, canvasA, e);
 
-  // Show sync cursor on panel B at same image coord
   if (state.imgB) {
-    const { wrapX, wrapY } = imgCoordToWrapSpace(canvasB, wrapB, imgX, imgY);
-    // Only show if within bounds
-    const inBounds = wrapX >= 0 && wrapY >= 0 &&
-                     wrapX <= wrapB.offsetWidth && wrapY <= wrapB.offsetHeight;
-    if (inBounds) showSyncCursor(cursorOnB, wrapX, wrapY);
-    else hideSyncCursor(cursorOnB);
+    const { wrapX, wrapY } = percentToWrapPos(wrapB, canvasB, px, py);
+    showSyncCursor(cursorOnB, wrapX, wrapY);
   }
   hideSyncCursor(cursorOnA);
 
-  drawLoupe(canvasA, imgX, imgY, e.clientX, e.clientY);
+  drawLoupe(canvasA, px, py, e.clientX, e.clientY);
 });
 
 wrapA.addEventListener('mouseleave', () => {
@@ -783,30 +774,24 @@ wrapA.addEventListener('mouseleave', () => {
   loupeEl.style.display = 'none';
 });
 
-// Panel B mouse events → sync cursor on Panel A
+// Panel B mouse events — sync cursor on Panel A at same percentage
 wrapB.addEventListener('mousemove', e => {
   if (!state.imgB) return;
-  const { imgX, imgY } = getImageCoord(wrapB, canvasB, e);
+  const { px, py } = getImagePercent(wrapB, canvasB, e);
 
   if (state.imgA) {
-    const { wrapX, wrapY } = imgCoordToWrapSpace(canvasA, wrapA, imgX, imgY);
-    const inBounds = wrapX >= 0 && wrapY >= 0 &&
-                     wrapX <= wrapA.offsetWidth && wrapY <= wrapA.offsetHeight;
-    if (inBounds) showSyncCursor(cursorOnA, wrapX, wrapY);
-    else hideSyncCursor(cursorOnA);
+    const { wrapX, wrapY } = percentToWrapPos(wrapA, canvasA, px, py);
+    showSyncCursor(cursorOnA, wrapX, wrapY);
   }
   hideSyncCursor(cursorOnB);
 
-  drawLoupe(canvasB, imgX, imgY, e.clientX, e.clientY);
+  drawLoupe(canvasB, px, py, e.clientX, e.clientY);
 });
 
 wrapB.addEventListener('mouseleave', () => {
   hideSyncCursor(cursorOnA);
   loupeEl.style.display = 'none';
 });
-
-// Also show local cursor indicator when hovering (thin outline on own panel)
-// so the user always knows which pixel they're on
 
 // ===================== Keyboard shortcuts =====================
 document.addEventListener('keydown', e => {
