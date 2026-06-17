@@ -175,6 +175,18 @@
     user-select: none;
   }
 
+  .canvas-wrap .overlay-canvas {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 100%;
+    max-height: 480px;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+  }
+
   /* Drop overlay */
   .drop-hint {
     position: absolute;
@@ -382,6 +394,7 @@
     </div>
     <div class="canvas-wrap" id="wrapA">
       <canvas id="canvasA"></canvas>
+      <canvas id="overlayA" class="overlay-canvas" style="display:none"></canvas>
       <div class="drop-hint">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
           <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
@@ -414,6 +427,7 @@
     </div>
     <div class="canvas-wrap" id="wrapB">
       <canvas id="canvasB"></canvas>
+      <canvas id="overlayB" class="overlay-canvas" style="display:none"></canvas>
       <div class="drop-hint">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
           <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
@@ -463,8 +477,12 @@ const state = {
 // ===================== Elements =====================
 const canvasA  = document.getElementById('canvasA');
 const canvasB  = document.getElementById('canvasB');
+const overlayA = document.getElementById('overlayA');
+const overlayB = document.getElementById('overlayB');
 const ctxA     = canvasA.getContext('2d');
 const ctxB     = canvasB.getContext('2d');
+const ctxOA    = overlayA.getContext('2d');
+const ctxOB    = overlayB.getContext('2d');
 const wrapA    = document.getElementById('wrapA');
 const wrapB    = document.getElementById('wrapB');
 const cursorOnA = document.getElementById('cursorOnA'); // mirror of B mouse
@@ -591,8 +609,9 @@ function computeDiff() {
   document.getElementById('statSize').textContent  = a.naturalWidth + '\u00d7' + a.naturalHeight + ' / ' + b.naturalWidth + '\u00d7' + b.naturalHeight + ' px';
   document.getElementById('statsBar').style.display = 'flex';
 
-  // Also redraw main canvases with diff overlay if enabled
-  redrawCanvases();
+  // Also redraw main canvases and build overlay
+  redrawBaseImages();
+  renderOverlays();
 }
 
 function renderDiff() {
@@ -619,38 +638,72 @@ function renderDiff() {
   document.getElementById('diffHint').style.display = 'none';
 }
 
-function redrawCanvases() {
+function redrawBaseImages() {
   if (!state.imgA || !state.imgB) return;
-  const { imgA, imgB } = state;
-  drawImageFit(canvasA, ctxA, imgA);
-  drawImageFit(canvasB, ctxB, imgB);
-
-  if (state.showDiffOverlay && state.diffData) {
-    const d = state.diffData;
-    overlayDiff(ctxA, canvasA.width, canvasA.height, d, state.overlayOpacity);
-    overlayDiff(ctxB, canvasB.width, canvasB.height, d, state.overlayOpacity);
-  }
+  drawImageFit(canvasA, ctxA, state.imgA);
+  drawImageFit(canvasB, ctxB, state.imgB);
 }
 
-function overlayDiff(ctx, cw, ch, { diffMask, W, H }, opacity) {
-  const id = ctx.getImageData(0, 0, cw, ch);
-  const scaleX = W / cw;
-  const scaleY = H / ch;
-  for (let y = 0; y < ch; y++) {
-    for (let x = 0; x < cw; x++) {
-      // Map canvas pixel (x,y) back to diffMask coords
-      const dx = Math.floor(x * scaleX);
-      const dy = Math.floor(y * scaleY);
+function renderOverlays() {
+  if (!state.diffData) return;
+  const { diffMask, W, H } = state.diffData;
+
+  // Size overlay canvases to match display canvases
+  overlayA.width  = canvasA.width;
+  overlayA.height = canvasA.height;
+  overlayB.width  = canvasB.width;
+  overlayB.height = canvasB.height;
+
+  // Pre-render red mask for overlayA
+  const dataA = ctxOA.createImageData(overlayA.width, overlayA.height);
+  const sxA = W / overlayA.width;
+  const syA = H / overlayA.height;
+  for (let y = 0; y < overlayA.height; y++) {
+    for (let x = 0; x < overlayA.width; x++) {
+      const dx = Math.floor(x * sxA);
+      const dy = Math.floor(y * syA);
       const di = dy * W + dx;
       if (di < diffMask.length && diffMask[di]) {
-        const o = (y * cw + x) * 4;
-        id.data[o]   = Math.round(id.data[o]   * (1 - opacity) + 255 * opacity);
-        id.data[o+1] = Math.round(id.data[o+1] * (1 - opacity) + 80  * opacity);
-        id.data[o+2] = Math.round(id.data[o+2] * (1 - opacity) + 50  * opacity);
+        const o = (y * overlayA.width + x) * 4;
+        dataA.data[o]   = 255;
+        dataA.data[o+1] = 50;
+        dataA.data[o+2] = 20;
+        dataA.data[o+3] = 255;
       }
     }
   }
-  ctx.putImageData(id, 0, 0);
+  ctxOA.putImageData(dataA, 0, 0);
+
+  // Pre-render red mask for overlayB
+  const dataB = ctxOB.createImageData(overlayB.width, overlayB.height);
+  const sxB = W / overlayB.width;
+  const syB = H / overlayB.height;
+  for (let y = 0; y < overlayB.height; y++) {
+    for (let x = 0; x < overlayB.width; x++) {
+      const dx = Math.floor(x * sxB);
+      const dy = Math.floor(y * syB);
+      const di = dy * W + dx;
+      if (di < diffMask.length && diffMask[di]) {
+        const o = (y * overlayB.width + x) * 4;
+        dataB.data[o]   = 255;
+        dataB.data[o+1] = 50;
+        dataB.data[o+2] = 20;
+        dataB.data[o+3] = 255;
+      }
+    }
+  }
+  ctxOB.putImageData(dataB, 0, 0);
+
+  updateOverlayDisplay();
+}
+
+function updateOverlayDisplay() {
+  const op = state.overlayOpacity;
+  overlayA.style.opacity = op;
+  overlayB.style.opacity = op;
+  const show = state.showDiffOverlay ? 'block' : 'none';
+  overlayA.style.display = show;
+  overlayB.style.display = show;
 }
 
 document.getElementById('btnCompare').addEventListener('click', computeDiff);
@@ -677,12 +730,12 @@ const opacityVal = document.getElementById('opacityVal');
 overlayOpacityInput.addEventListener('input', () => {
   state.overlayOpacity = +overlayOpacityInput.value / 100;
   opacityVal.textContent = overlayOpacityInput.value + '%';
-  redrawCanvases();
+  updateOverlayDisplay();
 });
 
 document.getElementById('showDiffOverlay').addEventListener('change', e => {
   state.showDiffOverlay = e.target.checked;
-  redrawCanvases();
+  updateOverlayDisplay();
 });
 
 document.getElementById('showLoupe').addEventListener('change', e => {
