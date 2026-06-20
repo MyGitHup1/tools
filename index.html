@@ -373,6 +373,26 @@
             --corner-opacity: 0.5; --corner-w: 12px; --corner-h: 3px; --corner-radius: 1px;
         }
 
+        /* ===== Theme: Smoke ===== */
+        body.theme-smoke {
+            --bg: #1a1a1e; --bg-fixed: #1a1a1e;
+            --card-bg: rgba(40,40,50,0.7); --card-bg-solid: #282832;
+            --border: rgba(180,190,210,0.08); --border-hover: rgba(200,210,230,0.22);
+            --text: #c8ccd8; --text-dim: #6a7080;
+            --tag-bg: rgba(180,190,210,0.05); --tag-border: rgba(180,190,210,0.09); --tag-border-hover: rgba(200,210,230,0.2);
+            --stat-bg: rgba(40,40,50,0.45); --stat-border: rgba(180,190,210,0.07);
+            --footer-text: #404450; --footer-border: rgba(180,190,210,0.05);
+            --card-glow-opacity: 0.06; --card-shadow: 0 10px 40px rgba(0,0,0,0.5); --card-hover-y: -6px;
+            --hero-grad-1: rgba(180,190,210,0.06); --hero-grad-2: rgba(150,160,190,0.04); --hero-grad-3: rgba(120,130,160,0.03);
+            --title-grad-1: #b0b8cc; --title-grad-2: #d0d8ec; --title-grad-3: #8a92a6;
+            --hover-arrow-color: var(--card-accent, #c0c8dc); --card-name-color: #c8ccd8; --card-blur: 18px;
+            --glow-color: rgba(160,170,200,0.06); --glow-size: 320px;
+            --hero-icon-glow: radial-gradient(circle, rgba(160,170,200,0.15), transparent);
+            --card-before: linear-gradient(135deg, rgba(180,190,210,0.1), rgba(150,160,190,0.04), rgba(180,190,210,0.08));
+            --corner-opacity: 0.2; --corner-w: 6px; --corner-h: 6px; --corner-radius: 50%;
+            --smoke: 1;
+        }
+
         /* ===== Theme: Tech Blue ===== */
         body.theme-tech-blue {
             --bg: #0a192f; --bg-fixed: #0a192f;
@@ -674,6 +694,7 @@
             { id:'glass', icon:'🔮', label:'玻璃拟态', cssVars:{} },
             { id:'cyber-mahjong', icon:'🀄', label:'赛博麻将', cssVars:{} },
             { id:'tech-blue', icon:'💠', label:'科技蓝', cssVars:{} },
+            { id:'smoke',     icon:'🌫️', label:'烟雾缭绕', cssVars:{} },
         ];
 
         // ==================== Particle color palettes per theme ====================
@@ -698,6 +719,7 @@
             glass:       { hues:[{h:200,w:20},{h:280,w:20},{h:160,w:20},{h:60,w:20},{h:340,w:20}], sat:50, lit:80, size:[1,4], speed:[0.1,0.35] },
             'cyber-mahjong':{ hues:[{h:185,w:30},{h:200,w:30},{h:170,w:20}], sat:85, lit:70, size:[1,4], speed:[0.15,0.5] },
             'tech-blue':   { hues:[{h:200,w:40},{h:190,w:30},{h:210,w:30}], sat:80, lit:65, size:[0.5,2.5], speed:[0.2,0.8] },
+            smoke:         { hues:[{h:210,w:20},{h:220,w:20},{h:200,w:20},{h:230,w:20}], sat:8, lit:70, size:[18,50], speed:[0.08,0.25] },
         };
 
         // ==================== Tool Registry ====================
@@ -706,43 +728,43 @@
                 name:"文件 Hash 两两对比", desc:"批量上传文件，计算 MD5/SHA-1/SHA-256 哈希值，自动两两对比快速找出重复文件",
                 icon:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>',
                 path:"tools/hash-compare/index.html",
-                accents:{cyberpunk:'#60a5fa',kawaii:'#93c5fd',zen:'#6b7280',retro:'#9bbc0f',vaporwave:'#00ffff',ocean:'#1e88e5',sunset:'#ff6d00',forest:'#43a047',neon:'#ffe632',candy:'#ff5722',starry:'#4fc3f7',aurora:'#76ff03',lava:'#ff5722',sakura:'#f48fb1',newspaper:'#5d4037',purpleDream:'#9c27b0',goldLuxury:'#ffd700',glass:'#80cbc4',cyberMahjong:'#00e5ff',techBlue:'#0097a7'},
+                accents:{cyberpunk:'#60a5fa',kawaii:'#93c5fd',zen:'#6b7280',retro:'#9bbc0f',vaporwave:'#00ffff',ocean:'#1e88e5',sunset:'#ff6d00',forest:'#43a047',neon:'#ffe632',candy:'#ff5722',starry:'#4fc3f7',aurora:'#76ff03',lava:'#ff5722',sakura:'#f48fb1',newspaper:'#5d4037',purpleDream:'#9c27b0',goldLuxury:'#ffd700',glass:'#80cbc4',cyberMahjong:'#00e5ff',techBlue:'#0097a7',smoke:'#a0aabb'},
                 tags:["文件","哈希","对比"]
             },{
                 name:"取色器", desc:"可视化拾取颜色，色相/饱和度/明度调节，透明度控制，HEX/RGB/HSL 格式切换，屏幕取色和颜色历史记录",
                 icon:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>',
                 path:"tools/color-picker/index.html",
-                accents:{cyberpunk:'#c084fc',kawaii:'#d8b4fe',zen:'#78716c',retro:'#8bac0f',vaporwave:'#ff69b4',ocean:'#42a5f5',sunset:'#e65100',forest:'#66bb6a',neon:'#ff64b4',candy:'#ab47bc',starry:'#e1bee7',aurora:'#b388ff',lava:'#ff6e40',sakura:'#f48fb1',newspaper:'#8d6e63',purpleDream:'#ce93d8',goldLuxury:'#ffd740',glass:'#80d8ff',cyberMahjong:'#18ffff',techBlue:'#448aff'},
+                accents:{cyberpunk:'#c084fc',kawaii:'#d8b4fe',zen:'#78716c',retro:'#8bac0f',vaporwave:'#ff69b4',ocean:'#42a5f5',sunset:'#e65100',forest:'#66bb6a',neon:'#ff64b4',candy:'#ab47bc',starry:'#e1bee7',aurora:'#b388ff',lava:'#ff6e40',sakura:'#f48fb1',newspaper:'#8d6e63',purpleDream:'#ce93d8',goldLuxury:'#ffd740',glass:'#80d8ff',cyberMahjong:'#18ffff',techBlue:'#448aff',smoke:'#b0bac8'},
                 tags:["颜色","取色","设计"]
             },{
                 name:"二维码生成器", desc:"输入文字或链接实时生成二维码，支持尺寸/颜色/纠错级别调节、Wi-Fi/名片等快捷模板，可下载 PNG",
                 icon:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2.48a2.5 2.5 0 00-4.52 0H4m16 0v-4a2 2 0 00-2-2h-1.5m2 6H20M4 15v-4a2 2 0 012-2h1.5M4 15h1.5M12 9v4m-4-6h8M8 3v2m8-2v2"/>',
                 path:"tools/qrcode-generator/index.html",
-                accents:{cyberpunk:'#818cf8',kawaii:'#a5b4fc',zen:'#57534e',retro:'#306230',vaporwave:'#8a2be2',ocean:'#1565c0',sunset:'#ff9100',forest:'#2e7d32',neon:'#00ffc8',candy:'#26c6da',starry:'#82b1ff',aurora:'#69f0ae',lava:'#ff8a65',sakura:'#f8bbd9',newspaper:'#a1887f',purpleDream:'#ba68c8',goldLuxury:'#ffc400',glass:'#84ffff',cyberMahjong:'#40c4ff',techBlue:'#00b0ff'},
+                accents:{cyberpunk:'#818cf8',kawaii:'#a5b4fc',zen:'#57534e',retro:'#306230',vaporwave:'#8a2be2',ocean:'#1565c0',sunset:'#ff9100',forest:'#2e7d32',neon:'#00ffc8',candy:'#26c6da',starry:'#82b1ff',aurora:'#69f0ae',lava:'#ff8a65',sakura:'#f8bbd9',newspaper:'#a1887f',purpleDream:'#ba68c8',goldLuxury:'#ffc400',glass:'#84ffff',cyberMahjong:'#40c4ff',techBlue:'#00b0ff',smoke:'#9aa8bc'},
                 tags:["二维码","生成","分享"]
             },{
                 name:"JSON 格式化工具", desc:"在线 JSON 格式化/压缩/校验，语法高亮、Key 排序、自定义缩进、节点统计，Ctrl+Enter 快捷格式化",
                 icon:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>',
                 path:"tools/json-formatter/index.html",
-                accents:{cyberpunk:'#f59e0b',kawaii:'#fcd34d',zen:'#a8a29e',retro:'#9bbc0f',vaporwave:'#ffb347',ocean:'#64b5f6',sunset:'#ff7043',forest:'#81c784',neon:'#ffcc00',candy:'#ffca28',starry:'#fff176',aurora:'#ccff90',lava:'#ffab40',sakura:'#f8bbd9',newspaper:'#bcaaa4',purpleDream:'#ab47bc',goldLuxury:'#ffab00',glass:'#b2ebf2',cyberMahjong:'#80d8ff',techBlue:'#40c4ff'},
+                accents:{cyberpunk:'#f59e0b',kawaii:'#fcd34d',zen:'#a8a29e',retro:'#9bbc0f',vaporwave:'#ffb347',ocean:'#64b5f6',sunset:'#ff7043',forest:'#81c784',neon:'#ffcc00',candy:'#ffca28',starry:'#fff176',aurora:'#ccff90',lava:'#ffab40',sakura:'#f8bbd9',newspaper:'#bcaaa4',purpleDream:'#ab47bc',goldLuxury:'#ffab00',glass:'#b2ebf2',cyberMahjong:'#80d8ff',techBlue:'#40c4ff',smoke:'#c0c8d4'},
                 tags:["JSON","格式化","开发"]
             },{
                 name:"高压电源设计工具箱", desc:"硬件工程师专属：分压器设计(自动算串联数/功耗)、RC充放电曲线、功率热耗散结温、电容储能TNT当量",
                 icon:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>',
                 path:"tools/hv-design/index.html",
-                accents:{cyberpunk:'#f87171',kawaii:'#fca5a5',zen:'#92400e',retro:'#9bbc0f',vaporwave:'#ff3366',ocean:'#ef5350',sunset:'#d84315',forest:'#e53935',neon:'#ff4444',candy:'#ff7043',starry:'#ff8a80',aurora:'#ff6e40',lava:'#ff3d00',sakura:'#ff80ab',newspaper:'#d84315',purpleDream:'#e040fb',goldLuxury:'#ff6d00',glass:'#ff80ab',cyberMahjong:'#ff1744',techBlue:'#ff5252'},
+                accents:{cyberpunk:'#f87171',kawaii:'#fca5a5',zen:'#92400e',retro:'#9bbc0f',vaporwave:'#ff3366',ocean:'#ef5350',sunset:'#d84315',forest:'#e53935',neon:'#ff4444',candy:'#ff7043',starry:'#ff8a80',aurora:'#ff6e40',lava:'#ff3d00',sakura:'#ff80ab',newspaper:'#d84315',purpleDream:'#e040fb',goldLuxury:'#ff6d00',glass:'#ff80ab',cyberMahjong:'#ff1744',techBlue:'#ff5252',smoke:'#d4a8a8'},
                 tags:["高压","分压器","RC","硬件"]
             },{
                 name:"BOM 整理工具", desc:"粘贴物料清单自动分类(电阻/电容/IC等19类)、排序筛选、统计概览，支持导出CSV/Excel和复制表格",
                 icon:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>',
                 path:"tools/bom-organizer/index.html",
-                accents:{cyberpunk:'#2dd4bf',kawaii:'#99f6e4',zen:'#14b8a6',retro:'#9bbc0f',vaporwave:'#00ffcc',ocean:'#26c6da',sunset:'#ffb74d',forest:'#4caf50',neon:'#00ff88',candy:'#38ef7d',starry:'#80cbc4',aurora:'#69f0ae',lava:'#ff6e40',sakura:'#80cbc4',newspaper:'#8d6e63',purpleDream:'#26a69a',goldLuxury:'#c0ca33',glass:'#80deea',cyberMahjong:'#1de9b6',techBlue:'#64ffda'},
+                accents:{cyberpunk:'#2dd4bf',kawaii:'#99f6e4',zen:'#14b8a6',retro:'#9bbc0f',vaporwave:'#00ffcc',ocean:'#26c6da',sunset:'#ffb74d',forest:'#4caf50',neon:'#00ff88',candy:'#38ef7d',starry:'#80cbc4',aurora:'#69f0ae',lava:'#ff6e40',sakura:'#80cbc4',newspaper:'#8d6e63',purpleDream:'#26a69a',goldLuxury:'#c0ca33',glass:'#80deea',cyberMahjong:'#1de9b6',techBlue:'#64ffda',smoke:'#8ab8c0'},
                 tags:["BOM","物料","硬件"]
             },{
                 name:"图片差异对比", desc:"上传两张同比例图片(尺寸不必相同)，鼠标悬停按百分比同步对面光标，像素级差异高亮叠加，支持放大镜和差异图导出",
                 icon:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>',
                 path:"tools/image-diff/index.html",
-                accents:{cyberpunk:'#34d399',kawaii:'#6ee7b7',zen:'#059669',retro:'#9bbc0f',vaporwave:'#00ffc8',ocean:'#26a69a',sunset:'#ffa000',forest:'#388e3c',neon:'#00ffaa',candy:'#69f0ae',starry:'#80cbc4',aurora:'#64ffda',lava:'#ff6e40',sakura:'#80cbc4',newspaper:'#4caf50',purpleDream:'#66bb6a',goldLuxury:'#aeea00',glass:'#b2dfdb',cyberMahjong:'#1de9b6',techBlue:'#00e5ff'},
+                accents:{cyberpunk:'#34d399',kawaii:'#6ee7b7',zen:'#059669',retro:'#9bbc0f',vaporwave:'#00ffc8',ocean:'#26a69a',sunset:'#ffa000',forest:'#388e3c',neon:'#00ffaa',candy:'#69f0ae',starry:'#80cbc4',aurora:'#64ffda',lava:'#ff6e40',sakura:'#80cbc4',newspaper:'#4caf50',purpleDream:'#66bb6a',goldLuxury:'#aeea00',glass:'#b2dfdb',cyberMahjong:'#1de9b6',techBlue:'#00e5ff',smoke:'#90b0a8'},
                 tags:["图片","对比","差异"]
             }
         ];
@@ -804,7 +826,7 @@
 
         // ==================== Last Update Badge ====================
         // ⚠️ 每次推送前更新这个时间戳！
-        const LAST_UPDATE = new Date('2026-06-17T20:02:00+08:00');
+        const LAST_UPDATE = new Date('2026-06-21T02:30:00+08:00');
 
         function renderUpdateBadge() {
             const badge = document.getElementById('updateBadge');
@@ -1040,6 +1062,15 @@
                 if(currentTheme==='glass') { this.shape='dot'; this.opacity=Math.random()*0.3+0.2; }
                 if(currentTheme==='cyber-mahjong') { this.shape='mahjong'; this.opacity=Math.random()*0.4+0.3; }
                 if(currentTheme==='tech-blue') { this.shape='data'; this.opacity=Math.random()*0.4+0.3; }
+                if(currentTheme==='smoke') {
+                    this.shape='smoke';
+                    this.size = 18 + Math.random()*40;
+                    this.opacity = Math.random()*0.12+0.04;
+                    this.vy = -(0.12+Math.random()*0.2);
+                    this.vx = (Math.random()-0.5)*0.15;
+                    this.growRate = 0.03+Math.random()*0.05;
+                    this.twistSpeed = (Math.random()-0.5)*0.006;
+                }
             }
             update(){
                 this.x+=this.vx; this.y+=this.vy; this.rotation+=this.rotSpeed;
@@ -1072,9 +1103,25 @@
                 if(currentTheme==='cyber-mahjong'){ this.rotation+=0.02; this.vy=0.05+Math.random()*0.1; if(this.y>canvas.height+30){this.y=-30;this.x=Math.random()*canvas.width;} }
                 // Tech blue: data flow effect
                 if(currentTheme==='tech-blue'){ this.vx=0.2+Math.random()*0.3; if(this.x>canvas.width+30){this.x=-30;} }
+                // Smoke: rise, expand, fade
+                if(currentTheme==='smoke'){
+                    this.vy -= 0.001;
+                    this.vx += this.twistSpeed;
+                    this.size += this.growRate;
+                    this.opacity -= 0.00018;
+                    if(this.opacity<=0 || this.y<-100){
+                        this.x = Math.random()*canvas.width;
+                        this.y = canvas.height + 20;
+                        this.size = 18+Math.random()*20;
+                        this.opacity = Math.random()*0.12+0.04;
+                        this.vy = -(0.12+Math.random()*0.2);
+                        this.vx = (Math.random()-0.5)*0.15;
+                        this.twistSpeed = (Math.random()-0.5)*0.006;
+                    }
+                }
                 // Wrap
                 if(this.x<-50)this.x=canvas.width+50; if(this.x>canvas.width+50)this.x=-50;
-                if(!['retro','ocean','forest','sunset','lava','sakura','cyber-mahjong'].includes(currentTheme)){
+                if(!['retro','ocean','forest','sunset','lava','sakura','cyber-mahjong','smoke'].includes(currentTheme)){
                     if(this.y<-50)this.y=canvas.height+50; if(this.y>canvas.height+50)this.y=-50;
                 }
             }
@@ -1132,6 +1179,14 @@
                 else if(this.shape==='data'){ 
                     ctx.fillRect(-this.size*0.5,-this.size*0.2,this.size,this.size*0.4); 
                 }
+                else if(this.shape==='smoke'){
+                    const grd = ctx.createRadialGradient(0,0,0,0,0,this.size);
+                    grd.addColorStop(0, `hsla(${this.hue},${this.sat}%,${this.lit}%,${this.opacity})`);
+                    grd.addColorStop(0.55, `hsla(${this.hue},${this.sat}%,${this.lit}%,${this.opacity*0.5})`);
+                    grd.addColorStop(1, `hsla(${this.hue},${this.sat}%,${this.lit}%,0)`);
+                    ctx.fillStyle = grd;
+                    ctx.beginPath(); ctx.arc(0,0,this.size,0,Math.PI*2); ctx.fill();
+                }
                 else {
                     // Zen: soft ink blob
                     if(currentTheme==='zen'){
@@ -1169,7 +1224,7 @@
             const maxDist = currentTheme==='kawaii'?0:currentTheme==='vaporwave'?90:currentTheme==='zen'?60:currentTheme==='neon'?100:120;
             const lineOpacity = currentTheme==='vaporwave'?0.06:currentTheme==='neon'?0.1:currentTheme==='zen'?0.04:0.08;
 
-            if (!['kawaii','retro','ocean','sunset','forest','candy','lava','sakura','newspaper','gold-luxury','glass','cyber-mahjong'].includes(currentTheme)) {
+            if (!['kawaii','retro','ocean','sunset','forest','candy','lava','sakura','newspaper','gold-luxury','glass','cyber-mahjong','smoke'].includes(currentTheme)) {
                 for(let i=0;i<particles.length;i++){
                     for(let j=i+1;j<particles.length;j++){
                         const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y;
