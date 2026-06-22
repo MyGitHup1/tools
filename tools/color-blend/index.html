@@ -108,10 +108,7 @@
     gap: 12px;
     position: relative;
     transition: border-color 0.2s, box-shadow 0.2s;
-    cursor: grab;
-    user-select: none;
   }
-  .layer-card:active { cursor: grabbing; }
   .layer-card.dragging {
     opacity: 0.5;
     box-shadow: 0 0 0 2px var(--accent);
@@ -245,16 +242,13 @@
     flex-shrink: 0;
     line-height: 1;
     padding: 2px 4px;
-    touch-action: none;
-    -webkit-user-drag: element;
+    user-select: none;
   }
+  .drag-handle:active { cursor: grabbing; }
   /* prevent inputs & select inside card from being blocked by drag */
   .layer-card input,
   .layer-card select,
   .layer-card button {
-    -webkit-user-drag: none;
-    user-select: text;
-  }
 
   /* order label */
   .layer-order {
@@ -701,7 +695,7 @@ function renderLayers() {
     ).join('');
 
     card.innerHTML = `
-      <span class="drag-handle" title="拖拽排序" draggable="true">⠿</span>
+      <span class="drag-handle" title="拖拽排序">⠿</span>
       <span class="layer-order">${i + 1}</span>
       <div class="layer-swatch" title="点击选色">
         <div class="layer-swatch-inner" style="background:rgba(${rgb[0]},${rgb[1]},${rgb[2]},${l.alpha})"></div>
@@ -723,39 +717,74 @@ function renderLayers() {
 
     list.appendChild(card);
 
-    // ---- Drag: only the handle is draggable, card never is ----
+    // ---- Custom drag via mouse events (zero conflict with inputs) ----
     const handle = card.querySelector('.drag-handle');
-
-    handle.addEventListener('dragstart', e => {
+    handle.addEventListener('mousedown', e => {
+      e.preventDefault();
       dragSrcIdx = i;
       card.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
-    });
-    handle.addEventListener('dragend', () => {
-      card.classList.remove('dragging');
-      dragSrcIdx = null;
-      document.querySelectorAll('.layer-card').forEach(c => c.classList.remove('drag-over'));
-    });
-
-    // card receives dragover/drop even though it's NOT draggable — works fine
-    card.addEventListener('dragover', e => {
-      e.preventDefault();
-      if (dragSrcIdx === null || dragSrcIdx === i) return;
-      document.querySelectorAll('.layer-card').forEach(c => c.classList.remove('drag-over'));
-      card.classList.add('drag-over');
-    });
-    card.addEventListener('drop', e => {
-      e.preventDefault();
-      card.classList.remove('drag-over');
-      if (dragSrcIdx === null || dragSrcIdx === i) return;
-      const moved = layers.splice(dragSrcIdx, 1)[0];
-      layers.splice(i, 0, moved);
-      renderLayers();
-      updateResult();
+      const ghost = card.cloneNode(true);
+      ghost.classList.add('sort-ghost');
+      Object.assign(ghost.style, {
+        position:'fixed', zIndex:'9999', width:card.offsetWidth+'px',
+        pointerEvents:'none', opacity:'0.85',
+        left: card.getBoundingClientRect().left+'px',
+        top: (e.clientY-20)+'px',
+        boxShadow:'0 8px 32px rgba(0,0,0,0.4)'
+      });
+      document.body.appendChild(ghost);
     });
   });
+  renderBindings();
+}
 
-  // Bind events
+let globalMouseMove, globalMouseUp;
+function renderBindings() {
+  if (globalMouseMove) document.removeEventListener('mousemove', globalMouseMove);
+  if (globalMouseUp)   document.removeEventListener('mouseup',   globalMouseUp);
+
+  globalMouseMove = e => {
+    if (dragSrcIdx === null) return;
+    const g = document.querySelector('.sort-ghost');
+    if (g) g.style.top = (e.clientY - 20) + 'px';
+
+    const cards = document.querySelectorAll('.layer-card');
+    cards.forEach(c => c.classList.remove('drag-over'));
+    let best = null, bestDist = Infinity;
+    cards.forEach(c => {
+      const r = c.getBoundingClientRect();
+      const cy = r.top + r.height / 2;
+      const d = Math.abs(e.clientY - cy);
+      if (d < bestDist) { bestDist = d; best = c; }
+    });
+    if (best) best.classList.add('drag-over');
+  };
+
+  globalMouseUp = () => {
+    if (dragSrcIdx === null) return;
+    const cards = document.querySelectorAll('.layer-card');
+    cards.forEach(c => c.classList.remove('drag-over', 'dragging'));
+    const g = document.querySelector('.sort-ghost');
+    if (g) g.remove();
+
+    let targetIdx = dragSrcIdx;
+    cards.forEach((c, j) => {
+      if (c.classList.contains('drag-over')) targetIdx = j;
+    });
+
+    if (targetIdx !== dragSrcIdx) {
+      const moved = layers.splice(dragSrcIdx, 1)[0];
+      layers.splice(targetIdx, 0, moved);
+      renderLayers();
+      updateResult();
+    }
+    dragSrcIdx = null;
+  };
+
+  document.addEventListener('mousemove', globalMouseMove);
+  document.addEventListener('mouseup', globalMouseUp);
+
+  // Bind input events
   document.querySelectorAll('.color-input').forEach(el => {
     el.addEventListener('input', e => {
       layers[+e.target.dataset.idx].hex = e.target.value;
