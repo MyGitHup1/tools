@@ -694,7 +694,6 @@ function renderLayers() {
     const rgb = hexToRgb(l.hex);
     const card = document.createElement('div');
     card.className = 'layer-card';
-    card.draggable = false;  // only enabled via drag handle
     card.dataset.idx = i;
 
     const modeOptions = BLEND_MODES.map(m =>
@@ -702,7 +701,7 @@ function renderLayers() {
     ).join('');
 
     card.innerHTML = `
-      <span class="drag-handle" title="拖拽排序">⠿</span>
+      <span class="drag-handle" title="拖拽排序" draggable="true">⠿</span>
       <span class="layer-order">${i + 1}</span>
       <div class="layer-swatch" title="点击选色">
         <div class="layer-swatch-inner" style="background:rgba(${rgb[0]},${rgb[1]},${rgb[2]},${l.alpha})"></div>
@@ -722,44 +721,38 @@ function renderLayers() {
       <button class="layer-del" data-idx="${i}" title="删除此层">✕</button>
     `;
 
-    // drag events — only triggered from the drag handle
-    card.addEventListener('dragstart', e => {
-      // reject drags not originating from the handle
-      if (!e.target.classList.contains('drag-handle')) {
-        e.preventDefault();
-        return;
-      }
+    list.appendChild(card);
+
+    // ---- Drag: only the handle is draggable, card never is ----
+    const handle = card.querySelector('.drag-handle');
+
+    handle.addEventListener('dragstart', e => {
       dragSrcIdx = i;
-      setTimeout(() => card.classList.add('dragging'), 0);
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
     });
-    card.addEventListener('dragend', () => {
+    handle.addEventListener('dragend', () => {
       card.classList.remove('dragging');
-      card.draggable = false;
       dragSrcIdx = null;
       document.querySelectorAll('.layer-card').forEach(c => c.classList.remove('drag-over'));
     });
+
+    // card receives dragover/drop even though it's NOT draggable — works fine
     card.addEventListener('dragover', e => {
       e.preventDefault();
+      if (dragSrcIdx === null || dragSrcIdx === i) return;
       document.querySelectorAll('.layer-card').forEach(c => c.classList.remove('drag-over'));
       card.classList.add('drag-over');
     });
     card.addEventListener('drop', e => {
       e.preventDefault();
       card.classList.remove('drag-over');
-      if (dragSrcIdx !== null && dragSrcIdx !== i) {
-        const moved = layers.splice(dragSrcIdx, 1)[0];
-        layers.splice(i, 0, moved);
-        renderLayers();
-        updateResult();
-      }
+      if (dragSrcIdx === null || dragSrcIdx === i) return;
+      const moved = layers.splice(dragSrcIdx, 1)[0];
+      layers.splice(i, 0, moved);
+      renderLayers();
+      updateResult();
     });
-
-    list.appendChild(card);
-
-    // Enable drag ONLY when mouse is down on the handle
-    const handle = card.querySelector('.drag-handle');
-    handle.addEventListener('mousedown', () => { card.draggable = true; });
-    handle.addEventListener('mouseleave', () => { if (dragSrcIdx === null) card.draggable = false; });
   });
 
   // Bind events
