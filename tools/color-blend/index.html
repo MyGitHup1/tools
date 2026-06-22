@@ -244,7 +244,16 @@
     cursor: grab;
     flex-shrink: 0;
     line-height: 1;
-    padding: 2px;
+    padding: 2px 4px;
+    touch-action: none;
+    -webkit-user-drag: element;
+  }
+  /* prevent inputs & select inside card from being blocked by drag */
+  .layer-card input,
+  .layer-card select,
+  .layer-card button {
+    -webkit-user-drag: none;
+    user-select: text;
   }
 
   /* order label */
@@ -685,7 +694,7 @@ function renderLayers() {
     const rgb = hexToRgb(l.hex);
     const card = document.createElement('div');
     card.className = 'layer-card';
-    card.draggable = true;
+    card.draggable = false;  // only enabled via drag handle
     card.dataset.idx = i;
 
     const modeOptions = BLEND_MODES.map(m =>
@@ -713,13 +722,20 @@ function renderLayers() {
       <button class="layer-del" data-idx="${i}" title="删除此层">✕</button>
     `;
 
-    // drag events
+    // drag events — only triggered from the drag handle
     card.addEventListener('dragstart', e => {
+      // reject drags not originating from the handle
+      if (!e.target.classList.contains('drag-handle')) {
+        e.preventDefault();
+        return;
+      }
       dragSrcIdx = i;
       setTimeout(() => card.classList.add('dragging'), 0);
     });
     card.addEventListener('dragend', () => {
       card.classList.remove('dragging');
+      card.draggable = false;
+      dragSrcIdx = null;
       document.querySelectorAll('.layer-card').forEach(c => c.classList.remove('drag-over'));
     });
     card.addEventListener('dragover', e => {
@@ -739,6 +755,11 @@ function renderLayers() {
     });
 
     list.appendChild(card);
+
+    // Enable drag ONLY when mouse is down on the handle
+    const handle = card.querySelector('.drag-handle');
+    handle.addEventListener('mousedown', () => { card.draggable = true; });
+    handle.addEventListener('mouseleave', () => { if (dragSrcIdx === null) card.draggable = false; });
   });
 
   // Bind events
