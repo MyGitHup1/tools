@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>颜色叠加计算器</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3350;
+    --text: #e2e8f0;
+    --text-dim: #8892a4;
+    --accent: #6366f1;
+    --accent2: #818cf8;
+    --danger: #f87171;
+    --success: #34d399;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px 16px;
+  }
+
+  /* ===== Header ===== */
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .header h1 {
+    font-size: 1.9rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #6366f1, #a78bfa, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+  }
+  .header p {
+    margin-top: 6px;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+    transition: color 0.2s;
+  }
+  .back-btn:hover { color: var(--accent2); }
+
+  /* ===== Layout ===== */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 720px) {
+    .container { grid-template-columns: 1fr; }
+  }
+
+  /* ===== Panel ===== */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .panel-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+
+  /* ===== Color Layer Card ===== */
+  .layers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 60px;
+  }
+
+  .layer-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    cursor: grab;
+    user-select: none;
+  }
+  .layer-card:active { cursor: grabbing; }
+  .layer-card.dragging {
+    opacity: 0.5;
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+  .layer-card.drag-over {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+
+  .layer-swatch {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    border: 2px solid rgba(255,255,255,0.15);
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  /* checkerboard behind swatch for transparency */
+  .layer-swatch::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(45deg,#666 25%,transparent 25%),
+      linear-gradient(-45deg,#666 25%,transparent 25%),
+      linear-gradient(45deg,transparent 75%,#666 75%),
+      linear-gradient(-45deg,transparent 75%,#666 75%);
+    background-size: 8px 8px;
+    background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+    background-color: #888;
+  }
+  .layer-swatch-inner {
+    position: absolute;
+    inset: 0;
+  }
+  .layer-swatch input[type="color"] {
+    position: absolute;
+    inset: -4px;
+    width: calc(100% + 8px);
+    height: calc(100% + 8px);
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .layer-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .layer-hex {
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    color: var(--text);
+    letter-spacing: 0.5px;
+  }
+
+  .layer-alpha-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 5px;
+  }
+  .layer-alpha-row label {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    flex-shrink: 0;
+    width: 18px;
+    text-align: right;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    cursor: pointer;
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent2);
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 4px rgba(99,102,241,0.6);
+  }
+  .alpha-val {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    width: 32px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .layer-mode {
+    font-size: 0.72rem;
+  }
+  .layer-mode select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 3px 6px;
+    font-size: 0.72rem;
+    cursor: pointer;
+    outline: none;
+  }
+  .layer-mode select:hover { border-color: var(--accent); }
+
+  .layer-del {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: color 0.2s, background 0.2s;
+    flex-shrink: 0;
+    font-size: 1rem;
+    line-height: 1;
+  }
+  .layer-del:hover { color: var(--danger); background: rgba(248,113,113,0.1); }
+
+  .drag-handle {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    cursor: grab;
+    flex-shrink: 0;
+    line-height: 1;
+    padding: 2px;
+  }
+
+  /* order label */
+  .layer-order {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    width: 16px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  /* ===== Add button ===== */
+  .add-btn {
+    margin-top: 12px;
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .add-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent2);
+    background: rgba(99,102,241,0.06);
+  }
+
+  /* ===== Mode legend ===== */
+  .mode-desc {
+    margin-top: 14px;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    line-height: 1.7;
+  }
+  .mode-desc b { color: var(--text); }
+
+  /* ===== Result Panel ===== */
+  .result-panel {
+    position: sticky;
+    top: 24px;
+  }
+
+  /* big color preview */
+  .result-preview {
+    position: relative;
+    height: 140px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  /* checkerboard */
+  .result-preview::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(45deg,#555 25%,transparent 25%),
+      linear-gradient(-45deg,#555 25%,transparent 25%),
+      linear-gradient(45deg,transparent 75%,#555 75%),
+      linear-gradient(-45deg,transparent 75%,#555 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+    background-color: #333;
+  }
+  .result-color-box {
+    position: absolute;
+    inset: 0;
+    transition: background 0.2s;
+  }
+  .result-on-white {
+    position: relative;
+    height: 60px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .result-on-white-label {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+
+  /* values */
+  .result-values {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .val-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .val-row:hover { border-color: var(--accent); }
+  .val-row .val-label {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .val-row .val-text {
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .val-row .copy-hint {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    margin-left: 8px;
+  }
+  .val-row.copied { border-color: var(--success); }
+  .val-row.copied .val-text { color: var(--success); }
+
+  /* ===== Visual stack ===== */
+  .stack-vis {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 3px;
+  }
+  .stack-vis-item {
+    height: 22px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    font-size: 0.68rem;
+    color: rgba(255,255,255,0.8);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+    font-weight: 600;
+    transition: background 0.2s;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  /* ===== On White/Black preview ===== */
+  .preview-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .preview-box {
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid var(--border);
+  }
+  .preview-box .preview-label {
+    font-size: 0.65rem;
+    opacity: 0.7;
+    margin-top: 4px;
+  }
+
+  /* ===== Toast ===== */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--accent);
+    color: white;
+    font-size: 0.82rem;
+    padding: 8px 18px;
+    border-radius: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s;
+    z-index: 999;
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ===== Empty state ===== */
+  .empty-hint {
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    text-align: center;
+    padding: 24px 0;
+    display: none;
+  }
+  .layers-list:empty + .empty-hint { display: block; }
+</style>
+</head>
+<body>
+
+<div style="max-width:900px; margin:0 auto 0; padding:0 16px 0;">
+  <a class="back-btn" href="../../index.html">
+    ← 返回工具箱
+  </a>
+</div>
+
+<div class="header">
+  <h1>🎨 颜色叠加计算器</h1>
+  <p>添加多个颜色层 · 设置透明度和混合模式 · 实时计算最终叠加色</p>
+</div>
+
+<div class="container">
+  <!-- LEFT: Layers -->
+  <div>
+    <div class="panel">
+      <div class="panel-title">颜色层（从下往上叠加）</div>
+      <div class="layers-list" id="layersList"></div>
+      <div class="empty-hint">暂无颜色层，点击下方按钮添加</div>
+      <button class="add-btn" id="addBtn">
+        <span style="font-size:1.1rem">＋</span> 添加颜色层
+      </button>
+    </div>
+
+    <div class="panel" style="margin-top:16px;">
+      <div class="panel-title">混合模式说明</div>
+      <div class="mode-desc">
+        <b>正常（Normal）</b>：按 Alpha 透明度直接叠加，最常见<br>
+        <b>正片叠底（Multiply）</b>：两色相乘，结果更暗，常用于阴影<br>
+        <b>滤色（Screen）</b>：与正片叠底相反，结果更亮，常用于发光<br>
+        <b>叠加（Overlay）</b>：亮处滤色+暗处正片叠底，增强对比<br>
+        <b>变亮（Lighten）</b>：取每通道较大值<br>
+        <b>变暗（Darken）</b>：取每通道较小值<br>
+        <b>差值（Difference）</b>：取绝对差值，用于检测变化
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Result -->
+  <div class="result-panel">
+    <div class="panel">
+      <div class="panel-title">叠加结果</div>
+
+      <div class="result-preview">
+        <div class="result-color-box" id="resultBox"></div>
+      </div>
+
+      <div class="preview-pair">
+        <div class="preview-box" id="onWhite">
+          <div id="onWhiteText">——</div>
+          <div class="preview-label">白底效果</div>
+        </div>
+        <div class="preview-box" id="onBlack">
+          <div id="onBlackText">——</div>
+          <div class="preview-label">黑底效果</div>
+        </div>
+      </div>
+
+      <div class="result-values" style="margin-top:14px;" id="resultValues">
+        <div class="val-row" id="valHex" onclick="copyVal('hex')">
+          <span class="val-label">HEX</span>
+          <span class="val-text" id="txtHex">#------</span>
+          <span class="copy-hint">点击复制</span>
+        </div>
+        <div class="val-row" id="valRgb" onclick="copyVal('rgb')">
+          <span class="val-label">RGB</span>
+          <span class="val-text" id="txtRgb">rgb(--,--,--)</span>
+          <span class="copy-hint">点击复制</span>
+        </div>
+        <div class="val-row" id="valRgba" onclick="copyVal('rgba')">
+          <span class="val-label">RGBA</span>
+          <span class="val-text" id="txtRgba">rgba(--,--,--,--)</span>
+          <span class="copy-hint">点击复制</span>
+        </div>
+        <div class="val-row" id="valHsl" onclick="copyVal('hsl')">
+          <span class="val-label">HSL</span>
+          <span class="val-text" id="txtHsl">hsl(--,--,--)</span>
+          <span class="copy-hint">点击复制</span>
+        </div>
+      </div>
+
+      <!-- Visual stack -->
+      <div class="panel-title" style="margin-top:20px;">叠加层可视化</div>
+      <div class="stack-vis" id="stackVis"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast">已复制 ✓</div>
+
+<script>
+// ===================== State =====================
+let layers = [];
+let dragSrcIdx = null;
+
+const BLEND_MODES = [
+  { id: 'normal',     label: '正常' },
+  { id: 'multiply',   label: '正片叠底' },
+  { id: 'screen',     label: '滤色' },
+  { id: 'overlay',    label: '叠加' },
+  { id: 'lighten',    label: '变亮' },
+  { id: 'darken',     label: '变暗' },
+  { id: 'difference', label: '差值' },
+];
+
+// Preset starting layers
+const PRESETS = [
+  { hex: '#1a1d27', alpha: 1.0,  mode: 'normal' },
+  { hex: '#6366f1', alpha: 0.65, mode: 'normal' },
+  { hex: '#f472b6', alpha: 0.4,  mode: 'screen' },
+];
+
+// ===================== Color Math =====================
+function hexToRgb(hex) {
+  hex = hex.replace(/^#/, '');
+  if (hex.length === 3) hex = hex.split('').map(c => c+c).join('');
+  const n = parseInt(hex, 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function rgbToHex(r, g, b) {
+  return '#' + [r, g, b].map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2,'0')).join('');
+}
+
+function rgbToHsl(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h, s, l = (max + min) / 2;
+  if (max === min) {
+    h = s = 0;
+  } else {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+      case g: h = ((b - r) / d + 2) / 6; break;
+      case b: h = ((r - g) / d + 4) / 6; break;
+    }
+  }
+  return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
+}
+
+// Blend two [r,g,b] colors using mode, return [r,g,b]
+function blendChannels(base, blend, mode) {
+  const b = base.map(v => v / 255);
+  const s = blend.map(v => v / 255);
+  let out;
+  switch (mode) {
+    case 'multiply':
+      out = b.map((v, i) => v * s[i]);
+      break;
+    case 'screen':
+      out = b.map((v, i) => 1 - (1 - v) * (1 - s[i]));
+      break;
+    case 'overlay':
+      out = b.map((v, i) =>
+        v < 0.5 ? 2 * v * s[i] : 1 - 2 * (1 - v) * (1 - s[i])
+      );
+      break;
+    case 'lighten':
+      out = b.map((v, i) => Math.max(v, s[i]));
+      break;
+    case 'darken':
+      out = b.map((v, i) => Math.min(v, s[i]));
+      break;
+    case 'difference':
+      out = b.map((v, i) => Math.abs(v - s[i]));
+      break;
+    default: // normal
+      out = s;
+  }
+  return out.map(v => Math.round(v * 255));
+}
+
+// Alpha composite: src over dst (Porter-Duff)
+// Returns { r, g, b, a } all 0-255 (alpha 0-1 inside, return 0-255 for a)
+function alphaComposite(dst, src_rgb, src_a, mode) {
+  const dst_a = dst.a / 255;
+  const src_alpha = src_a;
+
+  // Blend RGB channels first (using blend mode)
+  const blended = blendChannels([dst.r, dst.g, dst.b], src_rgb, mode);
+
+  // Porter-Duff "src over dst" compositing
+  const out_a = src_alpha + dst_a * (1 - src_alpha);
+  if (out_a === 0) return { r: 0, g: 0, b: 0, a: 0 };
+
+  const out = {};
+  ['r', 'g', 'b'].forEach((ch, i) => {
+    out[ch] = Math.round(
+      (blended[i] * src_alpha + dst[ch] * dst_a * (1 - src_alpha)) / out_a
+    );
+  });
+  out.a = Math.round(out_a * 255);
+  return out;
+}
+
+// Composite all layers bottom-to-top
+function compositeAll() {
+  if (layers.length === 0) return { r: 0, g: 0, b: 0, a: 0 };
+
+  let result = { r: 0, g: 0, b: 0, a: 0 };
+  for (let i = 0; i < layers.length; i++) {
+    const l = layers[i];
+    const rgb = hexToRgb(l.hex);
+    result = alphaComposite(result, rgb, l.alpha, l.mode);
+  }
+  return result;
+}
+
+// Flatten onto a given background
+function flattenOnBg(color, bg) {
+  const a = color.a / 255;
+  return {
+    r: Math.round(color.r * a + bg.r * (1 - a)),
+    g: Math.round(color.g * a + bg.g * (1 - a)),
+    b: Math.round(color.b * a + bg.b * (1 - a)),
+  };
+}
+
+// ===================== Render =====================
+function getLayerAccentColor(l) {
+  const rgb = hexToRgb(l.hex);
+  return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${Math.max(0.5, l.alpha)})`;
+}
+
+function renderLayers() {
+  const list = document.getElementById('layersList');
+  list.innerHTML = '';
+
+  layers.forEach((l, i) => {
+    const rgb = hexToRgb(l.hex);
+    const card = document.createElement('div');
+    card.className = 'layer-card';
+    card.draggable = true;
+    card.dataset.idx = i;
+
+    const modeOptions = BLEND_MODES.map(m =>
+      `<option value="${m.id}" ${l.mode === m.id ? 'selected' : ''}>${m.label}</option>`
+    ).join('');
+
+    card.innerHTML = `
+      <span class="drag-handle" title="拖拽排序">⠿</span>
+      <span class="layer-order">${i + 1}</span>
+      <div class="layer-swatch" title="点击选色">
+        <div class="layer-swatch-inner" style="background:rgba(${rgb[0]},${rgb[1]},${rgb[2]},${l.alpha})"></div>
+        <input type="color" value="${l.hex}" data-idx="${i}" class="color-input">
+      </div>
+      <div class="layer-info">
+        <div class="layer-hex">${l.hex.toUpperCase()} &nbsp;<span style="color:var(--text-dim);font-weight:400">α ${Math.round(l.alpha*100)}%</span></div>
+        <div class="layer-alpha-row">
+          <label>α</label>
+          <input type="range" min="0" max="100" value="${Math.round(l.alpha*100)}" data-idx="${i}" class="alpha-input">
+          <span class="alpha-val">${Math.round(l.alpha*100)}%</span>
+        </div>
+        <div class="layer-mode">
+          混合：<select data-idx="${i}" class="mode-select">${modeOptions}</select>
+        </div>
+      </div>
+      <button class="layer-del" data-idx="${i}" title="删除此层">✕</button>
+    `;
+
+    // drag events
+    card.addEventListener('dragstart', e => {
+      dragSrcIdx = i;
+      setTimeout(() => card.classList.add('dragging'), 0);
+    });
+    card.addEventListener('dragend', () => {
+      card.classList.remove('dragging');
+      document.querySelectorAll('.layer-card').forEach(c => c.classList.remove('drag-over'));
+    });
+    card.addEventListener('dragover', e => {
+      e.preventDefault();
+      document.querySelectorAll('.layer-card').forEach(c => c.classList.remove('drag-over'));
+      card.classList.add('drag-over');
+    });
+    card.addEventListener('drop', e => {
+      e.preventDefault();
+      card.classList.remove('drag-over');
+      if (dragSrcIdx !== null && dragSrcIdx !== i) {
+        const moved = layers.splice(dragSrcIdx, 1)[0];
+        layers.splice(i, 0, moved);
+        renderLayers();
+        updateResult();
+      }
+    });
+
+    list.appendChild(card);
+  });
+
+  // Bind events
+  document.querySelectorAll('.color-input').forEach(el => {
+    el.addEventListener('input', e => {
+      layers[+e.target.dataset.idx].hex = e.target.value;
+      renderLayers(); updateResult();
+    });
+  });
+  document.querySelectorAll('.alpha-input').forEach(el => {
+    el.addEventListener('input', e => {
+      const idx = +e.target.dataset.idx;
+      layers[idx].alpha = +e.target.value / 100;
+      renderLayers(); updateResult();
+    });
+  });
+  document.querySelectorAll('.mode-select').forEach(el => {
+    el.addEventListener('change', e => {
+      layers[+e.target.dataset.idx].mode = e.target.value;
+      updateResult();
+    });
+  });
+  document.querySelectorAll('.layer-del').forEach(el => {
+    el.addEventListener('click', e => {
+      layers.splice(+e.target.dataset.idx, 1);
+      renderLayers(); updateResult();
+    });
+  });
+}
+
+function updateResult() {
+  const c = compositeAll();
+
+  // Big preview
+  document.getElementById('resultBox').style.background =
+    `rgba(${c.r},${c.g},${c.b},${(c.a/255).toFixed(3)})`;
+
+  // Flatten on white / black
+  const onWhite = flattenOnBg(c, {r:255,g:255,b:255});
+  const onBlack = flattenOnBg(c, {r:0,g:0,b:0});
+
+  const owBox = document.getElementById('onWhite');
+  owBox.style.background = `rgb(${onWhite.r},${onWhite.g},${onWhite.b})`;
+  owBox.style.color = luminance(onWhite.r,onWhite.g,onWhite.b) > 0.4 ? '#111' : '#fff';
+  document.getElementById('onWhiteText').textContent = rgbToHex(onWhite.r,onWhite.g,onWhite.b).toUpperCase();
+
+  const obBox = document.getElementById('onBlack');
+  obBox.style.background = `rgb(${onBlack.r},${onBlack.g},${onBlack.b})`;
+  obBox.style.color = luminance(onBlack.r,onBlack.g,onBlack.b) > 0.4 ? '#111' : '#fff';
+  document.getElementById('onBlackText').textContent = rgbToHex(onBlack.r,onBlack.g,onBlack.b).toUpperCase();
+
+  // Values
+  const a = (c.a / 255).toFixed(3);
+  const hex = rgbToHex(c.r, c.g, c.b);
+  const hexA = hex + Math.round(c.a).toString(16).padStart(2,'0');
+  const [h, s, l] = rgbToHsl(c.r, c.g, c.b);
+
+  document.getElementById('txtHex').textContent = hex.toUpperCase() + (c.a < 255 ? ` (α ${Math.round(c.a/255*100)}%)` : '');
+  document.getElementById('txtRgb').textContent = `rgb(${c.r}, ${c.g}, ${c.b})`;
+  document.getElementById('txtRgba').textContent = `rgba(${c.r}, ${c.g}, ${c.b}, ${a})`;
+  document.getElementById('txtHsl').textContent = `hsl(${h}°, ${s}%, ${l}%)`;
+
+  window._result = { hex, hexA, r: c.r, g: c.g, b: c.b, a };
+
+  // Stack vis
+  const vis = document.getElementById('stackVis');
+  vis.innerHTML = '';
+  layers.forEach((l, i) => {
+    const rgb = hexToRgb(l.hex);
+    const item = document.createElement('div');
+    item.className = 'stack-vis-item';
+    item.style.background = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${Math.max(0.3, l.alpha)})`;
+    const modeName = BLEND_MODES.find(m => m.id === l.mode)?.label || l.mode;
+    item.textContent = `${i+1}. ${l.hex.toUpperCase()} · α${Math.round(l.alpha*100)}% · ${modeName}`;
+    vis.appendChild(item);
+  });
+}
+
+function luminance(r, g, b) {
+  const srgb = [r,g,b].map(v => {
+    v /= 255;
+    return v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4);
+  });
+  return 0.2126*srgb[0] + 0.7152*srgb[1] + 0.0722*srgb[2];
+}
+
+// ===================== Copy =====================
+const COPY_MAP = {
+  hex:  () => document.getElementById('txtHex').textContent.split(' ')[0],
+  rgb:  () => document.getElementById('txtRgb').textContent,
+  rgba: () => document.getElementById('txtRgba').textContent,
+  hsl:  () => document.getElementById('txtHsl').textContent,
+};
+
+function copyVal(key) {
+  const text = COPY_MAP[key]?.();
+  if (!text) return;
+  navigator.clipboard.writeText(text).catch(() => {});
+  const row = document.getElementById('val' + key.charAt(0).toUpperCase() + key.slice(1));
+  if (row) {
+    row.classList.add('copied');
+    setTimeout(() => row.classList.remove('copied'), 1200);
+  }
+  showToast('已复制：' + text);
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// ===================== Add Layer =====================
+function addLayer(preset) {
+  layers.push(preset || {
+    hex: '#' + Math.floor(Math.random()*0xffffff).toString(16).padStart(6,'0'),
+    alpha: 0.7,
+    mode: 'normal',
+  });
+  renderLayers();
+  updateResult();
+}
+
+// ===================== Init =====================
+document.getElementById('addBtn').addEventListener('click', () => addLayer());
+
+PRESETS.forEach(p => layers.push({ ...p }));
+renderLayers();
+updateResult();
+</script>
+</body>
+</html>
