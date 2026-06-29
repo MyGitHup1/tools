@@ -18,6 +18,7 @@
     --accent2: #a78bfa;
     --danger: #f87171;
     --success: #4ade80;
+    --warn: #fbbf24;
     --radius: 10px;
     --radius-sm: 6px;
   }
@@ -77,7 +78,7 @@
 
   /* ===== Sidebar ===== */
   .sidebar {
-    width: 260px;
+    width: 280px;
     flex-shrink: 0;
     background: var(--surface);
     border-right: 1px solid var(--border);
@@ -124,6 +125,12 @@
     font-size: 0.68rem; color: var(--accent);
     margin-top: 6px;
     font-weight: 500;
+  }
+  .drop-zone-tip {
+    font-size: 0.66rem; color: var(--warn);
+    margin-top: 4px;
+    opacity: 0.8;
+    line-height: 1.4;
   }
 
   /* ===== File info ===== */
@@ -218,6 +225,53 @@
   .stat-card-label { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
   .stat-card-value { font-size: 0.88rem; color: var(--text); font-weight: 600; margin-top: 2px; word-break: break-all; }
 
+  /* ===== Texture list ===== */
+  .texture-list {
+    display: none;
+    max-height: 160px;
+    overflow-y: auto;
+    margin-top: 6px;
+    gap: 4px;
+    flex-direction: column;
+  }
+  .texture-list.show { display: flex; }
+  .texture-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 8px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+  }
+  .texture-item-icon {
+    width: 28px; height: 28px;
+    border-radius: 3px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+  .texture-item-name {
+    flex: 1;
+    word-break: break-all;
+    line-height: 1.3;
+  }
+  .texture-item-type {
+    font-size: 0.6rem;
+    color: var(--accent);
+    background: rgba(96,165,250,0.12);
+    padding: 2px 5px;
+    border-radius: 3px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .texture-item-dim {
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
   /* ===== Canvas area ===== */
   .canvas-area {
     flex: 1;
@@ -267,24 +321,10 @@
     font-size: 1rem;
     transition: all 0.2s;
     backdrop-filter: blur(6px);
+    position: relative;
   }
   .tool-btn:hover { color: var(--text); border-color: var(--accent); }
   .tool-btn.active { color: var(--accent); border-color: var(--accent); background: rgba(96,165,250,0.12); }
-  .tool-btn[title]::after {
-    content: attr(title);
-    position: absolute;
-    right: calc(100% + 8px);
-    background: rgba(10,10,15,0.9);
-    color: var(--text);
-    font-size: 0.72rem;
-    padding: 4px 8px;
-    border-radius: 4px;
-    white-space: nowrap;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.15s;
-  }
-  .tool-btn:hover::after { opacity: 1; }
 
   /* ===== Loading ===== */
   .loading-overlay {
@@ -325,7 +365,7 @@
   }
   .error-overlay.show { display: flex; }
   .error-icon { font-size: 2.5rem; }
-  .error-msg { font-size: 0.88rem; color: var(--danger); text-align: center; max-width: 360px; }
+  .error-msg { font-size: 0.88rem; color: var(--danger); text-align: center; max-width: 420px; line-height: 1.6; }
   .error-close { margin-top: 8px; }
 
   /* ===== Hint tooltip bottom left ===== */
@@ -353,7 +393,7 @@
 <header>
   <a href="../../index.html" class="back-btn">← 返回首页</a>
   <span class="title">🧊 3D 模型预览</span>
-  <span class="subtitle">GLB · GLTF · OBJ · STL · FBX</span>
+  <span class="subtitle">GLB · GLTF · OBJ · STL · FBX · ZIP</span>
 </header>
 
 <div class="layout">
@@ -365,10 +405,11 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">📁 打开模型</div>
       <div class="drop-zone" id="dropZone">
-        <input type="file" id="fileInput" accept=".glb,.gltf,.obj,.stl,.fbx">
+        <input type="file" id="fileInput" accept=".glb,.gltf,.obj,.stl,.fbx,.zip" multiple>
         <div class="drop-zone-icon">📂</div>
-        <div class="drop-zone-text">点击选择或拖拽文件到此处</div>
-        <div class="drop-zone-formats">GLB · GLTF · OBJ · STL · FBX</div>
+        <div class="drop-zone-text">点击选择或拖拽文件 / ZIP 包</div>
+        <div class="drop-zone-formats">GLB · GLTF · OBJ · STL · FBX · ZIP</div>
+        <div class="drop-zone-tip">💡 带贴图的模型请打包为 ZIP 拖入</div>
       </div>
       <div class="file-info" id="fileInfo">
         <div class="file-info-name" id="fileName">—</div>
@@ -456,8 +497,12 @@
         <div class="stat-card"><div class="stat-card-label">面数</div><div class="stat-card-value" id="statFaces">—</div></div>
         <div class="stat-card"><div class="stat-card-label">网格数</div><div class="stat-card-value" id="statMeshes">—</div></div>
         <div class="stat-card"><div class="stat-card-label">材质数</div><div class="stat-card-value" id="statMats">—</div></div>
-        <div class="stat-card" style="grid-column:1/-1"><div class="stat-card-label">尺寸 (X·Y·Z mm)</div><div class="stat-card-value" id="statSize">—</div></div>
+        <div class="stat-card"><div class="stat-card-label">贴图数</div><div class="stat-card-value" id="statTex">—</div></div>
+        <div class="stat-card" style="grid-column:1/-1"><div class="stat-card-label">尺寸 (X·Y·Z)</div><div class="stat-card-value" id="statSize">—</div></div>
       </div>
+
+      <!-- Texture list -->
+      <div class="texture-list" id="textureList"></div>
     </div>
 
     <!-- Extra -->
@@ -470,6 +515,7 @@
       </div>
       <div class="btn-group" style="margin-top:6px">
         <button class="btn" onclick="screenshot()">📷 截图</button>
+        <button class="btn" id="btnReload" onclick="reloadModel()" style="display:none">🔄 重新加载</button>
       </div>
     </div>
 
@@ -495,8 +541,8 @@
     <!-- Before load hint -->
     <div class="canvas-hint" id="canvasHint">
       <div class="canvas-hint-icon">🧊</div>
-      <div class="canvas-hint-text">从左侧选择或拖入 3D 模型文件</div>
-      <div class="canvas-hint-sub">支持 GLB · GLTF · OBJ · STL · FBX</div>
+      <div class="canvas-hint-text">从左侧选择或拖入 3D 模型文件 / ZIP 包</div>
+      <div class="canvas-hint-sub">支持 GLB · GLTF · OBJ · STL · FBX · ZIP（含贴图）</div>
     </div>
 
     <!-- Toolbar -->
@@ -518,6 +564,10 @@
 
 </div>
 
+<!-- JSZip (loaded as regular script, available as window.JSZip) -->
+<script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js">
+</script>
+
 <!-- Three.js from CDN -->
 <script type="importmap">
 {
@@ -533,8 +583,12 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 import { STLLoader } from 'three/addons/loaders/STLLoader.js';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+
+// Access JSZip from window (loaded by regular script tag)
+const JSZip = window.JSZip;
 
 // ===================== Renderer Setup =====================
 const canvas = document.getElementById('threeCanvas');
@@ -608,8 +662,12 @@ window.viewMode = 'solid';
 let showGrid = true;
 let showAxes = false;
 let autoRotate = false;
-let origCamPos = camera.position.clone();
-let origTarget = controls.target.clone();
+
+// Virtual filesystem for ZIP/multi-file resolution
+let virtualFS = null;          // Map<normalizedPath, {url, blob}>
+let modelBasePath = '';
+let loadedSourceArchive = null; // Keep reference for potential reload
+let lastFileList = null;        // Keep reference for reload
 
 // ===================== Animation Loop =====================
 function animate() {
@@ -622,6 +680,122 @@ function animate() {
 }
 animate();
 
+// ===================== Virtual Filesystem =====================
+function buildVirtualFS(entries) {
+  // entries: Array of {path: string, data: Uint8Array|ArrayBuffer} from ZIP
+  // or Array of {path: string, blob: Blob} from multi-file drop
+  const fs = new Map();
+  for (const entry of entries) {
+    const blob = entry.blob || new Blob([entry.data], { type: guessMimeType(entry.path) });
+    const url = URL.createObjectURL(blob);
+    fs.set(entry.path, { url, blob });
+    // Also store by raw filename for fallback
+    const fname = entry.path.split('/').pop().split('\\').pop();
+    if (!fs.has(fname)) {
+      fs.set(fname, { url, blob });
+    }
+  }
+  return fs;
+}
+
+function guessMimeType(path) {
+  const ext = path.split('.').pop().toLowerCase();
+  const map = {
+    png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg',
+    webp: 'image/webp', bmp: 'image/bmp', gif: 'image/gif',
+    glb: 'model/gltf-binary', gltf: 'model/gltf+json',
+    bin: 'application/octet-stream', hdr: 'image/vnd.radiance',
+    exr: 'image/x-exr', svg: 'image/svg+xml'
+  };
+  return map[ext] || 'application/octet-stream';
+}
+
+function createResolvingManager(fs, basePath) {
+  const manager = new THREE.LoadingManager();
+  manager.resolveURL = (url) => {
+    // Already absolute / blob
+    if (url.startsWith('blob:') || url.startsWith('http') || url.startsWith('data:')) {
+      return url;
+    }
+
+    // Try exact match
+    if (fs.has(url) && fs.get(url).url) {
+      return fs.get(url).url;
+    }
+
+    // Try filename-only fallback
+    const fname = url.split('/').pop().split('\\').pop();
+    if (fs.has(fname) && fs.get(fname).url) {
+      return fs.get(fname).url;
+    }
+
+    // Try relative to base path (for nested folder references)
+    if (basePath) {
+      const relPath = basePath + '/' + url.replace(/\\/g, '/');
+      if (fs.has(relPath) && fs.get(relPath).url) {
+        return fs.get(relPath).url;
+      }
+    }
+
+    // Try common texture sub-directories
+    const texDirs = ['textures', 'tex', 'maps', 'images', 'img', 'texture'];
+    for (const d of texDirs) {
+      const tryPath = d + '/' + fname;
+      if (fs.has(tryPath) && fs.get(tryPath).url) return fs.get(tryPath).url;
+      if (basePath) {
+        const tryRel = basePath + '/' + tryPath;
+        if (fs.has(tryRel) && fs.get(tryRel).url) return fs.get(tryRel).url;
+      }
+    }
+
+    // Try URL-decoded version (spaces etc.)
+    try {
+      const decoded = decodeURIComponent(fname);
+      if (decoded !== fname) {
+        for (const d of texDirs) {
+          const tryPath = d + '/' + decoded;
+          if (fs.has(tryPath) && fs.get(tryPath).url) return fs.get(tryPath).url;
+        }
+        if (fs.has(decoded) && fs.get(decoded).url) return fs.get(decoded).url;
+      }
+    } catch(e) {}
+
+    console.warn('[model-viewer] 未能解析资源:', url);
+    return url;
+  };
+  return manager;
+}
+
+// ===================== Find model / MTL in virtual FS =====================
+function findModelFiles(fs) {
+  const found = [];
+  const priority = { gltf: 1, glb: 2, obj: 3, fbx: 4, stl: 5 };
+  for (const [path, entry] of fs) {
+    const ext = path.split('.').pop().toLowerCase();
+    if (['gltf', 'glb', 'obj', 'fbx', 'stl'].includes(ext) && entry.url) {
+      found.push({ path, ext, url: entry.url });
+    }
+  }
+  found.sort((a, b) => (priority[a.ext] || 99) - (priority[b.ext] || 99));
+  return found;
+}
+
+function findMtlForObj(objPath, fs) {
+  const base = objPath.replace(/\.obj$/i, '').replace(/\\/g, '/');
+  const candidates = [
+    base + '.mtl',
+    base + '.MTL',
+    objPath.replace(/\.obj$/i, '.mtl'),
+    objPath.replace(/\.obj$/i, '.MTL'),
+  ];
+  for (const c of candidates) {
+    if (fs.has(c)) return { path: c, url: fs.get(c).url };
+    const fname = c.split('/').pop();
+    if (fs.has(fname)) return { path: fname, url: fs.get(fname).url };
+  }
+  return null;
+}
+
 // ===================== File Drop / Select =====================
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
@@ -631,107 +805,426 @@ dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover
 dropZone.addEventListener('drop', e => {
   e.preventDefault();
   dropZone.classList.remove('dragover');
-  if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+  handleFiles(e.dataTransfer.files);
 });
 fileInput.addEventListener('change', e => {
-  if (e.target.files[0]) loadFile(e.target.files[0]);
+  handleFiles(e.target.files);
 });
 
 // Also support drag-drop to the entire canvas area
 area.addEventListener('dragover', e => { e.preventDefault(); });
 area.addEventListener('drop', e => {
   e.preventDefault();
-  if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+  handleFiles(e.dataTransfer.files);
 });
 
-// ===================== Load File =====================
-async function loadFile(file) {
+function handleFiles(files) {
+  if (!files || files.length === 0) return;
+  lastFileList = files; // Save for reload
+
+  if (files.length === 1 && files[0].name.toLowerCase().endsWith('.zip')) {
+    loadFromZip(files[0]);
+  } else if (files.length === 1 && !files[0].name.toLowerCase().endsWith('.zip')) {
+    loadSingleFile(files[0]);
+  } else {
+    loadMultipleFiles(files);
+  }
+}
+
+// ===================== ZIP Loading =====================
+async function loadFromZip(zipFile) {
+  if (typeof JSZip === 'undefined') {
+    showError('JSZip 库未加载，请刷新页面重试。');
+    return;
+  }
+
+  const name = zipFile.name;
+  showLoading(`正在解压 ${name}…`);
+  document.getElementById('canvasHint').style.display = 'none';
+
+  try {
+    const zip = await JSZip.loadAsync(zipFile);
+    const entries = [];
+
+    for (const [path, entry] of Object.entries(zip.files)) {
+      if (entry.dir) continue;
+      const data = await entry.async('uint8array');
+      entries.push({ path: path.replace(/\\/g, '/'), data });
+    }
+
+    virtualFS = buildVirtualFS(entries);
+    loadedSourceArchive = { type: 'zip', name };
+
+    const modelFiles = findModelFiles(virtualFS);
+    if (modelFiles.length === 0) {
+      throw new Error('ZIP 包中未找到支持的模型文件（.gltf / .glb / .obj / .fbx / .stl）');
+    }
+
+    const mainFile = modelFiles[0];
+    modelBasePath = mainFile.path.substring(0, mainFile.path.lastIndexOf('/'));
+
+    // Update file info
+    updateLoadedFileInfo(name, `ZIP · ${(zipFile.size / 1024).toFixed(1)} KB · ${entries.length} 个文件 · 主模型: ${mainFile.path.split('/').pop()}`);
+
+    // Show reload button
+    document.getElementById('btnReload').style.display = '';
+    document.getElementById('btnReload').onclick = () => {
+      if (lastFileList) handleFiles(lastFileList);
+    };
+
+    showLoading(`正在加载 ${mainFile.path.split('/').pop()}…`);
+    await loadModelFromFS(mainFile);
+
+  } catch (err) {
+    hideLoading();
+    showError(`ZIP 加载失败：${err.message || '未知错误'}`);
+    console.error(err);
+  }
+}
+
+// ===================== Single File Loading (non-ZIP) =====================
+async function loadSingleFile(file) {
   const ext = file.name.split('.').pop().toLowerCase();
   const supported = ['glb','gltf','obj','stl','fbx'];
   if (!supported.includes(ext)) {
-    showError(`不支持的格式：.${ext}<br>支持：GLB · GLTF · OBJ · STL · FBX`);
+    showError(`不支持的格式：.${ext}<br>支持：GLB · GLTF · OBJ · STL · FBX · ZIP`);
     return;
   }
 
   showLoading(`正在加载 ${file.name}…`);
   document.getElementById('canvasHint').style.display = 'none';
 
-  // Update file info
-  document.getElementById('fileName').textContent = file.name;
-  document.getElementById('fileMeta').textContent =
-    `${(file.size / 1024).toFixed(1)} KB · .${ext.toUpperCase()}`;
-  document.getElementById('fileInfo').classList.add('show');
-
+  // Build a minimal virtual FS from this single file
   const url = URL.createObjectURL(file);
+  virtualFS = new Map();
+  virtualFS.set(file.name, { url, blob: file });
+  loadedSourceArchive = { type: 'single', name: file.name };
+  modelBasePath = '';
+
+  updateLoadedFileInfo(file.name, `${(file.size / 1024).toFixed(1)} KB · .${ext.toUpperCase()}`);
+
+  document.getElementById('btnReload').style.display = '';
+  document.getElementById('btnReload').onclick = () => {
+    if (lastFileList) handleFiles(lastFileList);
+  };
 
   try {
     let object;
 
     if (ext === 'glb' || ext === 'gltf') {
       const loader = new GLTFLoader();
-      const gltf = await new Promise((res, rej) => loader.load(url, res, undefined, rej));
+      const gltf = await loader.loadAsync(url);
       object = gltf.scene;
+      collectTextureInfo(gltf);
     } else if (ext === 'obj') {
       const loader = new OBJLoader();
-      object = await new Promise((res, rej) => loader.load(url, res, undefined, rej));
+      object = await loader.loadAsync(url);
+      collectTextureInfoFromObj(object);
     } else if (ext === 'stl') {
       const loader = new STLLoader();
-      const geometry = await new Promise((res, rej) => loader.load(url, res, undefined, rej));
+      const geometry = await loader.loadAsync(url);
       const material = new THREE.MeshStandardMaterial({ color: 0x88aacc, metalness: 0.2, roughness: 0.5 });
       object = new THREE.Mesh(geometry, material);
     } else if (ext === 'fbx') {
       const loader = new FBXLoader();
-      object = await new Promise((res, rej) => loader.load(url, res, undefined, rej));
+      object = await loader.loadAsync(url);
     }
-
-    URL.revokeObjectURL(url);
-
-    // Remove old model
-    if (currentModel) {
-      scene.remove(currentModel);
-      disposeObject(currentModel);
-    }
-    if (wireframeMesh) {
-      scene.remove(wireframeMesh);
-      disposeObject(wireframeMesh);
-      wireframeMesh = null;
-    }
-
-    // Center and scale
-    const box = new THREE.Box3().setFromObject(object);
-    const center = box.getCenter(new THREE.Vector3());
-    const size = box.getSize(new THREE.Vector3());
-    const maxDim = Math.max(size.x, size.y, size.z);
-    const scale = 2 / maxDim;
-
-    object.position.sub(center.multiplyScalar(scale));
-    object.scale.setScalar(scale);
-
-    // Update grid to match model base
-    const scaledBox = new THREE.Box3().setFromObject(object);
-    const scaledMin = scaledBox.min;
-    grid.position.y = scaledMin.y;
-
-    scene.add(object);
-    currentModel = object;
-
-    // Apply current view mode
-    applyViewMode();
-
-    // Update stats
-    updateStats(object, size);
-
-    // Fit camera
-    fitToView();
 
     hideLoading();
+    setModel(object, { x: 1, y: 1, z: 1 });
 
   } catch (err) {
     URL.revokeObjectURL(url);
     hideLoading();
-    showError(`加载失败：${err.message || '未知错误'}<br>请确认文件未损坏。`);
+    showError(`加载失败：${err.message || '未知错误'}<br><br>
+      如果模型引用外部贴图或 .bin 文件，请将所有文件打包为 ZIP 后拖入。`);
     console.error(err);
   }
+}
+
+// ===================== Multiple File Loading (non-ZIP) =====================
+async function loadMultipleFiles(files) {
+  showLoading(`正在处理 ${files.length} 个文件…`);
+  document.getElementById('canvasHint').style.display = 'none';
+
+  try {
+    const entries = [];
+    for (const file of files) {
+      entries.push({
+        path: file.name.replace(/\\/g, '/'),
+        blob: file
+      });
+    }
+
+    virtualFS = buildVirtualFS(entries);
+    loadedSourceArchive = { type: 'multi', name: `${files.length} files` };
+
+    const modelFiles = findModelFiles(virtualFS);
+    if (modelFiles.length === 0) {
+      throw new Error('拖入的文件中未找到支持的模型文件（.gltf / .glb / .obj / .fbx / .stl）');
+    }
+
+    const mainFile = modelFiles[0];
+    modelBasePath = '';
+
+    updateLoadedFileInfo(
+      mainFile.path.split('/').pop(),
+      `${files.length} 个文件 · .${mainFile.ext.toUpperCase()}`
+    );
+
+    document.getElementById('btnReload').style.display = '';
+    document.getElementById('btnReload').onclick = () => {
+      if (lastFileList) handleFiles(lastFileList);
+    };
+
+    showLoading(`正在加载 ${mainFile.path.split('/').pop()}…`);
+    await loadModelFromFS(mainFile);
+
+  } catch (err) {
+    hideLoading();
+    showError(`加载失败：${err.message || '未知错误'}`);
+    console.error(err);
+  }
+}
+
+// ===================== Load model from virtual FS =====================
+async function loadModelFromFS(mainFile) {
+  const manager = createResolvingManager(virtualFS, modelBasePath);
+  let object;
+
+  if (mainFile.ext === 'glb' || mainFile.ext === 'gltf') {
+    const loader = new GLTFLoader(manager);
+    const gltf = await loader.loadAsync(mainFile.url);
+    object = gltf.scene;
+    collectTextureInfo(gltf);
+  } else if (mainFile.ext === 'obj') {
+    const mtlInfo = findMtlForObj(mainFile.path, virtualFS);
+    if (mtlInfo) {
+      const mtlLoader = new MTLLoader(manager);
+      const materials = await mtlLoader.loadAsync(mtlInfo.url);
+      materials.preload();
+      const objLoader = new OBJLoader(manager);
+      objLoader.setMaterials(materials);
+      object = await objLoader.loadAsync(mainFile.url);
+    } else {
+      const objLoader = new OBJLoader(manager);
+      object = await objLoader.loadAsync(mainFile.url);
+    }
+    collectTextureInfoFromObj(object);
+  } else if (mainFile.ext === 'fbx') {
+    const loader = new FBXLoader(manager);
+    object = await loader.loadAsync(mainFile.url);
+  } else if (mainFile.ext === 'stl') {
+    const loader = new STLLoader(manager);
+    const geometry = await loader.loadAsync(mainFile.url);
+    const material = new THREE.MeshStandardMaterial({ color: 0x88aacc, metalness: 0.2, roughness: 0.5 });
+    object = new THREE.Mesh(geometry, material);
+  }
+
+  hideLoading();
+  setModel(object, null);
+}
+
+// ===================== Set Model in Scene =====================
+function setModel(object, rawSizeOverride) {
+  // Remove old model
+  if (currentModel) {
+    scene.remove(currentModel);
+    disposeObject(currentModel);
+  }
+  if (wireframeMesh) {
+    scene.remove(wireframeMesh);
+    disposeObject(wireframeMesh);
+    wireframeMesh = null;
+  }
+
+  // Center and scale
+  const box = new THREE.Box3().setFromObject(object);
+  const center = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3());
+  const maxDim = Math.max(size.x, size.y, size.z);
+  const scale = maxDim > 0 ? (2 / maxDim) : 1;
+
+  object.position.sub(center.clone().multiplyScalar(scale));
+  object.scale.setScalar(scale);
+
+  // Update grid to match model base
+  const scaledBox = new THREE.Box3().setFromObject(object);
+  grid.position.y = scaledBox.min.y;
+
+  scene.add(object);
+  currentModel = object;
+
+  // Apply current view mode
+  applyViewMode();
+
+  // Update stats
+  updateStats(object, rawSizeOverride || size);
+
+  // Fit camera
+  fitToView();
+}
+
+// ===================== Reload =====================
+window.reloadModel = function() {
+  if (lastFileList) {
+    handleFiles(lastFileList);
+  }
+};
+
+// ===================== Texture Info Collection =====================
+function collectTextureInfo(gltf) {
+  const textures = [];
+  const seen = new Set();
+
+  // Check parser JSON for image references
+  if (gltf.parser && gltf.parser.json) {
+    const json = gltf.parser.json;
+    if (json.images) {
+      for (const img of json.images) {
+        const name = img.uri || img.name || '(内嵌贴图)';
+        if (seen.has(name)) continue;
+        seen.add(name);
+        textures.push({
+          name,
+          uri: img.uri || '',
+          mimeType: img.mimeType || guessType(name),
+          embedded: !img.uri
+        });
+      }
+    }
+    if (json.textures) {
+      for (const tex of json.textures) {
+        if (json.images && json.images[tex.source]) {
+          const img = json.images[tex.source];
+          const name = img.uri || img.name || '(内嵌贴图)';
+          if (seen.has(name)) continue;
+          seen.add(name);
+          textures.push({
+            name,
+            uri: img.uri || '',
+            mimeType: img.mimeType || guessType(name),
+            embedded: !img.uri,
+            sampler: tex.sampler,
+          });
+        }
+      }
+    }
+  }
+
+  // Also traverse scene for live texture references
+  gltf.scene.traverse(child => {
+    if (child.material && child.material.map) {
+      const tex = child.material.map;
+      const info = tex.source ? tex.source.data : null;
+      if (info && !seen.has('map')) {
+        seen.add('map');
+        textures.push({ name: '主贴图 (map)', uri: '', mimeType: 'image/...', embedded: true });
+      }
+    }
+  });
+
+  updateTexturePanel(textures);
+}
+
+function collectTextureInfoFromObj(obj) {
+  const textures = [];
+  const seen = new Set();
+
+  obj.traverse(child => {
+    if (!child.material) return;
+    const mats = Array.isArray(child.material) ? child.material : [child.material];
+    for (const m of mats) {
+      const mapKeys = [
+        { key: 'map', label: '颜色贴图' },
+        { key: 'normalMap', label: '法线贴图' },
+        { key: 'roughnessMap', label: '粗糙度贴图' },
+        { key: 'metalnessMap', label: '金属度贴图' },
+        { key: 'aoMap', label: 'AO贴图' },
+        { key: 'emissiveMap', label: '发光贴图' },
+        { key: 'bumpMap', label: '凹凸贴图' },
+        { key: 'alphaMap', label: '透明贴图' },
+        { key: 'specularMap', label: '高光贴图' },
+      ];
+      for (const { key, label } of mapKeys) {
+        if (m[key]) {
+          const tex = m[key];
+          let name = label;
+          let img = null;
+          let w = 0, h = 0;
+
+          if (tex.image) {
+            img = tex.image;
+            w = img.width || 0;
+            h = img.height || 0;
+            if (img.src && img.src.startsWith('blob:')) {
+              const fname = img.src.split('/').pop();
+              if (fname) name = fname;
+            }
+          } else if (tex.source && tex.source.data) {
+            img = tex.source.data;
+            w = img.width || 0;
+            h = img.height || 0;
+          }
+
+          const id = name + '_' + key;
+          if (seen.has(id)) continue;
+          seen.add(id);
+          textures.push({
+            name,
+            mimeType: guessType(name),
+            mapType: label,
+            width: w,
+            height: h,
+            thumbnailUrl: img && img.src ? img.src : (img ? URL.createObjectURL(new Blob([img], {type:'image/png'})) : '')
+          });
+        }
+      }
+    }
+  });
+
+  updateTexturePanel(textures);
+}
+
+function guessType(filename) {
+  const ext = filename.split('.').pop().toLowerCase();
+  const map = { png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', webp:'image/webp', bmp:'image/bmp', gif:'image/gif', hdr:'image/vnd.radiance', exr:'image/x-exr' };
+  return map[ext] || '贴图';
+}
+
+function updateTexturePanel(textures) {
+  const list = document.getElementById('textureList');
+  const countEl = document.getElementById('statTex');
+  countEl.textContent = textures.length;
+
+  if (textures.length === 0) {
+    list.innerHTML = '';
+    list.classList.remove('show');
+    return;
+  }
+
+  list.innerHTML = textures.map(t => {
+    const typeLabel = t.mapType || (t.embedded ? '内嵌' : t.mimeType.split('/').pop() || '贴图');
+    const dimStr = t.width && t.height ? `${t.width}×${t.height}` : '';
+    const thumbHtml = t.thumbnailUrl
+      ? `<img class="texture-item-icon" src="${t.thumbnailUrl}" alt="">`
+      : `<span class="texture-item-icon" style="display:flex;align-items:center;justify-content:center;background:var(--surface);font-size:0.7rem;">🖼</span>`;
+    return `
+      <div class="texture-item">
+        ${thumbHtml}
+        <span class="texture-item-name" title="${t.name}">${escapeHtml(t.name)}</span>
+        ${dimStr ? `<span class="texture-item-dim">${dimStr}</span>` : ''}
+        <span class="texture-item-type">${typeLabel}</span>
+      </div>`;
+  }).join('');
+
+  list.classList.add('show');
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }
 
 // ===================== Stats =====================
@@ -742,9 +1235,9 @@ function updateStats(obj, rawSize) {
     if (child.isMesh) {
       meshes++;
       const geo = child.geometry;
-      if (geo.attributes.position) verts += geo.attributes.position.count;
-      if (geo.index) faces += geo.index.count / 3;
-      else if (geo.attributes.position) faces += geo.attributes.position.count / 3;
+      if (geo && geo.attributes.position) verts += geo.attributes.position.count;
+      if (geo && geo.index) faces += geo.index.count / 3;
+      else if (geo && geo.attributes.position) faces += geo.attributes.position.count / 3;
       if (Array.isArray(child.material)) child.material.forEach(m => mats.add(m.uuid));
       else if (child.material) mats.add(child.material.uuid);
     }
@@ -754,17 +1247,21 @@ function updateStats(obj, rawSize) {
   document.getElementById('statFaces').textContent = Math.round(faces).toLocaleString();
   document.getElementById('statMeshes').textContent = meshes;
   document.getElementById('statMats').textContent = mats.size;
-
-  // Size in "model units" — treat as mm if unsure
   document.getElementById('statSize').textContent =
     `${rawSize.x.toFixed(1)} × ${rawSize.y.toFixed(1)} × ${rawSize.z.toFixed(1)}`;
+}
+
+// ===================== Update file info =====================
+function updateLoadedFileInfo(name, meta) {
+  document.getElementById('fileName').textContent = name;
+  document.getElementById('fileMeta').textContent = meta;
+  document.getElementById('fileInfo').classList.add('show');
 }
 
 // ===================== View Mode =====================
 function applyViewMode() {
   if (!currentModel) return;
 
-  // Remove old wireframe overlay
   if (wireframeMesh) { scene.remove(wireframeMesh); disposeObject(wireframeMesh); wireframeMesh = null; }
 
   currentModel.traverse(child => {
@@ -777,7 +1274,6 @@ function applyViewMode() {
   });
 
   if (viewMode === 'both') {
-    // Clone model for wireframe overlay
     wireframeMesh = currentModel.clone();
     wireframeMesh.traverse(child => {
       if (child.isMesh) {
@@ -789,12 +1285,9 @@ function applyViewMode() {
     scene.add(wireframeMesh);
   }
 
-  // Update sidebar buttons
   ['Solid','Wireframe','Both'].forEach(m => {
     document.getElementById('btn'+m).classList.toggle('active', viewMode === m.toLowerCase());
   });
-
-  // Update toolbar button
   document.getElementById('tbWireframe').classList.toggle('active', viewMode === 'both');
 }
 
@@ -822,8 +1315,8 @@ window.fitToView = function() {
   const dir = camera.position.clone().sub(controls.target).normalize();
   if (dir.length() < 0.01) dir.set(1, 0.8, 1).normalize();
   camera.position.copy(center).addScaledVector(dir, dist);
-  camera.near = dist * 0.001;
-  camera.far = dist * 100;
+  camera.near = Math.max(dist * 0.001, 0.001);
+  camera.far = Math.max(dist * 100, 1000);
   camera.updateProjectionMatrix();
   controls.update();
 };
@@ -931,7 +1424,13 @@ function disposeObject(obj) {
     if (child.geometry) child.geometry.dispose();
     if (child.material) {
       const mats = Array.isArray(child.material) ? child.material : [child.material];
-      mats.forEach(m => m.dispose());
+      mats.forEach(m => {
+        // Dispose textures to free GPU memory
+        for (const key of Object.keys(m)) {
+          if (m[key] && m[key].isTexture) m[key].dispose();
+        }
+        m.dispose();
+      });
     }
   });
 }
