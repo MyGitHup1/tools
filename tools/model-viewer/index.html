@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D 模型预览 — Tools</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a28;
+    --border: rgba(255,255,255,0.1);
+    --text: #e8e8f0;
+    --text-dim: #888899;
+    --accent: #60a5fa;
+    --accent2: #a78bfa;
+    --danger: #f87171;
+    --success: #4ade80;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .back-btn {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--text-dim); text-decoration: none;
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .back-btn:hover { color: var(--text); border-color: var(--accent); }
+
+  .title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-left: auto;
+  }
+
+  /* ===== Layout ===== */
+  .layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    height: calc(100vh - 57px);
+  }
+
+  /* ===== Sidebar ===== */
+  .sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .sidebar-section {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-section-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  /* ===== Drop Zone ===== */
+  .drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--accent);
+    background: rgba(96,165,250,0.05);
+  }
+  .drop-zone input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer;
+  }
+  .drop-zone-icon { font-size: 2rem; margin-bottom: 6px; }
+  .drop-zone-text { font-size: 0.78rem; color: var(--text-dim); line-height: 1.5; }
+  .drop-zone-formats {
+    font-size: 0.68rem; color: var(--accent);
+    margin-top: 6px;
+    font-weight: 500;
+  }
+
+  /* ===== File info ===== */
+  .file-info {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 0.78rem;
+    display: none;
+  }
+  .file-info.show { display: block; }
+  .file-info-name { color: var(--text); font-weight: 500; word-break: break-all; margin-bottom: 4px; }
+  .file-info-meta { color: var(--text-dim); }
+
+  /* ===== Controls ===== */
+  .ctrl-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.82rem;
+  }
+  .ctrl-label { color: var(--text-dim); }
+  .ctrl-value { color: var(--accent); font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+
+  input[type=range] {
+    width: 100%;
+    accent-color: var(--accent);
+    margin: 4px 0 10px;
+    cursor: pointer;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex: 1;
+    text-align: center;
+  }
+  .btn:hover { color: var(--text); border-color: var(--accent); }
+  .btn.active { color: var(--accent); border-color: var(--accent); background: rgba(96,165,250,0.1); }
+
+  .btn-icon {
+    padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-icon:hover { color: var(--text); border-color: var(--accent); }
+
+  .color-ctrl {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .color-ctrl input[type=color] {
+    width: 36px; height: 28px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: none;
+    cursor: pointer;
+    padding: 2px;
+  }
+  .color-ctrl span { font-size: 0.78rem; color: var(--text-dim); }
+
+  /* ===== Stats ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .stat-card {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+  }
+  .stat-card-label { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-card-value { font-size: 0.88rem; color: var(--text); font-weight: 600; margin-top: 2px; word-break: break-all; }
+
+  /* ===== Canvas area ===== */
+  .canvas-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: #050508;
+  }
+
+  #threeCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ===== Drop hint overlay (before file loaded) ===== */
+  .canvas-hint {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    gap: 12px;
+  }
+  .canvas-hint-icon { font-size: 4rem; opacity: 0.15; }
+  .canvas-hint-text { font-size: 0.95rem; color: var(--text-dim); opacity: 0.5; }
+  .canvas-hint-sub { font-size: 0.78rem; color: var(--text-dim); opacity: 0.35; }
+
+  /* ===== Toolbar overlay ===== */
+  .toolbar {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .tool-btn {
+    width: 36px; height: 36px;
+    border-radius: var(--radius-sm);
+    background: rgba(10,10,15,0.8);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    transition: all 0.2s;
+    backdrop-filter: blur(6px);
+  }
+  .tool-btn:hover { color: var(--text); border-color: var(--accent); }
+  .tool-btn.active { color: var(--accent); border-color: var(--accent); background: rgba(96,165,250,0.12); }
+  .tool-btn[title]::after {
+    content: attr(title);
+    position: absolute;
+    right: calc(100% + 8px);
+    background: rgba(10,10,15,0.9);
+    color: var(--text);
+    font-size: 0.72rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .tool-btn:hover::after { opacity: 1; }
+
+  /* ===== Loading ===== */
+  .loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(5,5,8,0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 14px;
+    backdrop-filter: blur(4px);
+    z-index: 50;
+  }
+  .loading-overlay.show { display: flex; }
+  .spinner {
+    width: 48px; height: 48px;
+    border: 3px solid rgba(96,165,250,0.2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 0.9rem; color: var(--text-dim); }
+
+  /* ===== Error ===== */
+  .error-overlay {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(5,5,8,0.85);
+    backdrop-filter: blur(4px);
+    z-index: 50;
+  }
+  .error-overlay.show { display: flex; }
+  .error-icon { font-size: 2.5rem; }
+  .error-msg { font-size: 0.88rem; color: var(--danger); text-align: center; max-width: 360px; }
+  .error-close { margin-top: 8px; }
+
+  /* ===== Hint tooltip bottom left ===== */
+  .hint-bar {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    opacity: 0.5;
+    line-height: 1.6;
+    pointer-events: none;
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .sidebar { width: 100%; height: auto; overflow: visible; }
+    .layout { flex-direction: column; height: auto; }
+    .canvas-area { height: 60vh; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../../index.html" class="back-btn">← 返回首页</a>
+  <span class="title">🧊 3D 模型预览</span>
+  <span class="subtitle">GLB · GLTF · OBJ · STL · FBX</span>
+</header>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+
+    <!-- Upload -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">📁 打开模型</div>
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" accept=".glb,.gltf,.obj,.stl,.fbx">
+        <div class="drop-zone-icon">📂</div>
+        <div class="drop-zone-text">点击选择或拖拽文件到此处</div>
+        <div class="drop-zone-formats">GLB · GLTF · OBJ · STL · FBX</div>
+      </div>
+      <div class="file-info" id="fileInfo">
+        <div class="file-info-name" id="fileName">—</div>
+        <div class="file-info-meta" id="fileMeta">—</div>
+      </div>
+    </div>
+
+    <!-- View Mode -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">👁 显示模式</div>
+      <div class="btn-group">
+        <button class="btn active" id="btnSolid" onclick="setViewMode('solid')">实体</button>
+        <button class="btn" id="btnWireframe" onclick="setViewMode('wireframe')">线框</button>
+        <button class="btn" id="btnBoth" onclick="setViewMode('both')">叠加</button>
+      </div>
+    </div>
+
+    <!-- Background -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">🎨 背景颜色</div>
+      <div class="color-ctrl">
+        <input type="color" id="bgColorInput" value="#050508" oninput="setBgColor(this.value)">
+        <span>拖动取色</span>
+        <div class="btn-group" style="flex:1">
+          <button class="btn" style="flex:none;padding:4px 8px" onclick="setBgColor('#050508')">黑</button>
+          <button class="btn" style="flex:none;padding:4px 8px" onclick="setBgColor('#f0f0f5')">白</button>
+          <button class="btn" style="flex:none;padding:4px 8px" onclick="setBgColor('#1a2035')">蓝</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lighting -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">💡 灯光</div>
+
+      <div class="ctrl-row">
+        <span class="ctrl-label">环境光强度</span>
+        <span class="ctrl-value" id="ambientVal">1.0</span>
+      </div>
+      <input type="range" min="0" max="300" value="100" id="ambientSlider" oninput="setAmbient(this.value)">
+
+      <div class="ctrl-row">
+        <span class="ctrl-label">方向光强度</span>
+        <span class="ctrl-value" id="dirVal">1.5</span>
+      </div>
+      <input type="range" min="0" max="500" value="150" id="dirSlider" oninput="setDirLight(this.value)">
+
+      <div class="ctrl-row">
+        <span class="ctrl-label">灯光颜色</span>
+      </div>
+      <div class="color-ctrl">
+        <input type="color" id="lightColorInput" value="#ffffff" oninput="setLightColor(this.value)">
+        <span>方向光颜色</span>
+      </div>
+    </div>
+
+    <!-- Camera -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">📷 摄像机</div>
+
+      <div class="ctrl-row">
+        <span class="ctrl-label">视野角 (FOV)</span>
+        <span class="ctrl-value" id="fovVal">45°</span>
+      </div>
+      <input type="range" min="15" max="120" value="45" id="fovSlider" oninput="setFov(this.value)">
+
+      <div class="btn-group" style="margin-top:4px">
+        <button class="btn" onclick="resetCamera()">重置视角</button>
+        <button class="btn" onclick="fitToView()">适应视图</button>
+      </div>
+
+      <div class="btn-group" style="margin-top:6px">
+        <button class="btn" onclick="setView('front')">前</button>
+        <button class="btn" onclick="setView('top')">顶</button>
+        <button class="btn" onclick="setView('right')">右</button>
+        <button class="btn" onclick="setView('iso')">透视</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">📊 模型信息</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-card-label">顶点数</div><div class="stat-card-value" id="statVerts">—</div></div>
+        <div class="stat-card"><div class="stat-card-label">面数</div><div class="stat-card-value" id="statFaces">—</div></div>
+        <div class="stat-card"><div class="stat-card-label">网格数</div><div class="stat-card-value" id="statMeshes">—</div></div>
+        <div class="stat-card"><div class="stat-card-label">材质数</div><div class="stat-card-value" id="statMats">—</div></div>
+        <div class="stat-card" style="grid-column:1/-1"><div class="stat-card-label">尺寸 (X·Y·Z mm)</div><div class="stat-card-value" id="statSize">—</div></div>
+      </div>
+    </div>
+
+    <!-- Extra -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">⚙️ 其他</div>
+      <div class="btn-group">
+        <button class="btn" id="btnGrid" onclick="toggleGrid()">网格</button>
+        <button class="btn" id="btnAxes" onclick="toggleAxes()">坐标轴</button>
+        <button class="btn" id="btnAuto" onclick="toggleAutoRotate()">自转</button>
+      </div>
+      <div class="btn-group" style="margin-top:6px">
+        <button class="btn" onclick="screenshot()">📷 截图</button>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- 3D Canvas -->
+  <div class="canvas-area" id="canvasArea">
+    <canvas id="threeCanvas"></canvas>
+
+    <!-- Loading -->
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="spinner"></div>
+      <div class="loading-text" id="loadingText">正在加载模型…</div>
+    </div>
+
+    <!-- Error -->
+    <div class="error-overlay" id="errorOverlay">
+      <div class="error-icon">⚠️</div>
+      <div class="error-msg" id="errorMsg">加载失败</div>
+      <button class="btn error-close" onclick="closeError()">关闭</button>
+    </div>
+
+    <!-- Before load hint -->
+    <div class="canvas-hint" id="canvasHint">
+      <div class="canvas-hint-icon">🧊</div>
+      <div class="canvas-hint-text">从左侧选择或拖入 3D 模型文件</div>
+      <div class="canvas-hint-sub">支持 GLB · GLTF · OBJ · STL · FBX</div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button class="tool-btn" id="tbWireframe" title="线框叠加" onclick="setViewMode(viewMode==='both'?'solid':'both')">⬡</button>
+      <button class="tool-btn" id="tbGrid" title="切换网格" onclick="toggleGrid()">⊞</button>
+      <button class="tool-btn" id="tbAxes" title="坐标轴" onclick="toggleAxes()">⟴</button>
+      <button class="tool-btn" id="tbAuto" title="自动旋转" onclick="toggleAutoRotate()">↻</button>
+      <button class="tool-btn" title="截图" onclick="screenshot()">📷</button>
+      <button class="tool-btn" title="适应视图" onclick="fitToView()">⤢</button>
+      <button class="tool-btn" title="重置视角" onclick="resetCamera()">⌖</button>
+    </div>
+
+    <!-- Hint bar -->
+    <div class="hint-bar">
+      左键拖动旋转 · 右键平移 · 滚轮缩放 · 双击聚焦
+    </div>
+  </div>
+
+</div>
+
+<!-- Three.js from CDN -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.163.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.163.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+
+// ===================== Renderer Setup =====================
+const canvas = document.getElementById('threeCanvas');
+const area = document.getElementById('canvasArea');
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#050508');
+
+// Camera
+const camera = new THREE.PerspectiveCamera(45, 1, 0.001, 10000);
+camera.position.set(3, 3, 3);
+
+// Controls
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.07;
+controls.minDistance = 0.01;
+controls.maxDistance = 5000;
+controls.mouseButtons = {
+  LEFT: THREE.MOUSE.ROTATE,
+  MIDDLE: THREE.MOUSE.DOLLY,
+  RIGHT: THREE.MOUSE.PAN
+};
+
+// Resize
+function resize() {
+  const w = area.clientWidth, h = area.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(area);
+resize();
+
+// ===================== Lighting =====================
+let ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
+scene.add(ambientLight);
+
+let dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
+dirLight.position.set(5, 10, 7);
+dirLight.castShadow = true;
+dirLight.shadow.mapSize.set(2048, 2048);
+scene.add(dirLight);
+
+let dirLight2 = new THREE.DirectionalLight(0xffffff, 0.4);
+dirLight2.position.set(-5, -3, -5);
+scene.add(dirLight2);
+
+// ===================== Grid & Axes =====================
+let grid = new THREE.GridHelper(20, 40, 0x333344, 0x222233);
+grid.material.opacity = 0.5;
+grid.material.transparent = true;
+scene.add(grid);
+
+let axes = new THREE.AxesHelper(2);
+axes.visible = false;
+scene.add(axes);
+
+// ===================== State =====================
+let currentModel = null;
+let wireframeMesh = null;
+window.viewMode = 'solid';
+let showGrid = true;
+let showAxes = false;
+let autoRotate = false;
+let origCamPos = camera.position.clone();
+let origTarget = controls.target.clone();
+
+// ===================== Animation Loop =====================
+function animate() {
+  requestAnimationFrame(animate);
+  if (autoRotate && currentModel) {
+    currentModel.rotation.y += 0.005;
+  }
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+// ===================== File Drop / Select =====================
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => {
+  if (e.target.files[0]) loadFile(e.target.files[0]);
+});
+
+// Also support drag-drop to the entire canvas area
+area.addEventListener('dragover', e => { e.preventDefault(); });
+area.addEventListener('drop', e => {
+  e.preventDefault();
+  if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+});
+
+// ===================== Load File =====================
+async function loadFile(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  const supported = ['glb','gltf','obj','stl','fbx'];
+  if (!supported.includes(ext)) {
+    showError(`不支持的格式：.${ext}<br>支持：GLB · GLTF · OBJ · STL · FBX`);
+    return;
+  }
+
+  showLoading(`正在加载 ${file.name}…`);
+  document.getElementById('canvasHint').style.display = 'none';
+
+  // Update file info
+  document.getElementById('fileName').textContent = file.name;
+  document.getElementById('fileMeta').textContent =
+    `${(file.size / 1024).toFixed(1)} KB · .${ext.toUpperCase()}`;
+  document.getElementById('fileInfo').classList.add('show');
+
+  const url = URL.createObjectURL(file);
+
+  try {
+    let object;
+
+    if (ext === 'glb' || ext === 'gltf') {
+      const loader = new GLTFLoader();
+      const gltf = await new Promise((res, rej) => loader.load(url, res, undefined, rej));
+      object = gltf.scene;
+    } else if (ext === 'obj') {
+      const loader = new OBJLoader();
+      object = await new Promise((res, rej) => loader.load(url, res, undefined, rej));
+    } else if (ext === 'stl') {
+      const loader = new STLLoader();
+      const geometry = await new Promise((res, rej) => loader.load(url, res, undefined, rej));
+      const material = new THREE.MeshStandardMaterial({ color: 0x88aacc, metalness: 0.2, roughness: 0.5 });
+      object = new THREE.Mesh(geometry, material);
+    } else if (ext === 'fbx') {
+      const loader = new FBXLoader();
+      object = await new Promise((res, rej) => loader.load(url, res, undefined, rej));
+    }
+
+    URL.revokeObjectURL(url);
+
+    // Remove old model
+    if (currentModel) {
+      scene.remove(currentModel);
+      disposeObject(currentModel);
+    }
+    if (wireframeMesh) {
+      scene.remove(wireframeMesh);
+      disposeObject(wireframeMesh);
+      wireframeMesh = null;
+    }
+
+    // Center and scale
+    const box = new THREE.Box3().setFromObject(object);
+    const center = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const scale = 2 / maxDim;
+
+    object.position.sub(center.multiplyScalar(scale));
+    object.scale.setScalar(scale);
+
+    // Update grid to match model base
+    const scaledBox = new THREE.Box3().setFromObject(object);
+    const scaledMin = scaledBox.min;
+    grid.position.y = scaledMin.y;
+
+    scene.add(object);
+    currentModel = object;
+
+    // Apply current view mode
+    applyViewMode();
+
+    // Update stats
+    updateStats(object, size);
+
+    // Fit camera
+    fitToView();
+
+    hideLoading();
+
+  } catch (err) {
+    URL.revokeObjectURL(url);
+    hideLoading();
+    showError(`加载失败：${err.message || '未知错误'}<br>请确认文件未损坏。`);
+    console.error(err);
+  }
+}
+
+// ===================== Stats =====================
+function updateStats(obj, rawSize) {
+  let verts = 0, faces = 0, meshes = 0, mats = new Set();
+
+  obj.traverse(child => {
+    if (child.isMesh) {
+      meshes++;
+      const geo = child.geometry;
+      if (geo.attributes.position) verts += geo.attributes.position.count;
+      if (geo.index) faces += geo.index.count / 3;
+      else if (geo.attributes.position) faces += geo.attributes.position.count / 3;
+      if (Array.isArray(child.material)) child.material.forEach(m => mats.add(m.uuid));
+      else if (child.material) mats.add(child.material.uuid);
+    }
+  });
+
+  document.getElementById('statVerts').textContent = verts.toLocaleString();
+  document.getElementById('statFaces').textContent = Math.round(faces).toLocaleString();
+  document.getElementById('statMeshes').textContent = meshes;
+  document.getElementById('statMats').textContent = mats.size;
+
+  // Size in "model units" — treat as mm if unsure
+  document.getElementById('statSize').textContent =
+    `${rawSize.x.toFixed(1)} × ${rawSize.y.toFixed(1)} × ${rawSize.z.toFixed(1)}`;
+}
+
+// ===================== View Mode =====================
+function applyViewMode() {
+  if (!currentModel) return;
+
+  // Remove old wireframe overlay
+  if (wireframeMesh) { scene.remove(wireframeMesh); disposeObject(wireframeMesh); wireframeMesh = null; }
+
+  currentModel.traverse(child => {
+    if (child.isMesh) {
+      if (child.material) {
+        const mats = Array.isArray(child.material) ? child.material : [child.material];
+        mats.forEach(m => { m.wireframe = (viewMode === 'wireframe'); m.needsUpdate = true; });
+      }
+    }
+  });
+
+  if (viewMode === 'both') {
+    // Clone model for wireframe overlay
+    wireframeMesh = currentModel.clone();
+    wireframeMesh.traverse(child => {
+      if (child.isMesh) {
+        child.material = new THREE.MeshBasicMaterial({
+          color: 0x60a5fa, wireframe: true, transparent: true, opacity: 0.35
+        });
+      }
+    });
+    scene.add(wireframeMesh);
+  }
+
+  // Update sidebar buttons
+  ['Solid','Wireframe','Both'].forEach(m => {
+    document.getElementById('btn'+m).classList.toggle('active', viewMode === m.toLowerCase());
+  });
+
+  // Update toolbar button
+  document.getElementById('tbWireframe').classList.toggle('active', viewMode === 'both');
+}
+
+window.setViewMode = function(mode) {
+  viewMode = mode;
+  applyViewMode();
+};
+
+// ===================== Camera Controls =====================
+window.resetCamera = function() {
+  camera.position.set(3, 3, 3);
+  controls.target.set(0, 0, 0);
+  controls.update();
+};
+
+window.fitToView = function() {
+  if (!currentModel) return;
+  const box = new THREE.Box3().setFromObject(currentModel);
+  const center = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3());
+  const maxDim = Math.max(size.x, size.y, size.z);
+  const dist = maxDim * 2.2;
+
+  controls.target.copy(center);
+  const dir = camera.position.clone().sub(controls.target).normalize();
+  if (dir.length() < 0.01) dir.set(1, 0.8, 1).normalize();
+  camera.position.copy(center).addScaledVector(dir, dist);
+  camera.near = dist * 0.001;
+  camera.far = dist * 100;
+  camera.updateProjectionMatrix();
+  controls.update();
+};
+
+window.setView = function(view) {
+  if (!currentModel) return;
+  const box = new THREE.Box3().setFromObject(currentModel);
+  const center = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3());
+  const d = Math.max(size.x, size.y, size.z) * 2;
+
+  controls.target.copy(center);
+  const offsets = {
+    front: [0, 0, d],
+    top:   [0, d, 0.001],
+    right: [d, 0, 0],
+    iso:   [d*0.8, d*0.8, d*0.8]
+  };
+  const o = offsets[view] || offsets.iso;
+  camera.position.set(center.x + o[0], center.y + o[1], center.z + o[2]);
+  camera.updateProjectionMatrix();
+  controls.update();
+};
+
+// ===================== Toggles =====================
+window.toggleGrid = function() {
+  showGrid = !showGrid;
+  grid.visible = showGrid;
+  document.getElementById('btnGrid').classList.toggle('active', showGrid);
+  document.getElementById('tbGrid').classList.toggle('active', showGrid);
+};
+
+window.toggleAxes = function() {
+  showAxes = !showAxes;
+  axes.visible = showAxes;
+  document.getElementById('btnAxes').classList.toggle('active', showAxes);
+  document.getElementById('tbAxes').classList.toggle('active', showAxes);
+};
+
+window.toggleAutoRotate = function() {
+  autoRotate = !autoRotate;
+  document.getElementById('btnAuto').classList.toggle('active', autoRotate);
+  document.getElementById('tbAuto').classList.toggle('active', autoRotate);
+};
+
+// ===================== Lighting Controls =====================
+window.setAmbient = function(val) {
+  ambientLight.intensity = val / 100;
+  document.getElementById('ambientVal').textContent = (val / 100).toFixed(1);
+};
+
+window.setDirLight = function(val) {
+  dirLight.intensity = val / 100;
+  document.getElementById('dirVal').textContent = (val / 100).toFixed(1);
+};
+
+window.setLightColor = function(hex) {
+  dirLight.color.set(hex);
+  dirLight2.color.set(hex);
+};
+
+// ===================== Background =====================
+window.setBgColor = function(hex) {
+  scene.background = new THREE.Color(hex);
+  document.getElementById('bgColorInput').value = hex;
+};
+
+// ===================== FOV =====================
+window.setFov = function(val) {
+  camera.fov = +val;
+  camera.updateProjectionMatrix();
+  document.getElementById('fovVal').textContent = val + '°';
+};
+
+// ===================== Screenshot =====================
+window.screenshot = function() {
+  renderer.render(scene, camera);
+  const link = document.createElement('a');
+  link.href = canvas.toDataURL('image/png');
+  link.download = '3d-preview.png';
+  link.click();
+};
+
+// ===================== Loading / Error =====================
+function showLoading(msg) {
+  document.getElementById('loadingText').textContent = msg || '加载中…';
+  document.getElementById('loadingOverlay').classList.add('show');
+  document.getElementById('errorOverlay').classList.remove('show');
+}
+function hideLoading() {
+  document.getElementById('loadingOverlay').classList.remove('show');
+}
+function showError(msg) {
+  document.getElementById('errorMsg').innerHTML = msg;
+  document.getElementById('errorOverlay').classList.add('show');
+  hideLoading();
+}
+window.closeError = function() {
+  document.getElementById('errorOverlay').classList.remove('show');
+};
+
+// ===================== Dispose Helpers =====================
+function disposeObject(obj) {
+  obj.traverse(child => {
+    if (child.geometry) child.geometry.dispose();
+    if (child.material) {
+      const mats = Array.isArray(child.material) ? child.material : [child.material];
+      mats.forEach(m => m.dispose());
+    }
+  });
+}
+
+// ===================== Double click to focus =====================
+renderer.domElement.addEventListener('dblclick', () => fitToView());
+
+// Init: show grid by default active
+document.getElementById('btnGrid').classList.add('active');
+document.getElementById('tbGrid').classList.add('active');
+
+</script>
+</body>
+</html>
