@@ -666,45 +666,50 @@ function getBlobUrl(fs, key) {
 }
 
 // 在虚拟文件系统中查找一个资源，返回 blob URL
-// 查找策略：精确路径 → 文件名 → 常见贴图子目录下的文件名
+// ★ GLTFLoader 解析子资源时会构造 blob:http://xxx/textures/file.png 这样的 URL，
+//    所以不能以 startsWith('blob:') 提前退出，必须提取文件名后匹配。
 function resolveInFS(fs, rawUrl) {
   if (!fs) return null;
-  if (!rawUrl || rawUrl.startsWith('blob:') || rawUrl.startsWith('data:')) return null;
+  if (!rawUrl) return null;
 
-  // 去掉 query string
+  // 去掉 query string / hash
   let url = rawUrl.split('?')[0].split('#')[0];
 
   // 1) 精确匹配（含路径）
-  if (fs.has(url)) {
+  if (!url.startsWith('blob:') && fs.has(url)) {
     return getBlobUrl(fs, url);
   }
 
-  // 2) 文件名匹配
-  const fname = url.split('/').pop().split('\\').pop();
+  // 2) 提取文件名
+  let fname = '';
+  try {
+    // 对于 blob:xxx/some/path/file.png 也要能提取 file.png
+    const decoded = decodeURIComponent(url);
+    fname = decoded.split('/').pop().split('\\').pop();
+  } catch(e) {
+    fname = url.split('/').pop().split('\\').pop();
+  }
+
+  if (!fname || fname.length > 200) return null;
+
+  // 3) 文件名精确匹配
   if (fs.has(fname)) {
     return getBlobUrl(fs, fname);
   }
 
-  // 3) 常见贴图子目录
-  const texDirs = ['textures', 'textures/', 'tex', 'maps', 'images', 'img', 'texture', 'assets'];
-  for (const dir of texDirs) {
-    const tryKey = dir.endsWith('/') ? dir + fname : dir + '/' + fname;
-    if (fs.has(tryKey)) {
-      return getBlobUrl(fs, tryKey);
-    }
-    // 也尝试带前缀的路径
-    for (const [key] of fs) {
-      if (key.endsWith('/' + fname) || key === fname) {
-        return getBlobUrl(fs, key);
-      }
+  // 4) 遍历所有 key，找以 fname 结尾的
+  for (const [key, entry] of fs) {
+    if (entry.url) continue;  // 已匹配过的跳过（优化）
+    if (key === fname || key.endsWith('/' + fname) || key.endsWith('\\' + fname)) {
+      return getBlobUrl(fs, key);
     }
   }
 
-  // 4) 模糊匹配：遍历所有 key，看是否以 fname 结尾
-  for (const [key, entry] of fs) {
-    if (key.endsWith(fname)) {
-      return getBlobUrl(fs, key);
-    }
+  // 5) 常见贴图子目录 + 文件名
+  const texDirs = ['textures', 'tex', 'maps', 'images', 'img', 'texture', 'assets', 'materials', 'mat'];
+  for (const dir of texDirs) {
+    const tryKey = dir + '/' + fname;
+    if (fs.has(tryKey)) return getBlobUrl(fs, tryKey);
   }
 
   return null;
@@ -714,14 +719,23 @@ function resolveInFS(fs, rawUrl) {
 function createManagerWithFS(fs) {
   const manager = new THREE.LoadingManager();
 
+  // 打印虚拟 FS 中有多少文件
+  console.log('[model-viewer] 虚拟文件系统已就绪，共', fs.size, '个条目');
+  const imgFiles = [...fs.keys()].filter(k => /\.(png|jpg|jpeg|webp|bmp|gif|hdr|exr)$/i.test(k));
+  console.log('[model-viewer] 其中的图片文件:', imgFiles);
+
   // setURLModifier：拦截所有加载器发出的资源请求
   manager.setURLModifier((url) => {
     const resolved = resolveInFS(fs, url);
     if (resolved) {
-      console.log('[model-viewer] 资源解析:', url, '→', resolved.slice(0, 50) + '...');
+      console.log('[model-viewer] ✅ 资源解析:', url.slice(0, 60), '→', resolved.slice(0, 50) + '...');
       return resolved;
     }
-    // 没找到，返回原 URL（加载器会按默认方式处理，通常会 404）
+    // 没找到 —— 但如果是贴图类 URL，发出警告
+    if (/\.(png|jpg|jpeg|webp|bmp|gif|hdr|exr)$/i.test(url)) {
+      console.warn('[model-viewer] ❌ 贴图未匹配:', url.slice(0, 80));
+      console.warn('[model-viewer] FS 中可用的文件:', [...fs.keys()].filter(k => !k.endsWith('.gltf') && !k.endsWith('.glb') && !k.endsWith('.bin')).join(', '));
+    }
     return url;
   });
 
