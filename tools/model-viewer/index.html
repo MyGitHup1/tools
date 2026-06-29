@@ -68,7 +68,6 @@
     margin-left: auto;
   }
 
-  /* ===== Layout ===== */
   .layout {
     display: flex;
     flex: 1;
@@ -76,7 +75,6 @@
     height: calc(100vh - 57px);
   }
 
-  /* ===== Sidebar ===== */
   .sidebar {
     width: 280px;
     flex-shrink: 0;
@@ -102,7 +100,6 @@
     margin-bottom: 10px;
   }
 
-  /* ===== Drop Zone ===== */
   .drop-zone {
     border: 2px dashed var(--border);
     border-radius: var(--radius);
@@ -133,7 +130,6 @@
     line-height: 1.4;
   }
 
-  /* ===== File info ===== */
   .file-info {
     background: var(--surface2);
     border-radius: var(--radius-sm);
@@ -145,7 +141,6 @@
   .file-info-name { color: var(--text); font-weight: 500; word-break: break-all; margin-bottom: 4px; }
   .file-info-meta { color: var(--text-dim); }
 
-  /* ===== Controls ===== */
   .ctrl-row {
     display: flex;
     align-items: center;
@@ -184,18 +179,6 @@
   .btn:hover { color: var(--text); border-color: var(--accent); }
   .btn.active { color: var(--accent); border-color: var(--accent); background: rgba(96,165,250,0.1); }
 
-  .btn-icon {
-    padding: 7px 10px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-    background: var(--surface2);
-    color: var(--text-dim);
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-icon:hover { color: var(--text); border-color: var(--accent); }
-
   .color-ctrl {
     display: flex;
     align-items: center;
@@ -211,7 +194,6 @@
   }
   .color-ctrl span { font-size: 0.78rem; color: var(--text-dim); }
 
-  /* ===== Stats ===== */
   .stats-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -225,10 +207,9 @@
   .stat-card-label { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
   .stat-card-value { font-size: 0.88rem; color: var(--text); font-weight: 600; margin-top: 2px; word-break: break-all; }
 
-  /* ===== Texture list ===== */
   .texture-list {
     display: none;
-    max-height: 160px;
+    max-height: 180px;
     overflow-y: auto;
     margin-top: 6px;
     gap: 4px;
@@ -251,11 +232,13 @@
     object-fit: cover;
     flex-shrink: 0;
     border: 1px solid var(--border);
+    background: #1a1a28;
   }
   .texture-item-name {
     flex: 1;
     word-break: break-all;
     line-height: 1.3;
+    font-size: 0.72rem;
   }
   .texture-item-type {
     font-size: 0.6rem;
@@ -272,7 +255,6 @@
     flex-shrink: 0;
   }
 
-  /* ===== Canvas area ===== */
   .canvas-area {
     flex: 1;
     position: relative;
@@ -286,7 +268,6 @@
     height: 100%;
   }
 
-  /* ===== Drop hint overlay (before file loaded) ===== */
   .canvas-hint {
     position: absolute;
     inset: 0;
@@ -301,7 +282,6 @@
   .canvas-hint-text { font-size: 0.95rem; color: var(--text-dim); opacity: 0.5; }
   .canvas-hint-sub { font-size: 0.78rem; color: var(--text-dim); opacity: 0.35; }
 
-  /* ===== Toolbar overlay ===== */
   .toolbar {
     position: absolute;
     top: 12px;
@@ -326,7 +306,6 @@
   .tool-btn:hover { color: var(--text); border-color: var(--accent); }
   .tool-btn.active { color: var(--accent); border-color: var(--accent); background: rgba(96,165,250,0.12); }
 
-  /* ===== Loading ===== */
   .loading-overlay {
     position: absolute;
     inset: 0;
@@ -350,7 +329,6 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading-text { font-size: 0.9rem; color: var(--text-dim); }
 
-  /* ===== Error ===== */
   .error-overlay {
     position: absolute;
     inset: 0;
@@ -368,7 +346,6 @@
   .error-msg { font-size: 0.88rem; color: var(--danger); text-align: center; max-width: 420px; line-height: 1.6; }
   .error-close { margin-top: 8px; }
 
-  /* ===== Hint tooltip bottom left ===== */
   .hint-bar {
     position: absolute;
     bottom: 12px;
@@ -380,7 +357,6 @@
     pointer-events: none;
   }
 
-  /* Responsive */
   @media (max-width: 640px) {
     .sidebar { width: 100%; height: auto; overflow: visible; }
     .layout { flex-direction: column; height: auto; }
@@ -398,10 +374,8 @@
 
 <div class="layout">
 
-  <!-- Sidebar -->
   <aside class="sidebar">
 
-    <!-- Upload -->
     <div class="sidebar-section">
       <div class="sidebar-section-title">📁 打开模型</div>
       <div class="drop-zone" id="dropZone">
@@ -417,7 +391,6 @@
       </div>
     </div>
 
-    <!-- View Mode -->
     <div class="sidebar-section">
       <div class="sidebar-section-title">👁 显示模式</div>
       <div class="btn-group">
@@ -427,7 +400,6 @@
       </div>
     </div>
 
-    <!-- Background -->
     <div class="sidebar-section">
       <div class="sidebar-section-title">🎨 背景颜色</div>
       <div class="color-ctrl">
@@ -441,21 +413,26 @@
       </div>
     </div>
 
-    <!-- Lighting -->
     <div class="sidebar-section">
       <div class="sidebar-section-title">💡 灯光</div>
 
       <div class="ctrl-row">
         <span class="ctrl-label">环境光强度</span>
-        <span class="ctrl-value" id="ambientVal">1.0</span>
+        <span class="ctrl-value" id="ambientVal">1.5</span>
       </div>
-      <input type="range" min="0" max="300" value="100" id="ambientSlider" oninput="setAmbient(this.value)">
+      <input type="range" min="0" max="300" value="150" id="ambientSlider" oninput="setAmbient(this.value)">
 
       <div class="ctrl-row">
         <span class="ctrl-label">方向光强度</span>
-        <span class="ctrl-value" id="dirVal">1.5</span>
+        <span class="ctrl-value" id="dirVal">2.0</span>
       </div>
-      <input type="range" min="0" max="500" value="150" id="dirSlider" oninput="setDirLight(this.value)">
+      <input type="range" min="0" max="500" value="200" id="dirSlider" oninput="setDirLight(this.value)">
+
+      <div class="ctrl-row">
+        <span class="ctrl-label">补光强度</span>
+        <span class="ctrl-value" id="hemiVal">0.8</span>
+      </div>
+      <input type="range" min="0" max="200" value="80" id="hemiSlider" oninput="setHemi(this.value)">
 
       <div class="ctrl-row">
         <span class="ctrl-label">灯光颜色</span>
@@ -466,7 +443,6 @@
       </div>
     </div>
 
-    <!-- Camera -->
     <div class="sidebar-section">
       <div class="sidebar-section-title">📷 摄像机</div>
 
@@ -489,7 +465,6 @@
       </div>
     </div>
 
-    <!-- Stats -->
     <div class="sidebar-section">
       <div class="sidebar-section-title">📊 模型信息</div>
       <div class="stats-grid">
@@ -500,12 +475,9 @@
         <div class="stat-card"><div class="stat-card-label">贴图数</div><div class="stat-card-value" id="statTex">—</div></div>
         <div class="stat-card" style="grid-column:1/-1"><div class="stat-card-label">尺寸 (X·Y·Z)</div><div class="stat-card-value" id="statSize">—</div></div>
       </div>
-
-      <!-- Texture list -->
       <div class="texture-list" id="textureList"></div>
     </div>
 
-    <!-- Extra -->
     <div class="sidebar-section">
       <div class="sidebar-section-title">⚙️ 其他</div>
       <div class="btn-group">
@@ -515,37 +487,33 @@
       </div>
       <div class="btn-group" style="margin-top:6px">
         <button class="btn" onclick="screenshot()">📷 截图</button>
+        <button class="btn" id="btnFixMat" onclick="fixMaterials()" style="display:none">🎨 修复材质</button>
         <button class="btn" id="btnReload" onclick="reloadModel()" style="display:none">🔄 重新加载</button>
       </div>
     </div>
 
   </aside>
 
-  <!-- 3D Canvas -->
   <div class="canvas-area" id="canvasArea">
     <canvas id="threeCanvas"></canvas>
 
-    <!-- Loading -->
     <div class="loading-overlay" id="loadingOverlay">
       <div class="spinner"></div>
       <div class="loading-text" id="loadingText">正在加载模型…</div>
     </div>
 
-    <!-- Error -->
     <div class="error-overlay" id="errorOverlay">
       <div class="error-icon">⚠️</div>
       <div class="error-msg" id="errorMsg">加载失败</div>
       <button class="btn error-close" onclick="closeError()">关闭</button>
     </div>
 
-    <!-- Before load hint -->
     <div class="canvas-hint" id="canvasHint">
       <div class="canvas-hint-icon">🧊</div>
       <div class="canvas-hint-text">从左侧选择或拖入 3D 模型文件 / ZIP 包</div>
       <div class="canvas-hint-sub">支持 GLB · GLTF · OBJ · STL · FBX · ZIP（含贴图）</div>
     </div>
 
-    <!-- Toolbar -->
     <div class="toolbar">
       <button class="tool-btn" id="tbWireframe" title="线框叠加" onclick="setViewMode(viewMode==='both'?'solid':'both')">⬡</button>
       <button class="tool-btn" id="tbGrid" title="切换网格" onclick="toggleGrid()">⊞</button>
@@ -556,7 +524,6 @@
       <button class="tool-btn" title="重置视角" onclick="resetCamera()">⌖</button>
     </div>
 
-    <!-- Hint bar -->
     <div class="hint-bar">
       左键拖动旋转 · 右键平移 · 滚轮缩放 · 双击聚焦
     </div>
@@ -564,11 +531,8 @@
 
 </div>
 
-<!-- JSZip (loaded as regular script, available as window.JSZip) -->
-<script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js">
-</script>
+<script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
 
-<!-- Three.js from CDN -->
 <script type="importmap">
 {
   "imports": {
@@ -587,10 +551,9 @@ import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 import { STLLoader } from 'three/addons/loaders/STLLoader.js';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 
-// Access JSZip from window (loaded by regular script tag)
 const JSZip = window.JSZip;
 
-// ===================== Renderer Setup =====================
+// ===================== Renderer =====================
 const canvas = document.getElementById('threeCanvas');
 const area = document.getElementById('canvasArea');
 
@@ -605,11 +568,9 @@ renderer.toneMappingExposure = 1.2;
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#050508');
 
-// Camera
 const camera = new THREE.PerspectiveCamera(45, 1, 0.001, 10000);
 camera.position.set(3, 3, 3);
 
-// Controls
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.07;
@@ -621,7 +582,6 @@ controls.mouseButtons = {
   RIGHT: THREE.MOUSE.PAN
 };
 
-// Resize
 function resize() {
   const w = area.clientWidth, h = area.clientHeight;
   renderer.setSize(w, h, false);
@@ -631,19 +591,23 @@ function resize() {
 new ResizeObserver(resize).observe(area);
 resize();
 
-// ===================== Lighting =====================
-let ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
+// ===================== Lighting（增强） =====================
+let ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
 scene.add(ambientLight);
 
-let dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
+let dirLight = new THREE.DirectionalLight(0xffffff, 2.0);
 dirLight.position.set(5, 10, 7);
 dirLight.castShadow = true;
 dirLight.shadow.mapSize.set(2048, 2048);
 scene.add(dirLight);
 
-let dirLight2 = new THREE.DirectionalLight(0xffffff, 0.4);
+let dirLight2 = new THREE.DirectionalLight(0xffffff, 0.8);
 dirLight2.position.set(-5, -3, -5);
 scene.add(dirLight2);
+
+// 半球补光 —— 解决模型底部/背面发黑问题
+let hemiLight = new THREE.HemisphereLight(0x8888cc, 0x444422, 0.8);
+scene.add(hemiLight);
 
 // ===================== Grid & Axes =====================
 let grid = new THREE.GridHelper(20, 40, 0x333344, 0x222233);
@@ -658,145 +622,351 @@ scene.add(axes);
 // ===================== State =====================
 let currentModel = null;
 let wireframeMesh = null;
+let currentModelRawSizes = null;  // 原始尺寸，用于 stats
 window.viewMode = 'solid';
 let showGrid = true;
 let showAxes = false;
 let autoRotate = false;
 
-// Virtual filesystem for ZIP/multi-file resolution
-let virtualFS = null;          // Map<normalizedPath, {url, blob}>
-let modelBasePath = '';
-let loadedSourceArchive = null; // Keep reference for potential reload
-let lastFileList = null;        // Keep reference for reload
+// 虚拟文件系统（ZIP / 多文件拖入）
+// Map<normalizedPath, { blob:Blob, url:string(blob_url) }>
+let virtualFS = null;
+let lastFileList = null;   // 保存上次拖入的文件列表，供"重新加载"使用
 
-// ===================== Animation Loop =====================
-function animate() {
-  requestAnimationFrame(animate);
-  if (autoRotate && currentModel) {
-    currentModel.rotation.y += 0.005;
-  }
-  controls.update();
-  renderer.render(scene, camera);
-}
-animate();
+// ===================== 工具函数 =====================
 
-// ===================== Virtual Filesystem =====================
+// 构建虚拟文件系统 Map
 function buildVirtualFS(entries) {
-  // entries: Array of {path: string, data: Uint8Array|ArrayBuffer} from ZIP
-  // or Array of {path: string, blob: Blob} from multi-file drop
+  // entries: [{path:string, blob:Blob}]
   const fs = new Map();
   for (const entry of entries) {
-    const blob = entry.blob || new Blob([entry.data], { type: guessMimeType(entry.path) });
-    const url = URL.createObjectURL(blob);
-    fs.set(entry.path, { url, blob });
-    // Also store by raw filename for fallback
-    const fname = entry.path.split('/').pop().split('\\').pop();
+    const normPath = entry.path.replace(/\\/g, '/');
+    // 存原始路径
+    if (!fs.has(normPath)) {
+      fs.set(normPath, { blob: entry.blob, url: null });
+    }
+    // 也存文件名（不含路径），作为 fallback
+    const fname = normPath.split('/').pop();
     if (!fs.has(fname)) {
-      fs.set(fname, { url, blob });
+      fs.set(fname, { blob: entry.blob, url: null });
     }
   }
+  // 为所有条目生成 blob URL（延迟生成，用时再生成）
   return fs;
 }
 
-function guessMimeType(path) {
-  const ext = path.split('.').pop().toLowerCase();
-  const map = {
-    png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg',
-    webp: 'image/webp', bmp: 'image/bmp', gif: 'image/gif',
-    glb: 'model/gltf-binary', gltf: 'model/gltf+json',
-    bin: 'application/octet-stream', hdr: 'image/vnd.radiance',
-    exr: 'image/x-exr', svg: 'image/svg+xml'
-  };
-  return map[ext] || 'application/octet-stream';
+// 为虚拟 FS 中的某个条目获取（或创建）blob URL
+function getBlobUrl(fs, key) {
+  const entry = fs.get(key);
+  if (!entry) return null;
+  if (!entry.url) {
+    entry.url = URL.createObjectURL(entry.blob);
+  }
+  return entry.url;
 }
 
-function createResolvingManager(fs, basePath) {
-  const manager = new THREE.LoadingManager();
-  manager.resolveURL = (url) => {
-    // Already absolute / blob
-    if (url.startsWith('blob:') || url.startsWith('http') || url.startsWith('data:')) {
-      return url;
-    }
+// 在虚拟文件系统中查找一个资源，返回 blob URL
+// 查找策略：精确路径 → 文件名 → 常见贴图子目录下的文件名
+function resolveInFS(fs, rawUrl) {
+  if (!fs) return null;
+  if (!rawUrl || rawUrl.startsWith('blob:') || rawUrl.startsWith('data:')) return null;
 
-    // Try exact match
-    if (fs.has(url) && fs.get(url).url) {
-      return fs.get(url).url;
-    }
+  // 去掉 query string
+  let url = rawUrl.split('?')[0].split('#')[0];
 
-    // Try filename-only fallback
-    const fname = url.split('/').pop().split('\\').pop();
-    if (fs.has(fname) && fs.get(fname).url) {
-      return fs.get(fname).url;
-    }
+  // 1) 精确匹配（含路径）
+  if (fs.has(url)) {
+    return getBlobUrl(fs, url);
+  }
 
-    // Try relative to base path (for nested folder references)
-    if (basePath) {
-      const relPath = basePath + '/' + url.replace(/\\/g, '/');
-      if (fs.has(relPath) && fs.get(relPath).url) {
-        return fs.get(relPath).url;
+  // 2) 文件名匹配
+  const fname = url.split('/').pop().split('\\').pop();
+  if (fs.has(fname)) {
+    return getBlobUrl(fs, fname);
+  }
+
+  // 3) 常见贴图子目录
+  const texDirs = ['textures', 'textures/', 'tex', 'maps', 'images', 'img', 'texture', 'assets'];
+  for (const dir of texDirs) {
+    const tryKey = dir.endsWith('/') ? dir + fname : dir + '/' + fname;
+    if (fs.has(tryKey)) {
+      return getBlobUrl(fs, tryKey);
+    }
+    // 也尝试带前缀的路径
+    for (const [key] of fs) {
+      if (key.endsWith('/' + fname) || key === fname) {
+        return getBlobUrl(fs, key);
       }
-    }
-
-    // Try common texture sub-directories
-    const texDirs = ['textures', 'tex', 'maps', 'images', 'img', 'texture'];
-    for (const d of texDirs) {
-      const tryPath = d + '/' + fname;
-      if (fs.has(tryPath) && fs.get(tryPath).url) return fs.get(tryPath).url;
-      if (basePath) {
-        const tryRel = basePath + '/' + tryPath;
-        if (fs.has(tryRel) && fs.get(tryRel).url) return fs.get(tryRel).url;
-      }
-    }
-
-    // Try URL-decoded version (spaces etc.)
-    try {
-      const decoded = decodeURIComponent(fname);
-      if (decoded !== fname) {
-        for (const d of texDirs) {
-          const tryPath = d + '/' + decoded;
-          if (fs.has(tryPath) && fs.get(tryPath).url) return fs.get(tryPath).url;
-        }
-        if (fs.has(decoded) && fs.get(decoded).url) return fs.get(decoded).url;
-      }
-    } catch(e) {}
-
-    console.warn('[model-viewer] 未能解析资源:', url);
-    return url;
-  };
-  return manager;
-}
-
-// ===================== Find model / MTL in virtual FS =====================
-function findModelFiles(fs) {
-  const found = [];
-  const priority = { gltf: 1, glb: 2, obj: 3, fbx: 4, stl: 5 };
-  for (const [path, entry] of fs) {
-    const ext = path.split('.').pop().toLowerCase();
-    if (['gltf', 'glb', 'obj', 'fbx', 'stl'].includes(ext) && entry.url) {
-      found.push({ path, ext, url: entry.url });
     }
   }
-  found.sort((a, b) => (priority[a.ext] || 99) - (priority[b.ext] || 99));
-  return found;
-}
 
-function findMtlForObj(objPath, fs) {
-  const base = objPath.replace(/\.obj$/i, '').replace(/\\/g, '/');
-  const candidates = [
-    base + '.mtl',
-    base + '.MTL',
-    objPath.replace(/\.obj$/i, '.mtl'),
-    objPath.replace(/\.obj$/i, '.MTL'),
-  ];
-  for (const c of candidates) {
-    if (fs.has(c)) return { path: c, url: fs.get(c).url };
-    const fname = c.split('/').pop();
-    if (fs.has(fname)) return { path: fname, url: fs.get(fname).url };
+  // 4) 模糊匹配：遍历所有 key，看是否以 fname 结尾
+  for (const [key, entry] of fs) {
+    if (key.endsWith(fname)) {
+      return getBlobUrl(fs, key);
+    }
   }
+
   return null;
 }
 
-// ===================== File Drop / Select =====================
+// 创建带 FS 解析能力的 LoadingManager
+function createManagerWithFS(fs) {
+  const manager = new THREE.LoadingManager();
+
+  // setURLModifier：拦截所有加载器发出的资源请求
+  manager.setURLModifier((url) => {
+    const resolved = resolveInFS(fs, url);
+    if (resolved) {
+      console.log('[model-viewer] 资源解析:', url, '→', resolved.slice(0, 50) + '...');
+      return resolved;
+    }
+    // 没找到，返回原 URL（加载器会按默认方式处理，通常会 404）
+    return url;
+  });
+
+  return manager;
+}
+
+// 修复材质：设置贴图颜色空间 + 提亮过暗的材质
+function fixMaterials(object) {
+  const textureKeys = ['map', 'emissiveMap', 'lightMap', 'envMap'];
+  const nonSrgbKeys = ['normalMap', 'roughnessMap', 'metalnessMap', 'aoMap', 'bumpMap', 'alphaMap'];
+
+  object.traverse(child => {
+    if (!child.isMesh) return;
+    const mats = Array.isArray(child.material) ? child.material : [child.material];
+    mats.forEach(m => {
+      if (!m) return;
+
+      // 颜色贴图设为 sRGB
+      textureKeys.forEach(k => {
+        if (m[k] && m[k].isTexture && m[k].colorSpace !== THREE.SRGBColorSpace) {
+          m[k].colorSpace = THREE.SRGBColorSpace;
+          m[k].needsUpdate = true;
+        }
+      });
+
+      // 非颜色贴图确保是 Linear
+      nonSrgbKeys.forEach(k => {
+        if (m[k] && m[k].isTexture && m[k].colorSpace !== THREE.LinearSRGBColorSpace) {
+          m[k].colorSpace = THREE.LinearSRGBColorSpace;
+          m[k].needsUpdate = true;
+        }
+      });
+
+      // 如果材质没有贴图且颜色过暗，提亮
+      const hasColorMap = m.map || m.emissiveMap;
+      if (!hasColorMap && m.color) {
+        const c = m.color;
+        const brightness = (c.r + c.g + c.b) / 3;
+        if (brightness < 0.15) {
+          // 太暗了，给个默认亮色
+          m.color.set(0x88aacc);
+          m.needsUpdate = true;
+        }
+      }
+
+      // 确保材质响应灯光
+      if (m.isMeshBasicMaterial) {
+        // MeshBasicMaterial 不受灯光影响，换成 Standard
+        const newMat = new THREE.MeshStandardMaterial({
+          color: m.color ? m.color.clone() : new THREE.Color(0x88aacc),
+          map: m.map || null,
+          transparent: m.transparent,
+          opacity: m.opacity,
+          side: m.side,
+          name: m.name,
+        });
+        if (child.material === m) child.material = newMat;
+        m.dispose();
+      }
+
+      m.needsUpdate = true;
+    });
+  });
+}
+
+// 收集贴图信息并显示在面板
+function collectTextureInfo(object) {
+  const textures = [];
+  const seen = new Set();
+
+  object.traverse(child => {
+    if (!child.isMesh || !child.material) return;
+    const mats = Array.isArray(child.material) ? child.material : [child.material];
+    mats.forEach(m => {
+      const allTexKeys = [
+        { key: 'map', label: '颜色贴图' },
+        { key: 'normalMap', label: '法线贴图' },
+        { key: 'roughnessMap', label: '粗糙度' },
+        { key: 'metalnessMap', label: '金属度' },
+        { key: 'aoMap', label: 'AO' },
+        { key: 'emissiveMap', label: '自发光' },
+        { key: 'bumpMap', label: '凹凸' },
+        { key: 'alphaMap', label: '透明' },
+        { key: 'specularMap', label: '高光' },
+        { key: 'envMap', label: '环境' },
+      ];
+      allTexKeys.forEach(({ key, label }) => {
+        if (m[key] && m[key].isTexture) {
+          const t = m[key];
+          // 用 image.src 作为唯一标识
+          const uid = t.image ? (t.image.src || t.image.currentSrc || '') : t.uuid;
+          if (seen.has(uid)) return;
+          seen.add(uid);
+
+          let thumbUrl = '';
+          if (t.image && t.image.src && t.image.src.startsWith('blob:')) {
+            thumbUrl = t.image.src;
+          } else if (t.source && t.source.data && t.source.data instanceof HTMLImageElement) {
+            thumbUrl = t.source.data.src || '';
+          }
+
+          const w = t.image ? (t.image.naturalWidth || t.image.width || 0) : 0;
+          const h = t.image ? (t.image.naturalHeight || t.image.height || 0) : 0;
+
+          textures.push({
+            name: t.name || label,
+            label,
+            width: w,
+            height: h,
+            thumbUrl,
+            colorSpace: t.colorSpace === THREE.SRGBColorSpace ? 'sRGB' : (t.colorSpace === THREE.LinearSRGBColorSpace ? 'Linear' : '—'),
+          });
+        }
+      });
+    });
+  });
+
+  // 更新面板
+  document.getElementById('statTex').textContent = textures.length;
+  const list = document.getElementById('textureList');
+  if (textures.length === 0) {
+    list.innerHTML = '';
+    list.classList.remove('show');
+    return;
+  }
+
+  list.innerHTML = textures.map(t => {
+    const dimStr = t.width && t.height ? `${t.width}×${t.height}` : '';
+    const thumbHtml = t.thumbUrl
+      ? `<img class="texture-item-icon" src="${t.thumbUrl}" alt="">`
+      : `<span class="texture-item-icon" style="display:flex;align-items:center;justify-content:center;font-size:0.7rem;">🖼</span>`;
+    return `
+      <div class="texture-item">
+        ${thumbHtml}
+        <span class="texture-item-name" title="${t.name}">${escapeHtml(t.name)}</span>
+        ${dimStr ? `<span class="texture-item-dim">${dimStr}</span>` : ''}
+        <span class="texture-item-type">${t.label}</span>
+      </div>`;
+  }).join('');
+
+  list.classList.add('show');
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// ===================== Stats =====================
+function updateStats(object, rawSize) {
+  let verts = 0, faces = 0, meshes = 0, mats = new Set();
+
+  object.traverse(child => {
+    if (child.isMesh) {
+      meshes++;
+      const geo = child.geometry;
+      if (geo && geo.attributes && geo.attributes.position) verts += geo.attributes.position.count;
+      if (geo && geo.index) faces += geo.index.count / 3;
+      else if (geo && geo.attributes && geo.attributes.position) faces += geo.attributes.position.count / 3;
+      if (Array.isArray(child.material)) child.material.forEach(m => { if(m) mats.add(m.uuid); });
+      else if (child.material) mats.add(child.material.uuid);
+    }
+  });
+
+  document.getElementById('statVerts').textContent = verts.toLocaleString();
+  document.getElementById('statFaces').textContent = Math.round(faces).toLocaleString();
+  document.getElementById('statMeshes').textContent = meshes;
+  document.getElementById('statMats').textContent = mats.size;
+
+  if (rawSize) {
+    document.getElementById('statSize').textContent =
+      `${rawSize.x.toFixed(1)} × ${rawSize.y.toFixed(1)} × ${rawSize.z.toFixed(1)}`;
+  }
+}
+
+// ===================== 将模型放入场景 =====================
+function setModel(object) {
+  // 清除旧模型
+  if (currentModel) {
+    scene.remove(currentModel);
+    disposeObject(currentModel);
+  }
+  if (wireframeMesh) {
+    scene.remove(wireframeMesh);
+    disposeObject(wireframeMesh);
+    wireframeMesh = null;
+  }
+
+  // 居中 + 缩放
+  const box = new THREE.Box3().setFromObject(object);
+  const center = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3());
+  const maxDim = Math.max(size.x, size.y, size.z);
+  const scale = maxDim > 0 ? (2 / maxDim) : 1;
+
+  object.position.sub(center.clone().multiplyScalar(scale));
+  object.scale.setScalar(scale);
+
+  // 网格跟随模型底部
+  const scaledBox = new THREE.Box3().setFromObject(object);
+  grid.position.y = scaledBox.min.y;
+
+  scene.add(object);
+  currentModel = object;
+  currentModelRawSizes = size;
+
+  // 修复材质（贴图颜色空间 + 提亮暗材质）
+  fixMaterials(object);
+
+  // 应用当前显示模式
+  applyViewMode();
+
+  // 统计信息
+  updateStats(object, size);
+  collectTextureInfo(object);
+
+  // 适应视图
+  fitToView();
+
+  // 显示"修复材质"按钮
+  document.getElementById('btnFixMat').style.display = '';
+}
+
+function disposeObject(obj) {
+  obj.traverse(child => {
+    if (child.geometry) child.geometry.dispose();
+    if (child.material) {
+      const mats = Array.isArray(child.material) ? child.material : [child.material];
+      mats.forEach(m => {
+        if (m && m.isTexture) { /* handled below */ }
+        // 释放材质的所有贴图
+        for (const key of Object.keys(m || {})) {
+          try {
+            if (m[key] && m[key].isTexture) m[key].dispose();
+          } catch(e) {}
+        }
+        if (m) m.dispose();
+      });
+    }
+  });
+}
+
+// ===================== 文件处理入口 =====================
+
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
 
@@ -809,9 +979,9 @@ dropZone.addEventListener('drop', e => {
 });
 fileInput.addEventListener('change', e => {
   handleFiles(e.target.files);
+  fileInput.value = '';  // 允许重复选择同一文件
 });
 
-// Also support drag-drop to the entire canvas area
 area.addEventListener('dragover', e => { e.preventDefault(); });
 area.addEventListener('drop', e => {
   e.preventDefault();
@@ -820,27 +990,29 @@ area.addEventListener('drop', e => {
 
 function handleFiles(files) {
   if (!files || files.length === 0) return;
-  lastFileList = files; // Save for reload
+  lastFileList = files;
 
-  if (files.length === 1 && files[0].name.toLowerCase().endsWith('.zip')) {
-    loadFromZip(files[0]);
-  } else if (files.length === 1 && !files[0].name.toLowerCase().endsWith('.zip')) {
-    loadSingleFile(files[0]);
+  const arr = Array.from(files);
+  const hasZip = arr.some(f => f.name.toLowerCase().endsWith('.zip'));
+
+  if (arr.length === 1 && hasZip) {
+    loadFromZip(arr[0]);
   } else {
-    loadMultipleFiles(files);
+    // 多文件或单文件（非 ZIP）→ 构建虚拟 FS
+    loadFromMultipleFiles(arr);
   }
 }
 
-// ===================== ZIP Loading =====================
+// ===================== 加载 ZIP =====================
 async function loadFromZip(zipFile) {
   if (typeof JSZip === 'undefined') {
-    showError('JSZip 库未加载，请刷新页面重试。');
+    showError('JSZip 库加载失败，请检查网络连接后刷新页面。');
     return;
   }
 
-  const name = zipFile.name;
-  showLoading(`正在解压 ${name}…`);
+  showLoading(`正在解压 ${zipFile.name}…`);
   document.getElementById('canvasHint').style.display = 'none';
+  clearTexturePanel();
 
   try {
     const zip = await JSZip.loadAsync(zipFile);
@@ -848,428 +1020,215 @@ async function loadFromZip(zipFile) {
 
     for (const [path, entry] of Object.entries(zip.files)) {
       if (entry.dir) continue;
-      const data = await entry.async('uint8array');
-      entries.push({ path: path.replace(/\\/g, '/'), data });
+      const data = await entry.async('blob');
+      entries.push({ path: path.replace(/\\/g, '/'), blob: data });
     }
+
+    if (entries.length === 0) throw new Error('ZIP 包为空');
 
     virtualFS = buildVirtualFS(entries);
-    loadedSourceArchive = { type: 'zip', name };
 
-    const modelFiles = findModelFiles(virtualFS);
-    if (modelFiles.length === 0) {
-      throw new Error('ZIP 包中未找到支持的模型文件（.gltf / .glb / .obj / .fbx / .stl）');
+    // 在 ZIP 中找模型文件
+    const modelEntry = findModelInEntries(entries);
+
+    if (!modelEntry) {
+      throw new Error('ZIP 中未找到支持的模型文件（.gltf / .glb / .obj / .fbx / .stl）');
     }
 
-    const mainFile = modelFiles[0];
-    modelBasePath = mainFile.path.substring(0, mainFile.path.lastIndexOf('/'));
-
-    // Update file info
-    updateLoadedFileInfo(name, `ZIP · ${(zipFile.size / 1024).toFixed(1)} KB · ${entries.length} 个文件 · 主模型: ${mainFile.path.split('/').pop()}`);
-
-    // Show reload button
+    updateFileInfo(zipFile.name, `ZIP · ${(zipFile.size/1024).toFixed(1)} KB · ${entries.length} 个文件 · 主模型: ${modelEntry.path.split('/').pop()}`);
+    showLoading(`正在加载 ${modelEntry.path.split('/').pop()}…`);
     document.getElementById('btnReload').style.display = '';
-    document.getElementById('btnReload').onclick = () => {
-      if (lastFileList) handleFiles(lastFileList);
-    };
 
-    showLoading(`正在加载 ${mainFile.path.split('/').pop()}…`);
-    await loadModelFromFS(mainFile);
+    await loadModelFromFileEntry(modelEntry);
 
   } catch (err) {
     hideLoading();
-    showError(`ZIP 加载失败：${err.message || '未知错误'}`);
+    showError(`ZIP 加载失败：${err.message}`);
     console.error(err);
   }
 }
 
-// ===================== Single File Loading (non-ZIP) =====================
-async function loadSingleFile(file) {
-  const ext = file.name.split('.').pop().toLowerCase();
-  const supported = ['glb','gltf','obj','stl','fbx'];
-  if (!supported.includes(ext)) {
-    showError(`不支持的格式：.${ext}<br>支持：GLB · GLTF · OBJ · STL · FBX · ZIP`);
-    return;
-  }
-
-  showLoading(`正在加载 ${file.name}…`);
-  document.getElementById('canvasHint').style.display = 'none';
-
-  // Build a minimal virtual FS from this single file
-  const url = URL.createObjectURL(file);
-  virtualFS = new Map();
-  virtualFS.set(file.name, { url, blob: file });
-  loadedSourceArchive = { type: 'single', name: file.name };
-  modelBasePath = '';
-
-  updateLoadedFileInfo(file.name, `${(file.size / 1024).toFixed(1)} KB · .${ext.toUpperCase()}`);
-
-  document.getElementById('btnReload').style.display = '';
-  document.getElementById('btnReload').onclick = () => {
-    if (lastFileList) handleFiles(lastFileList);
-  };
-
-  try {
-    let object;
-
-    if (ext === 'glb' || ext === 'gltf') {
-      const loader = new GLTFLoader();
-      const gltf = await loader.loadAsync(url);
-      object = gltf.scene;
-      collectTextureInfo(gltf);
-    } else if (ext === 'obj') {
-      const loader = new OBJLoader();
-      object = await loader.loadAsync(url);
-      collectTextureInfoFromObj(object);
-    } else if (ext === 'stl') {
-      const loader = new STLLoader();
-      const geometry = await loader.loadAsync(url);
-      const material = new THREE.MeshStandardMaterial({ color: 0x88aacc, metalness: 0.2, roughness: 0.5 });
-      object = new THREE.Mesh(geometry, material);
-    } else if (ext === 'fbx') {
-      const loader = new FBXLoader();
-      object = await loader.loadAsync(url);
-    }
-
-    hideLoading();
-    setModel(object, { x: 1, y: 1, z: 1 });
-
-  } catch (err) {
-    URL.revokeObjectURL(url);
-    hideLoading();
-    showError(`加载失败：${err.message || '未知错误'}<br><br>
-      如果模型引用外部贴图或 .bin 文件，请将所有文件打包为 ZIP 后拖入。`);
-    console.error(err);
-  }
-}
-
-// ===================== Multiple File Loading (non-ZIP) =====================
-async function loadMultipleFiles(files) {
+// ===================== 加载多文件（非 ZIP） =====================
+async function loadFromMultipleFiles(files) {
   showLoading(`正在处理 ${files.length} 个文件…`);
   document.getElementById('canvasHint').style.display = 'none';
+  clearTexturePanel();
 
   try {
-    const entries = [];
-    for (const file of files) {
-      entries.push({
-        path: file.name.replace(/\\/g, '/'),
-        blob: file
-      });
-    }
+    const entries = files.map(f => ({
+      path: f.name.replace(/\\/g, '/'),
+      blob: f
+    }));
 
     virtualFS = buildVirtualFS(entries);
-    loadedSourceArchive = { type: 'multi', name: `${files.length} files` };
 
-    const modelFiles = findModelFiles(virtualFS);
-    if (modelFiles.length === 0) {
-      throw new Error('拖入的文件中未找到支持的模型文件（.gltf / .glb / .obj / .fbx / .stl）');
+    const modelFile = findModelInFiles(files);
+    if (!modelFile) {
+      throw new Error('未找到支持的模型文件');
     }
 
-    const mainFile = modelFiles[0];
-    modelBasePath = '';
-
-    updateLoadedFileInfo(
-      mainFile.path.split('/').pop(),
-      `${files.length} 个文件 · .${mainFile.ext.toUpperCase()}`
-    );
-
+    updateFileInfo(modelFile.name, `${files.length} 个文件 · ${modelFile.name.split('.').pop().toUpperCase()}`);
+    showLoading(`正在加载 ${modelFile.name}…`);
     document.getElementById('btnReload').style.display = '';
-    document.getElementById('btnReload').onclick = () => {
-      if (lastFileList) handleFiles(lastFileList);
-    };
 
-    showLoading(`正在加载 ${mainFile.path.split('/').pop()}…`);
-    await loadModelFromFS(mainFile);
+    // 找到对应的 entry
+    const entry = entries.find(e => e.path.endsWith(modelFile.name)) || entries[0];
+    await loadModelFromFileEntry(entry);
 
   } catch (err) {
     hideLoading();
-    showError(`加载失败：${err.message || '未知错误'}`);
+    showError(`加载失败：${err.message}<br><br>如果模型引用了外部贴图，请打包为 ZIP 后拖入。`);
     console.error(err);
   }
 }
 
-// ===================== Load model from virtual FS =====================
-async function loadModelFromFS(mainFile) {
-  const manager = createResolvingManager(virtualFS, modelBasePath);
-  let object;
-
-  if (mainFile.ext === 'glb' || mainFile.ext === 'gltf') {
-    const loader = new GLTFLoader(manager);
-    const gltf = await loader.loadAsync(mainFile.url);
-    object = gltf.scene;
-    collectTextureInfo(gltf);
-  } else if (mainFile.ext === 'obj') {
-    const mtlInfo = findMtlForObj(mainFile.path, virtualFS);
-    if (mtlInfo) {
-      const mtlLoader = new MTLLoader(manager);
-      const materials = await mtlLoader.loadAsync(mtlInfo.url);
-      materials.preload();
-      const objLoader = new OBJLoader(manager);
-      objLoader.setMaterials(materials);
-      object = await objLoader.loadAsync(mainFile.url);
-    } else {
-      const objLoader = new OBJLoader(manager);
-      object = await objLoader.loadAsync(mainFile.url);
+// 在 ZIP entries 中找模型文件
+function findModelInEntries(entries) {
+  const priority = { gltf: 1, glb: 2, obj: 3, fbx: 4, stl: 5 };
+  let best = null;
+  for (const e of entries) {
+    const ext = e.path.split('.').pop().toLowerCase();
+    if (priority[ext]) {
+      if (!best || priority[ext] < priority[best.path.split('.').pop().toLowerCase()]) {
+        best = e;
+      }
     }
-    collectTextureInfoFromObj(object);
-  } else if (mainFile.ext === 'fbx') {
-    const loader = new FBXLoader(manager);
-    object = await loader.loadAsync(mainFile.url);
-  } else if (mainFile.ext === 'stl') {
-    const loader = new STLLoader(manager);
-    const geometry = await loader.loadAsync(mainFile.url);
-    const material = new THREE.MeshStandardMaterial({ color: 0x88aacc, metalness: 0.2, roughness: 0.5 });
-    object = new THREE.Mesh(geometry, material);
   }
-
-  hideLoading();
-  setModel(object, null);
+  return best;
 }
 
-// ===================== Set Model in Scene =====================
-function setModel(object, rawSizeOverride) {
-  // Remove old model
-  if (currentModel) {
-    scene.remove(currentModel);
-    disposeObject(currentModel);
+// 在 FileList 中找模型文件
+function findModelInFiles(files) {
+  const priority = { gltf: 1, glb: 2, obj: 3, fbx: 4, stl: 5 };
+  let best = null;
+  for (const f of files) {
+    const ext = f.name.split('.').pop().toLowerCase();
+    if (priority[ext]) {
+      if (!best || priority[ext] < priority[best.name.split('.').pop().toLowerCase()]) {
+        best = f;
+      }
+    }
   }
-  if (wireframeMesh) {
-    scene.remove(wireframeMesh);
-    disposeObject(wireframeMesh);
-    wireframeMesh = null;
-  }
-
-  // Center and scale
-  const box = new THREE.Box3().setFromObject(object);
-  const center = box.getCenter(new THREE.Vector3());
-  const size = box.getSize(new THREE.Vector3());
-  const maxDim = Math.max(size.x, size.y, size.z);
-  const scale = maxDim > 0 ? (2 / maxDim) : 1;
-
-  object.position.sub(center.clone().multiplyScalar(scale));
-  object.scale.setScalar(scale);
-
-  // Update grid to match model base
-  const scaledBox = new THREE.Box3().setFromObject(object);
-  grid.position.y = scaledBox.min.y;
-
-  scene.add(object);
-  currentModel = object;
-
-  // Apply current view mode
-  applyViewMode();
-
-  // Update stats
-  updateStats(object, rawSizeOverride || size);
-
-  // Fit camera
-  fitToView();
+  return best;
 }
 
-// ===================== Reload =====================
+// ===================== 加载模型（从虚拟 FS entry） =====================
+async function loadModelFromFileEntry(entry) {
+  const ext = entry.path.split('.').pop().toLowerCase();
+  const manager = virtualFS ? createManagerWithFS(virtualFS) : new THREE.LoadingManager();
+
+  try {
+    let object = null;
+
+    if (ext === 'glb' || ext === 'gltf') {
+      const url = getBlobUrlForEntry(entry);
+      const loader = new GLTFLoader(manager);
+      const gltf = await loader.loadAsync(url);
+      object = gltf.scene;
+
+    } else if (ext === 'obj') {
+      const url = getBlobUrlForEntry(entry);
+
+      // 尝试找 MTL
+      const mtlEntry = findMtlEntry(entry.path);
+      if (mtlEntry) {
+        const mtlUrl = getBlobUrlForEntry(mtlEntry);
+        const mtlLoader = new MTLLoader(manager);
+        const materials = await mtlLoader.loadAsync(mtlUrl);
+        materials.preload();
+        const objLoader = new OBJLoader(manager);
+        objLoader.setMaterials(materials);
+        object = await objLoader.loadAsync(url);
+      } else {
+        const objLoader = new OBJLoader(manager);
+        object = await objLoader.loadAsync(url);
+      }
+
+    } else if (ext === 'stl') {
+      const url = getBlobUrlForEntry(entry);
+      const loader = new STLLoader(manager);
+      const geometry = await loader.loadAsync(url);
+      const material = new THREE.MeshStandardMaterial({
+        color: 0x88aacc,
+        metalness: 0.15,
+        roughness: 0.55,
+      });
+      object = new THREE.Mesh(geometry, material);
+
+    } else if (ext === 'fbx') {
+      const url = getBlobUrlForEntry(entry);
+      const loader = new FBXLoader(manager);
+      object = await loader.loadAsync(url);
+    }
+
+    if (!object) throw new Error('不支持的格式: ' + ext);
+
+    hideLoading();
+    setModel(object);
+
+  } catch (err) {
+    hideLoading();
+    showError(`模型加载失败：${err.message}<br><br>请确认文件完整，或将模型与贴图一起打包为 ZIP 后拖入。`);
+    console.error(err);
+  }
+}
+
+// 为 entry 获取 blob URL
+function getBlobUrlForEntry(entry) {
+  if (entry.url) return entry.url;
+  // 如果 entry 是 {path, blob} 格式
+  if (entry.blob) {
+    entry.url = URL.createObjectURL(entry.blob);
+    return entry.url;
+  }
+  // 如果是 virtualFS 中的条目
+  const normPath = entry.path ? entry.path.replace(/\\/g, '/') : '';
+  if (virtualFS && virtualFS.has(normPath)) {
+    return getBlobUrl(virtualFS, normPath);
+  }
+  throw new Error('无法获取文件 URL: ' + (entry.path || 'unknown'));
+}
+
+// 找 MTL 文件
+function findMtlEntry(objPath) {
+  if (!virtualFS) return null;
+  const basePath = objPath.replace(/\.obj$/i, '');
+  const candidates = [
+    basePath + '.mtl',
+    basePath + '.MTL',
+    objPath.split('/').pop().replace(/\.obj$/i, '.mtl'),
+  ];
+  for (const c of candidates) {
+    if (virtualFS.has(c)) return { path: c, blob: virtualFS.get(c).blob };
+    // 也试试文件名
+    const fname = c.split('/').pop();
+    if (virtualFS.has(fname)) return { path: fname, blob: virtualFS.get(fname).blob };
+  }
+  return null;
+}
+
+// ===================== 重新加载 =====================
 window.reloadModel = function() {
-  if (lastFileList) {
+  if (lastFileList && lastFileList.length > 0) {
     handleFiles(lastFileList);
   }
 };
 
-// ===================== Texture Info Collection =====================
-function collectTextureInfo(gltf) {
-  const textures = [];
-  const seen = new Set();
-
-  // Check parser JSON for image references
-  if (gltf.parser && gltf.parser.json) {
-    const json = gltf.parser.json;
-    if (json.images) {
-      for (const img of json.images) {
-        const name = img.uri || img.name || '(内嵌贴图)';
-        if (seen.has(name)) continue;
-        seen.add(name);
-        textures.push({
-          name,
-          uri: img.uri || '',
-          mimeType: img.mimeType || guessType(name),
-          embedded: !img.uri
-        });
-      }
-    }
-    if (json.textures) {
-      for (const tex of json.textures) {
-        if (json.images && json.images[tex.source]) {
-          const img = json.images[tex.source];
-          const name = img.uri || img.name || '(内嵌贴图)';
-          if (seen.has(name)) continue;
-          seen.add(name);
-          textures.push({
-            name,
-            uri: img.uri || '',
-            mimeType: img.mimeType || guessType(name),
-            embedded: !img.uri,
-            sampler: tex.sampler,
-          });
-        }
-      }
-    }
-  }
-
-  // Also traverse scene for live texture references
-  gltf.scene.traverse(child => {
-    if (child.material && child.material.map) {
-      const tex = child.material.map;
-      const info = tex.source ? tex.source.data : null;
-      if (info && !seen.has('map')) {
-        seen.add('map');
-        textures.push({ name: '主贴图 (map)', uri: '', mimeType: 'image/...', embedded: true });
-      }
-    }
-  });
-
-  updateTexturePanel(textures);
-}
-
-function collectTextureInfoFromObj(obj) {
-  const textures = [];
-  const seen = new Set();
-
-  obj.traverse(child => {
-    if (!child.material) return;
-    const mats = Array.isArray(child.material) ? child.material : [child.material];
-    for (const m of mats) {
-      const mapKeys = [
-        { key: 'map', label: '颜色贴图' },
-        { key: 'normalMap', label: '法线贴图' },
-        { key: 'roughnessMap', label: '粗糙度贴图' },
-        { key: 'metalnessMap', label: '金属度贴图' },
-        { key: 'aoMap', label: 'AO贴图' },
-        { key: 'emissiveMap', label: '发光贴图' },
-        { key: 'bumpMap', label: '凹凸贴图' },
-        { key: 'alphaMap', label: '透明贴图' },
-        { key: 'specularMap', label: '高光贴图' },
-      ];
-      for (const { key, label } of mapKeys) {
-        if (m[key]) {
-          const tex = m[key];
-          let name = label;
-          let img = null;
-          let w = 0, h = 0;
-
-          if (tex.image) {
-            img = tex.image;
-            w = img.width || 0;
-            h = img.height || 0;
-            if (img.src && img.src.startsWith('blob:')) {
-              const fname = img.src.split('/').pop();
-              if (fname) name = fname;
-            }
-          } else if (tex.source && tex.source.data) {
-            img = tex.source.data;
-            w = img.width || 0;
-            h = img.height || 0;
-          }
-
-          const id = name + '_' + key;
-          if (seen.has(id)) continue;
-          seen.add(id);
-          textures.push({
-            name,
-            mimeType: guessType(name),
-            mapType: label,
-            width: w,
-            height: h,
-            thumbnailUrl: img && img.src ? img.src : (img ? URL.createObjectURL(new Blob([img], {type:'image/png'})) : '')
-          });
-        }
-      }
-    }
-  });
-
-  updateTexturePanel(textures);
-}
-
-function guessType(filename) {
-  const ext = filename.split('.').pop().toLowerCase();
-  const map = { png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', webp:'image/webp', bmp:'image/bmp', gif:'image/gif', hdr:'image/vnd.radiance', exr:'image/x-exr' };
-  return map[ext] || '贴图';
-}
-
-function updateTexturePanel(textures) {
-  const list = document.getElementById('textureList');
-  const countEl = document.getElementById('statTex');
-  countEl.textContent = textures.length;
-
-  if (textures.length === 0) {
-    list.innerHTML = '';
-    list.classList.remove('show');
-    return;
-  }
-
-  list.innerHTML = textures.map(t => {
-    const typeLabel = t.mapType || (t.embedded ? '内嵌' : t.mimeType.split('/').pop() || '贴图');
-    const dimStr = t.width && t.height ? `${t.width}×${t.height}` : '';
-    const thumbHtml = t.thumbnailUrl
-      ? `<img class="texture-item-icon" src="${t.thumbnailUrl}" alt="">`
-      : `<span class="texture-item-icon" style="display:flex;align-items:center;justify-content:center;background:var(--surface);font-size:0.7rem;">🖼</span>`;
-    return `
-      <div class="texture-item">
-        ${thumbHtml}
-        <span class="texture-item-name" title="${t.name}">${escapeHtml(t.name)}</span>
-        ${dimStr ? `<span class="texture-item-dim">${dimStr}</span>` : ''}
-        <span class="texture-item-type">${typeLabel}</span>
-      </div>`;
-  }).join('');
-
-  list.classList.add('show');
-}
-
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
-// ===================== Stats =====================
-function updateStats(obj, rawSize) {
-  let verts = 0, faces = 0, meshes = 0, mats = new Set();
-
-  obj.traverse(child => {
-    if (child.isMesh) {
-      meshes++;
-      const geo = child.geometry;
-      if (geo && geo.attributes.position) verts += geo.attributes.position.count;
-      if (geo && geo.index) faces += geo.index.count / 3;
-      else if (geo && geo.attributes.position) faces += geo.attributes.position.count / 3;
-      if (Array.isArray(child.material)) child.material.forEach(m => mats.add(m.uuid));
-      else if (child.material) mats.add(child.material.uuid);
-    }
-  });
-
-  document.getElementById('statVerts').textContent = verts.toLocaleString();
-  document.getElementById('statFaces').textContent = Math.round(faces).toLocaleString();
-  document.getElementById('statMeshes').textContent = meshes;
-  document.getElementById('statMats').textContent = mats.size;
-  document.getElementById('statSize').textContent =
-    `${rawSize.x.toFixed(1)} × ${rawSize.y.toFixed(1)} × ${rawSize.z.toFixed(1)}`;
-}
-
-// ===================== Update file info =====================
-function updateLoadedFileInfo(name, meta) {
-  document.getElementById('fileName').textContent = name;
-  document.getElementById('fileMeta').textContent = meta;
-  document.getElementById('fileInfo').classList.add('show');
-}
-
-// ===================== View Mode =====================
+// ===================== 显示模式 =====================
 function applyViewMode() {
   if (!currentModel) return;
 
   if (wireframeMesh) { scene.remove(wireframeMesh); disposeObject(wireframeMesh); wireframeMesh = null; }
 
   currentModel.traverse(child => {
-    if (child.isMesh) {
-      if (child.material) {
-        const mats = Array.isArray(child.material) ? child.material : [child.material];
-        mats.forEach(m => { m.wireframe = (viewMode === 'wireframe'); m.needsUpdate = true; });
-      }
+    if (child.isMesh && child.material) {
+      const mats = Array.isArray(child.material) ? child.material : [child.material];
+      mats.forEach(m => {
+        if (m && m.isMaterial) {
+          m.wireframe = (viewMode === 'wireframe');
+          m.needsUpdate = true;
+        }
+      });
     }
   });
 
@@ -1278,7 +1237,10 @@ function applyViewMode() {
     wireframeMesh.traverse(child => {
       if (child.isMesh) {
         child.material = new THREE.MeshBasicMaterial({
-          color: 0x60a5fa, wireframe: true, transparent: true, opacity: 0.35
+          color: 0x60a5fa,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.35,
         });
       }
     });
@@ -1296,7 +1258,16 @@ window.setViewMode = function(mode) {
   applyViewMode();
 };
 
-// ===================== Camera Controls =====================
+// ===================== 修复材质（手动触发） =====================
+window.fixMaterials = function() {
+  if (!currentModel) return;
+  fixMaterials(currentModel);
+  collectTextureInfo(currentModel);
+  showLoading('材质已修复');
+  setTimeout(hideLoading, 800);
+};
+
+// ===================== Camera =====================
 window.resetCamera = function() {
   camera.position.set(3, 3, 3);
   controls.target.set(0, 0, 0);
@@ -1362,7 +1333,7 @@ window.toggleAutoRotate = function() {
   document.getElementById('tbAuto').classList.toggle('active', autoRotate);
 };
 
-// ===================== Lighting Controls =====================
+// ===================== Lighting =====================
 window.setAmbient = function(val) {
   ambientLight.intensity = val / 100;
   document.getElementById('ambientVal').textContent = (val / 100).toFixed(1);
@@ -1371,6 +1342,11 @@ window.setAmbient = function(val) {
 window.setDirLight = function(val) {
   dirLight.intensity = val / 100;
   document.getElementById('dirVal').textContent = (val / 100).toFixed(1);
+};
+
+window.setHemi = function(val) {
+  hemiLight.intensity = val / 100;
+  document.getElementById('hemiVal').textContent = (val / 100).toFixed(1);
 };
 
 window.setLightColor = function(hex) {
@@ -1396,7 +1372,7 @@ window.screenshot = function() {
   renderer.render(scene, camera);
   const link = document.createElement('a');
   link.href = canvas.toDataURL('image/png');
-  link.download = '3d-preview.png';
+  link.download = '3d-preview-' + Date.now() + '.png';
   link.click();
 };
 
@@ -1418,29 +1394,34 @@ window.closeError = function() {
   document.getElementById('errorOverlay').classList.remove('show');
 };
 
-// ===================== Dispose Helpers =====================
-function disposeObject(obj) {
-  obj.traverse(child => {
-    if (child.geometry) child.geometry.dispose();
-    if (child.material) {
-      const mats = Array.isArray(child.material) ? child.material : [child.material];
-      mats.forEach(m => {
-        // Dispose textures to free GPU memory
-        for (const key of Object.keys(m)) {
-          if (m[key] && m[key].isTexture) m[key].dispose();
-        }
-        m.dispose();
-      });
-    }
-  });
+function updateFileInfo(name, meta) {
+  document.getElementById('fileName').textContent = name;
+  document.getElementById('fileMeta').textContent = meta;
+  document.getElementById('fileInfo').classList.add('show');
 }
 
-// ===================== Double click to focus =====================
-renderer.domElement.addEventListener('dblclick', () => fitToView());
+function clearTexturePanel() {
+  document.getElementById('statTex').textContent = '—';
+  const list = document.getElementById('textureList');
+  list.innerHTML = '';
+  list.classList.remove('show');
+}
 
-// Init: show grid by default active
+// ===================== Animation =====================
+function animate() {
+  requestAnimationFrame(animate);
+  if (autoRotate && currentModel) {
+    currentModel.rotation.y += 0.005;
+  }
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+// ===================== Init =====================
 document.getElementById('btnGrid').classList.add('active');
 document.getElementById('tbGrid').classList.add('active');
+renderer.domElement.addEventListener('dblclick', () => fitToView());
 
 </script>
 </body>
